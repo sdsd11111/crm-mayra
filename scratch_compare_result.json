@@ -1,0 +1,243 @@
+{
+  "total_oficina_listado": 255,
+  "total_cartera_sheets": 88,
+  "total_archivo_rows": 125,
+  "matched_count": 88,
+  "unmatched_cartera_count": 0,
+  "unmatched_oficina_count": 234,
+  "unmatched_cartera": [],
+  "matched_sample": [
+    {
+      "cartera_sheet": "ELIZABETH CAJILEMA",
+      "oficina_name": "",
+      "ruc": "CORREOS",
+      "score": 0.95
+    },
+    {
+      "cartera_sheet": "DAVID MARTINEZ",
+      "oficina_name": "",
+      "ruc": "CORREOS",
+      "score": 0.95
+    },
+    {
+      "cartera_sheet": "GALO SISALIMA",
+      "oficina_name": "",
+      "ruc": "CORREOS",
+      "score": 0.95
+    },
+    {
+      "cartera_sheet": "DANIELA JARAMILLO",
+      "oficina_name": "",
+      "ruc": "CORREOS",
+      "score": 0.95
+    },
+    {
+      "cartera_sheet": "ALEXANDER MARTINEZ",
+      "oficina_name": "",
+      "ruc": "CORREOS",
+      "score": 0.95
+    },
+    {
+      "cartera_sheet": "VANESSA VILLEGAS",
+      "oficina_name": "",
+      "ruc": "CORREOS",
+      "score": 0.95
+    },
+    {
+      "cartera_sheet": "SORAYA ZUÑIGA",
+      "oficina_name": "",
+      "ruc": "CORREOS",
+      "score": 0.95
+    },
+    {
+      "cartera_sheet": "CESAR PEREZ",
+      "oficina_name": "",
+      "ruc": "CORREOS",
+      "score": 0.95
+    },
+    {
+      "cartera_sheet": "MELVITA SUQUILANDA",
+      "oficina_name": "",
+      "ruc": "CORREOS",
+      "score": 0.95
+    },
+    {
+      "cartera_sheet": "ALEXA ALOCER",
+      "oficina_name": "",
+      "ruc": "CORREOS",
+      "score": 0.95
+    },
+    {
+      "cartera_sheet": "JOSE MARIA",
+      "oficina_name": "LEON CABRERA JOSE MARIA",
+      "ruc": "0703071324001",
+      "score": 0.95
+    },
+    {
+      "cartera_sheet": "CARRION SAUL",
+      "oficina_name": "",
+      "ruc": "CORREOS",
+      "score": 0.95
+    },
+    {
+      "cartera_sheet": "BRAYAN Y LEONELA",
+      "oficina_name": "",
+      "ruc": "CORREOS",
+      "score": 0.95
+    },
+    {
+      "cartera_sheet": "LUIS LOJAN",
+      "oficina_name": "",
+      "ruc": "CORREOS",
+      "score": 0.95
+    },
+    {
+      "cartera_sheet": "MARGOTH RAMIREZ",
+      "oficina_name": "",
+      "ruc": "CORREOS",
+      "score": 0.95
+    },
+    {
+      "cartera_sheet": "GRANYUR",
+      "oficina_name": "ALIMENTOS DEL SUR GRANYUR AARLINE CIA. LTDA",
+      "ruc": "1191797193001",
+      "score": 0.95
+    },
+    {
+      "cartera_sheet": "MICHELL CALDERON",
+      "oficina_name": "",
+      "ruc": "CORREOS",
+      "score": 0.95
+    },
+    {
+      "cartera_sheet": "CARLOS ESCUDERO",
+      "oficina_name": "",
+      "ruc": "CORREOS",
+      "score": 0.95
+    },
+    {
+      "cartera_sheet": "FREDDI CAMPOVERDE",
+      "oficina_name": "",
+      "ruc": "CORREOS",
+      "score": 0.95
+    },
+    {
+      "cartera_sheet": "OLGA UCHUARI",
+      "oficina_name": "",
+      "ruc": "CORREOS",
+      "score": 0.95
+    },
+    {
+      "cartera_sheet": "SOCIEDAD DE HECHO",
+      "oficina_name": "SOCIEDAD DE HECHO PRODUCTORES AGROPECUARIOS",
+      "ruc": "1191795210001",
+      "score": 0.95
+    },
+    {
+      "cartera_sheet": "ANDEANBOTANICS S.A.S",
+      "oficina_name": "ANDEANBOTANICS S.A.S",
+      "ruc": "1191795360001",
+      "score": 1.0
+    },
+    {
+      "cartera_sheet": "JHONATAN MANANGON",
+      "oficina_name": "",
+      "ruc": "CORREOS",
+      "score": 0.95
+    },
+    {
+      "cartera_sheet": "LUIS BRAVO",
+      "oficina_name": "",
+      "ruc": "CORREOS",
+      "score": 0.95
+    },
+    {
+      "cartera_sheet": "NELLY GANAZHAPA",
+      "oficina_name": "",
+      "ruc": "CORREOS",
+      "score": 0.95
+    }
+  ],
+  "unmatched_oficina_sample": [
+    {
+      "name": "ELABORAR ATS SR ALEMAN",
+      "ruc": "0922329479001"
+    },
+    {
+      "name": "CONSTRUCTORA PSEMAT",
+      "ruc": "1191796814001"
+    },
+    {
+      "name": "PINCAY CARRION FRANCISCO JACINTO",
+      "ruc": "1103419410001"
+    },
+    {
+      "name": "PEÑA ANDRADE JOHANA",
+      "ruc": "1717899916001"
+    },
+    {
+      "name": "GORDILLO PASACA KARLA ELIZABETH",
+      "ruc": "1150228219001"
+    },
+    {
+      "name": "BENITEZ UCHUARI ROSA ALICIA",
+      "ruc": "1105835910001"
+    },
+    {
+      "name": "MACAS SUQILANGA ANGEL MEDARDO",
+      "ruc": "1102780523001"
+    },
+    {
+      "name": "SANCHEZ GUAMAN JOFFRE LEONARDO",
+      "ruc": "0603230327001"
+    },
+    {
+      "name": "LOZANO MUÑOZ WALTER OSWALDO",
+      "ruc": "1103688725001"
+    },
+    {
+      "name": "RIOFRIO JARAMILLO BAIRON MARCELO",
+      "ruc": "1102909924001"
+    },
+    {
+      "name": "PEÑA YAGUACHE LUIS ALFONSO",
+      "ruc": "1102966221001"
+    },
+    {
+      "name": "GONZALES AREVALO CAMILO FABIAN",
+      "ruc": "1105955528001"
+    },
+    {
+      "name": "SARANGO FLORES STALIN WLADIMIR",
+      "ruc": "1104462328001"
+    },
+    {
+      "name": "COMPAÑÍA DE TRANSPORTES PRORITY OPERADOR LOGISTICO",
+      "ruc": "1191788326001"
+    },
+    {
+      "name": "ALVARADO CHAMBA JORDY ANDRES",
+      "ruc": "1104124423001"
+    },
+    {
+      "name": "ROJAS MERCHAN PEDRO DANIEL",
+      "ruc": "1103404529001"
+    },
+    {
+      "name": "AGRICULTURAL & LIVESTOK RISK ANALYSIS COMPANY EC BY WNETCOOP ALRACEC S.A.S.",
+      "ruc": "1793090737001"
+    },
+    {
+      "name": "OFERTAS EN CAMINO OFERCAMIN CIA. LTDA",
+      "ruc": "1191772330001"
+    },
+    {
+      "name": "OGOÑO SINCHE MARCEL ADRIAN",
+      "ruc": "1104880834001"
+    },
+    {
+      "name": "JARAMILLO GARCIA MARIA BEATRIZ",
+      "ruc": "1103319438001"
+    }
+  ]
+}

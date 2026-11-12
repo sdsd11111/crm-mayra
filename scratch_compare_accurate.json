@@ -1,0 +1,1577 @@
+{
+  "total_oficina_valid_clients": 252,
+  "total_cartera_sheets": 88,
+  "matched_count": 53,
+  "unmatched_cartera_count": 35,
+  "unmatched_oficina_count": 193,
+  "matched": [
+    {
+      "cartera_sheet": "DAVID MARTINEZ",
+      "oficina_name": "MARTINEZ LALANGUI HECTOR DAVID",
+      "ruc": "1104055908001",
+      "reason": "COMMON_WORDS: MARTINEZ, DAVID",
+      "score": 0.85
+    },
+    {
+      "cartera_sheet": "GALO SISALIMA",
+      "oficina_name": "SISALIMA CUENCA GALO SECUNDINO",
+      "ruc": "1100865359001",
+      "reason": "COMMON_WORDS: SISALIMA, GALO",
+      "score": 0.85
+    },
+    {
+      "cartera_sheet": "DANIELA JARAMILLO",
+      "oficina_name": "CASTILLO JARAMILLO MARIA DANIELA",
+      "ruc": "1103989636001",
+      "reason": "COMMON_WORDS: DANIELA, JARAMILLO",
+      "score": 0.85
+    },
+    {
+      "cartera_sheet": "ALEXANDER MARTINEZ",
+      "oficina_name": "MARTINEZ ALVAREZ WINSTON ALEXANDER",
+      "ruc": "1104454614",
+      "reason": "COMMON_WORDS: MARTINEZ, ALEXANDER",
+      "score": 0.85
+    },
+    {
+      "cartera_sheet": "SORAYA ZUÑIGA",
+      "oficina_name": "ZUÑIGA MONCAYO SORAYA DEL ROCIO",
+      "ruc": "1102769005001",
+      "reason": "COMMON_WORDS: ZUNIGA, SORAYA",
+      "score": 0.85
+    },
+    {
+      "cartera_sheet": "JOSE MARIA",
+      "oficina_name": "LEON CABRERA JOSE MARIA",
+      "ruc": "0703071324001",
+      "reason": "COMMON_WORDS: JOSE, MARIA",
+      "score": 0.85
+    },
+    {
+      "cartera_sheet": "CARRION SAUL",
+      "oficina_name": "CARRION ANDRADE SAUL PATRICIO",
+      "ruc": "0101894764001",
+      "reason": "COMMON_WORDS: SAUL, CARRION",
+      "score": 0.85
+    },
+    {
+      "cartera_sheet": "MARGOTH RAMIREZ",
+      "oficina_name": "RAMIREZ BUSTAMANTE ELSA MARGOTH",
+      "ruc": "2100251061",
+      "reason": "COMMON_WORDS: RAMIREZ, MARGOTH",
+      "score": 0.85
+    },
+    {
+      "cartera_sheet": "GRANYUR",
+      "oficina_name": "GRANYUR",
+      "ruc": "1191797193001",
+      "reason": "EXACTO",
+      "score": 1.0
+    },
+    {
+      "cartera_sheet": "CARLOS ESCUDERO",
+      "oficina_name": "ESCUDERO VILLAVICENCIO CARLOS ALBERTO",
+      "ruc": "1105081762001",
+      "reason": "COMMON_WORDS: CARLOS, ESCUDERO",
+      "score": 0.85
+    },
+    {
+      "cartera_sheet": "OLGA UCHUARI",
+      "oficina_name": "UCHUARI CHAPA OLGA BEATRIZ",
+      "ruc": "1103837454001",
+      "reason": "COMMON_WORDS: UCHUARI, OLGA",
+      "score": 0.85
+    },
+    {
+      "cartera_sheet": "SOCIEDAD DE HECHO",
+      "oficina_name": "SOCIEDAD DE HECHO",
+      "ruc": "1191795210001",
+      "reason": "EXACTO",
+      "score": 1.0
+    },
+    {
+      "cartera_sheet": "ANDEANBOTANICS S.A.S",
+      "oficina_name": "ANDEANBOTANICS S.A.S",
+      "ruc": "1191795360001",
+      "reason": "EXACTO",
+      "score": 1.0
+    },
+    {
+      "cartera_sheet": "JHONATAN MANANGON",
+      "oficina_name": "MANANGON BENITEZ JHONATAN FABIAN",
+      "ruc": "1717163735001",
+      "reason": "COMMON_WORDS: JHONATAN, MANANGON",
+      "score": 0.85
+    },
+    {
+      "cartera_sheet": "LUIS BRAVO",
+      "oficina_name": "BRAVO LUIS",
+      "ruc": "1100606506001",
+      "reason": "SUBSET_TOKENS",
+      "score": 1.0
+    },
+    {
+      "cartera_sheet": "NELLY GANAZHAPA",
+      "oficina_name": "GANAZHAPA PIZARRO NELLY LACKELINE",
+      "ruc": "1150631594001",
+      "reason": "COMMON_WORDS: GANAZHAPA, NELLY",
+      "score": 0.85
+    },
+    {
+      "cartera_sheet": "WALTER LOZANO",
+      "oficina_name": "LOZANO MUÑOZ WALTER OSWALDO",
+      "ruc": "1103688725001",
+      "reason": "COMMON_WORDS: LOZANO, WALTER",
+      "score": 0.85
+    },
+    {
+      "cartera_sheet": "JULIO CARPIO",
+      "oficina_name": "CARPIO GRANDA JULIO CESAR",
+      "ruc": "1106063470001",
+      "reason": "COMMON_WORDS: JULIO, CARPIO",
+      "score": 0.85
+    },
+    {
+      "cartera_sheet": "SEGUNDO LOZANO",
+      "oficina_name": "SEGUNDO AURELIO LOZANO CAJAMARCA",
+      "ruc": "1101417168001",
+      "reason": "COMMON_WORDS: SEGUNDO, LOZANO",
+      "score": 0.85
+    },
+    {
+      "cartera_sheet": "DANIEL VELEZ",
+      "oficina_name": "VELEZ PALACIOS DANIEL IVAN",
+      "ruc": "1104812183001",
+      "reason": "COMMON_WORDS: VELEZ, DANIEL",
+      "score": 0.85
+    },
+    {
+      "cartera_sheet": "JOSE MEJIA",
+      "oficina_name": "MEJIA MOLINA JOSE HERMINIO",
+      "ruc": "1101742797",
+      "reason": "COMMON_WORDS: JOSE, MEJIA",
+      "score": 0.85
+    },
+    {
+      "cartera_sheet": "Maria Daniela Castillo",
+      "oficina_name": "CASTILLO JARAMILLO MARIA DANIELA",
+      "ruc": "1103989636001",
+      "reason": "COMMON_WORDS: MARIA, DANIELA, CASTILLO",
+      "score": 0.85
+    },
+    {
+      "cartera_sheet": "FRANCISCO PINCAY",
+      "oficina_name": "PINCAY CARRION FRANCISCO JACINTO",
+      "ruc": "1103419410001",
+      "reason": "COMMON_WORDS: FRANCISCO, PINCAY",
+      "score": 0.85
+    },
+    {
+      "cartera_sheet": "KARLA GORDILLO",
+      "oficina_name": "GORDILLO PASACA KARLA ELIZABETH",
+      "ruc": "1150228219001",
+      "reason": "COMMON_WORDS: GORDILLO, KARLA",
+      "score": 0.85
+    },
+    {
+      "cartera_sheet": "MARCELO RIOFRIO",
+      "oficina_name": "RIOFRIO JARAMILLO BAIRON MARCELO",
+      "ruc": "1102909924001",
+      "reason": "COMMON_WORDS: MARCELO, RIOFRIO",
+      "score": 0.85
+    },
+    {
+      "cartera_sheet": "MIA MEDINA",
+      "oficina_name": "Medina Jaramillo Mia Noelia",
+      "ruc": "1151664867",
+      "reason": "COMMON_WORDS: MEDINA, MIA",
+      "score": 0.85
+    },
+    {
+      "cartera_sheet": "DARWIN JUMBO",
+      "oficina_name": "JUMBO QUICHIMBO DARWIN ALFREDO",
+      "ruc": "1900400639",
+      "reason": "COMMON_WORDS: DARWIN, JUMBO",
+      "score": 0.85
+    },
+    {
+      "cartera_sheet": "SURBASA",
+      "oficina_name": "CONSTRUCTORA SURBASA",
+      "ruc": "119174882001",
+      "reason": "UNIQUE_WORD: SURBASA",
+      "score": 0.8
+    },
+    {
+      "cartera_sheet": "Wilmer Cuenca",
+      "oficina_name": "CUENCA CUENCA WILMER ROLANDO",
+      "ruc": "1102128095001",
+      "reason": "COMMON_WORDS: WILMER, CUENCA",
+      "score": 0.85
+    },
+    {
+      "cartera_sheet": "Wilson Armijos",
+      "oficina_name": "ING. WILSON ARMIJOS",
+      "ruc": "1100452851001",
+      "reason": "COMMON_WORDS: WILSON, ARMIJOS",
+      "score": 0.85
+    },
+    {
+      "cartera_sheet": "Magdalena Reyes",
+      "oficina_name": "REYES VELEZ ELISA YOLANDA MAGDALENA",
+      "ruc": "1100711140001",
+      "reason": "COMMON_WORDS: REYES, MAGDALENA",
+      "score": 0.85
+    },
+    {
+      "cartera_sheet": "PAULO ROBLES",
+      "oficina_name": "ROBLES AREVALO PAULO ROBERTO",
+      "ruc": "1104527930001",
+      "reason": "COMMON_WORDS: ROBLES, PAULO",
+      "score": 0.85
+    },
+    {
+      "cartera_sheet": "SRA DELIA",
+      "oficina_name": "SINCHE CARAGUAY DELIA",
+      "ruc": "1101881439001",
+      "reason": "UNIQUE_WORD: DELIA",
+      "score": 0.8
+    },
+    {
+      "cartera_sheet": "Pablo Jimenez",
+      "oficina_name": "JIMENEZ JIMENEZ PABLO ENRIQUE",
+      "ruc": "1104175052001",
+      "reason": "COMMON_WORDS: PABLO, JIMENEZ",
+      "score": 0.85
+    },
+    {
+      "cartera_sheet": "Johana Peña",
+      "oficina_name": "PEÑA ANDRADE JOHANA",
+      "ruc": "1717899916001",
+      "reason": "COMMON_WORDS: PENA, JOHANA",
+      "score": 0.85
+    },
+    {
+      "cartera_sheet": "Geovanny Haro",
+      "oficina_name": "CABEZAS HARO GEOVANNY DAVID",
+      "ruc": "1715714190001",
+      "reason": "COMMON_WORDS: HARO, GEOVANNY",
+      "score": 0.85
+    },
+    {
+      "cartera_sheet": "PADFIT SAS",
+      "oficina_name": "PADFIT SAS",
+      "ruc": "1191797716001",
+      "reason": "EXACTO",
+      "score": 1.0
+    },
+    {
+      "cartera_sheet": "Pablo Chamba",
+      "oficina_name": "CHAMBA BUSTAN PABLO ADRIAN",
+      "ruc": "1104056872001",
+      "reason": "COMMON_WORDS: CHAMBA, PABLO",
+      "score": 0.85
+    },
+    {
+      "cartera_sheet": "Ivan Echeverria",
+      "oficina_name": "IVAN ECHEVERRIA MOREIRA",
+      "ruc": "0916280126",
+      "reason": "COMMON_WORDS: IVAN, ECHEVERRIA",
+      "score": 0.85
+    },
+    {
+      "cartera_sheet": "GABRIELA ABAD",
+      "oficina_name": "ABAD CALVA GABRIELA NATALI",
+      "ruc": "1105987042001",
+      "reason": "COMMON_WORDS: GABRIELA, ABAD",
+      "score": 0.85
+    },
+    {
+      "cartera_sheet": "Caridad Cordero",
+      "oficina_name": "CORDERO PALACIOS MARIA CARIDAD",
+      "ruc": "0101962298001",
+      "reason": "COMMON_WORDS: CARIDAD, CORDERO",
+      "score": 0.85
+    },
+    {
+      "cartera_sheet": "RR INMOGRUPO",
+      "oficina_name": "RR INMOGRUPO S.A.S.",
+      "ruc": "1191796421001",
+      "reason": "COMMON_WORDS: INMOGRUPO, RR",
+      "score": 0.85
+    },
+    {
+      "cartera_sheet": "LUCIA PALACIOS",
+      "oficina_name": "PALACIOS MALDONADO LUCIA ISABEL",
+      "ruc": "0100746783001",
+      "reason": "COMMON_WORDS: LUCIA, PALACIOS",
+      "score": 0.85
+    },
+    {
+      "cartera_sheet": "ING, CRISTINA RIOFRIO",
+      "oficina_name": "RIOFRIO JARAMILLO MARIA CRISTINA",
+      "ruc": "1103171037001",
+      "reason": "COMMON_WORDS: CRISTINA, RIOFRIO",
+      "score": 0.85
+    },
+    {
+      "cartera_sheet": "NATALIA ARMIJOS",
+      "oficina_name": "ARMIJOS VELASCO NATALIA GABRIELA",
+      "ruc": "1103414296001",
+      "reason": "COMMON_WORDS: ARMIJOS, NATALIA",
+      "score": 0.85
+    },
+    {
+      "cartera_sheet": "PILAR GIA",
+      "oficina_name": "GIA  SARAGURO DEIFILIA DEL PILAR",
+      "ruc": "1103248975001",
+      "reason": "COMMON_WORDS: PILAR, GIA",
+      "score": 0.85
+    },
+    {
+      "cartera_sheet": "JUAN CAPA",
+      "oficina_name": "CAPA YUNGA JUAN CARLOS",
+      "ruc": "1104428311001",
+      "reason": "COMMON_WORDS: CAPA, JUAN",
+      "score": 0.85
+    },
+    {
+      "cartera_sheet": "DHARMA COSMETIC",
+      "oficina_name": "DHARMA COSMETIC LABDHARMA S.A.S",
+      "ruc": "1191797243001",
+      "reason": "COMMON_WORDS: DHARMA, COSMETIC",
+      "score": 0.85
+    },
+    {
+      "cartera_sheet": "CLUB ZARUMA",
+      "oficina_name": "CLUB ZARUMA TEAEKWONDO",
+      "ruc": "1191795749001",
+      "reason": "COMMON_WORDS: ZARUMA, CLUB",
+      "score": 0.85
+    },
+    {
+      "cartera_sheet": "PABLO",
+      "oficina_name": "JIMENEZ JIMENEZ PABLO ENRIQUE",
+      "ruc": "1104175052001",
+      "reason": "UNIQUE_WORD: PABLO",
+      "score": 0.8
+    },
+    {
+      "cartera_sheet": "DEL VALLE SEG",
+      "oficina_name": "DEL VALLE SEG",
+      "ruc": "1792702445001",
+      "reason": "EXACTO",
+      "score": 1.0
+    },
+    {
+      "cartera_sheet": "YULEISISFARM",
+      "oficina_name": "YULEISIS FARM",
+      "ruc": "0993393568001",
+      "reason": "EXACTO",
+      "score": 1.0
+    },
+    {
+      "cartera_sheet": "MOISES CABRERA",
+      "oficina_name": "CABRERA SUQUILANDA CRISTIAN MOISES",
+      "ruc": "1105809105001",
+      "reason": "COMMON_WORDS: CABRERA, MOISES",
+      "score": 0.85
+    }
+  ],
+  "unmatched_cartera": [
+    "ELIZABETH CAJILEMA",
+    "VANESSA VILLEGAS",
+    "CESAR PEREZ",
+    "MELVITA SUQUILANDA",
+    "ALEXA ALOCER",
+    "BRAYAN Y LEONELA",
+    "LUIS LOJAN",
+    "MICHELL CALDERON",
+    "FREDDI CAMPOVERDE",
+    "JOSUE HILLBIG",
+    "ELSA LALANGUI",
+    "DEMIS CONZA",
+    "JUAN FRANCISCO",
+    "PASCALTECH",
+    "MARIA SONGOR",
+    "LORISITA",
+    "LEONARDO Y VANESITA",
+    "Yesenia Rodriguez",
+    "MAURO GUZMAN",
+    "Nelly Villavicencio",
+    "SRA ZOILITA",
+    "FERNANDO MALDONADO",
+    "Anita Castillo",
+    "Andrea Peña",
+    "Elsita",
+    "Angelito",
+    "JESUS MACAS",
+    "Dres. Riofrio",
+    "OLGA FERNADEZ",
+    "SILVITA SUESCUN",
+    "OLGER CORONEL",
+    "JEAN CARLOS",
+    "MARCITA",
+    "Doctores Carrión",
+    "DR LAPO"
+  ],
+  "unmatched_oficina": [
+    {
+      "row": 3,
+      "name": "SOCIEDAD DE HECHO PRODUCTORES AGROPECUARIOS",
+      "ruc": "1191795210001",
+      "fee": 2
+    },
+    {
+      "row": 4,
+      "name": "ELABORAR ATS SR ALEMAN",
+      "ruc": "0922329479001",
+      "fee": null
+    },
+    {
+      "row": 6,
+      "name": "PASCAL-TECH S.A.S.",
+      "ruc": "1191796812001",
+      "fee": 60
+    },
+    {
+      "row": 7,
+      "name": "CONSTRUCTORA PSEMAT",
+      "ruc": "1191796814001",
+      "fee": 60
+    },
+    {
+      "row": 11,
+      "name": "BENITEZ UCHUARI ROSA ALICIA",
+      "ruc": "1105835910001",
+      "fee": 10
+    },
+    {
+      "row": 12,
+      "name": "MACAS SUQILANGA ANGEL MEDARDO",
+      "ruc": "1102780523001",
+      "fee": 30
+    },
+    {
+      "row": 13,
+      "name": "SANCHEZ GUAMAN JOFFRE LEONARDO",
+      "ruc": "0603230327001",
+      "fee": 30
+    },
+    {
+      "row": 17,
+      "name": "PEÑA YAGUACHE LUIS ALFONSO",
+      "ruc": "1102966221001",
+      "fee": 5
+    },
+    {
+      "row": 18,
+      "name": "GONZALES AREVALO CAMILO FABIAN",
+      "ruc": "1105955528001",
+      "fee": 10
+    },
+    {
+      "row": 19,
+      "name": "SARANGO FLORES STALIN WLADIMIR",
+      "ruc": "1104462328001",
+      "fee": 30
+    },
+    {
+      "row": 20,
+      "name": "COMPAÑÍA DE TRANSPORTES PRORITY OPERADOR LOGISTICO",
+      "ruc": "1191788326001",
+      "fee": null
+    },
+    {
+      "row": 22,
+      "name": "ALVARADO CHAMBA JORDY ANDRES",
+      "ruc": "1104124423001",
+      "fee": null
+    },
+    {
+      "row": 23,
+      "name": "ROJAS MERCHAN PEDRO DANIEL",
+      "ruc": "1103404529001",
+      "fee": 30
+    },
+    {
+      "row": 24,
+      "name": "AGRICULTURAL & LIVESTOK RISK ANALYSIS COMPANY EC BY WNETCOOP ALRACEC S.A.S.",
+      "ruc": "1793090737001",
+      "fee": 150
+    },
+    {
+      "row": 25,
+      "name": "OFERTAS EN CAMINO OFERCAMIN CIA. LTDA",
+      "ruc": "1191772330001",
+      "fee": null
+    },
+    {
+      "row": 26,
+      "name": "OGOÑO SINCHE MARCEL ADRIAN",
+      "ruc": "1104880834001",
+      "fee": 40
+    },
+    {
+      "row": 27,
+      "name": "JARAMILLO GARCIA MARIA BEATRIZ",
+      "ruc": "1103319438001",
+      "fee": null
+    },
+    {
+      "row": 29,
+      "name": "ROJAS FERNANDEZ RICARDO JAVIER",
+      "ruc": "1105655235001",
+      "fee": 20
+    },
+    {
+      "row": 31,
+      "name": "CAMPOVERDE RAMIREZ FREDI ENRIQUE",
+      "ruc": "2100050539001",
+      "fee": 40
+    },
+    {
+      "row": 33,
+      "name": "OGOÑO SINCHE CLAUDIO SANTIAGO",
+      "ruc": "1104023633001",
+      "fee": 40
+    },
+    {
+      "row": 34,
+      "name": "REYES JARAMILLO CESAR AUGUSTO",
+      "ruc": "1103421531001",
+      "fee": 15
+    },
+    {
+      "row": 35,
+      "name": "MORENO ARIAS JOSE ADRIAN",
+      "ruc": "1314241330001",
+      "fee": 30
+    },
+    {
+      "row": 36,
+      "name": "PAZ Y MIÑO MORA EMILIA INES",
+      "ruc": "1727426635001",
+      "fee": 25
+    },
+    {
+      "row": 38,
+      "name": "PALACIOS ENRIQUE ZOILA",
+      "ruc": "1100657749001",
+      "fee": 40
+    },
+    {
+      "row": 39,
+      "name": "MENDEZ LOPEZ JOMAYRA LEONELA",
+      "ruc": "1600631244001",
+      "fee": 30
+    },
+    {
+      "row": 42,
+      "name": "OBANDO SARMIENTO MARIA VERONICA",
+      "ruc": "1103606834001",
+      "fee": null
+    },
+    {
+      "row": 43,
+      "name": "ASOCIACION DE OBREROS MALACATOS",
+      "ruc": "1191745848001",
+      "fee": null
+    },
+    {
+      "row": 45,
+      "name": "GLOBAL-ENGINEERING SOLUTION AMBIENTALES",
+      "ruc": "2293536751001",
+      "fee": null
+    },
+    {
+      "row": 46,
+      "name": "CONSTRUCCION-DISEÑO E INGENIERIA AMAZONAS",
+      "ruc": "2191774850001",
+      "fee": null
+    },
+    {
+      "row": 47,
+      "name": "NAT - LAB ANALITICA AMBIENTAL S.A.S.",
+      "ruc": "1793196556001",
+      "fee": 40
+    },
+    {
+      "row": 48,
+      "name": "ALRAC ECUADOR BY WNETCOOP CIA.LTDA.",
+      "ruc": "1793203754001",
+      "fee": null
+    },
+    {
+      "row": 50,
+      "name": "AMALUZA S.A.S",
+      "ruc": "0195136157001",
+      "fee": null
+    },
+    {
+      "row": 51,
+      "name": "CAJILEMA MENDOZA ISABEL MARIBEL",
+      "ruc": "1803929759001",
+      "fee": 10
+    },
+    {
+      "row": 53,
+      "name": "CHALAN VEINTIMILLA LILIANA STEFANIA",
+      "ruc": "1104861057001",
+      "fee": null
+    },
+    {
+      "row": 54,
+      "name": "QUICHIMBO ANGAMARCA EDWIN FERNANDO",
+      "ruc": "1104289457001",
+      "fee": 40
+    },
+    {
+      "row": 55,
+      "name": "TULP FARMA LABORATORIOS S.A.S",
+      "ruc": "1191798252001",
+      "fee": null
+    },
+    {
+      "row": 56,
+      "name": "GEREMCOMASIS SAS",
+      "ruc": "0993368966001",
+      "fee": null
+    },
+    {
+      "row": 57,
+      "name": "YULEISISFARM S.A.S",
+      "ruc": "0993393568001",
+      "fee": 50
+    },
+    {
+      "row": 58,
+      "name": "ELO CONSTRUCTORA ELECTRO ORIENTE S.A",
+      "ruc": "1191773361001",
+      "fee": null
+    },
+    {
+      "row": 59,
+      "name": "JUNTA DE AGUA LA ARGENTINA Y RAMOS HURCO",
+      "ruc": "1191796960001",
+      "fee": null
+    },
+    {
+      "row": 62,
+      "name": "VELASCO MOGOLLON ROCIO DEL PILAR",
+      "ruc": "1703848661001",
+      "fee": 5
+    },
+    {
+      "row": 64,
+      "name": "CASTILLO QUIZHPE MAYRA AMALIA",
+      "ruc": "1103873962001",
+      "fee": null
+    },
+    {
+      "row": 65,
+      "name": "MENDOZA CABRERA FABIOLA DEL CARMEN",
+      "ruc": "1103020168001",
+      "fee": 60
+    },
+    {
+      "row": 67,
+      "name": "CONZA CONZA DEMISS EMANUEL",
+      "ruc": "1103398366001",
+      "fee": 10
+    },
+    {
+      "row": 68,
+      "name": "GRUPO EMPRESARIAL REYES SAS BIC",
+      "ruc": "1191797066001",
+      "fee": 20
+    },
+    {
+      "row": 69,
+      "name": "CONZA CONZA JACKSON",
+      "ruc": "1103851067001",
+      "fee": 10
+    },
+    {
+      "row": 70,
+      "name": "CORREA VIVANCO CESAR DANIEL",
+      "ruc": "1105295065001",
+      "fee": 20
+    },
+    {
+      "row": 71,
+      "name": "MALDONADO MACAS EVELIN MORELIA",
+      "ruc": "1104847262001",
+      "fee": 20
+    },
+    {
+      "row": 72,
+      "name": "COMPAÑÍA DE TRANSPORTES RIO CHAMBA",
+      "ruc": "1191750175001",
+      "fee": null
+    },
+    {
+      "row": 73,
+      "name": "CLOPMEDIA SAS",
+      "ruc": "1191796977001",
+      "fee": null
+    },
+    {
+      "row": 74,
+      "name": "CARRION ALVAREZ MARCO VINICIO",
+      "ruc": "1101997177001",
+      "fee": 40
+    },
+    {
+      "row": 75,
+      "name": "MORENO CABRERA CHRISTIAN ISRAEL",
+      "ruc": "1103826671001",
+      "fee": 15
+    },
+    {
+      "row": 77,
+      "name": "ROJAS FERNANDEZ VANESSA LIZBETH",
+      "ruc": "1105048373001",
+      "fee": 40
+    },
+    {
+      "row": 80,
+      "name": "ROA CHEJIN MARIA SUSANA",
+      "ruc": "1104541378001",
+      "fee": 40
+    },
+    {
+      "row": 81,
+      "name": "BALLADARES GOMEZ LUIS ALFREDO",
+      "ruc": "1600741670001",
+      "fee": 40
+    },
+    {
+      "row": 82,
+      "name": "PAMI BIOTIENDA S.A.S.",
+      "ruc": "1191797374001",
+      "fee": null
+    },
+    {
+      "row": 83,
+      "name": "SANCHEZ VARGAS ROBERTO STALIN",
+      "ruc": "1103311773001",
+      "fee": 5
+    },
+    {
+      "row": 84,
+      "name": "PAZ Y MIÑO ESTHELA DEL CARMEN",
+      "ruc": "1703396877001",
+      "fee": 30
+    },
+    {
+      "row": 86,
+      "name": "CORPORACION PARA EL BUEN GOBIERNO",
+      "ruc": "1191797989001",
+      "fee": null
+    },
+    {
+      "row": 87,
+      "name": "MOJIFRUIT S.A.S.",
+      "ruc": "1498316480001",
+      "fee": null
+    },
+    {
+      "row": 88,
+      "name": "ALIMENTOS DEL SUR GRANYUR AARLINE CIA. LTDA",
+      "ruc": "1191797193001",
+      "fee": 60
+    },
+    {
+      "row": 89,
+      "name": "ROGEL OJEDA ANA MARIA",
+      "ruc": "1103959795001",
+      "fee": 5
+    },
+    {
+      "row": 92,
+      "name": "SUENSUN LALANGUI SILVITA",
+      "ruc": "1103165393001",
+      "fee": 40
+    },
+    {
+      "row": 94,
+      "name": "CARRION VEGA LUPE BEATRIZ",
+      "ruc": "1102395090001",
+      "fee": 15
+    },
+    {
+      "row": 95,
+      "name": "ARMIJOS VELAZCO ANDRES",
+      "ruc": "1103580492001",
+      "fee": 15
+    },
+    {
+      "row": 96,
+      "name": "MACAS PAOLA",
+      "ruc": "1104473226001",
+      "fee": null
+    },
+    {
+      "row": 97,
+      "name": "CABRERA MACAS MARIO",
+      "ruc": "1715334437001",
+      "fee": 30
+    },
+    {
+      "row": 98,
+      "name": "SODA CM S.A.S.",
+      "ruc": "1191795406001",
+      "fee": 50
+    },
+    {
+      "row": 99,
+      "name": "LYNXSEG",
+      "ruc": "1793207405001",
+      "fee": null
+    },
+    {
+      "row": 100,
+      "name": "HYDROSEMAT S.A",
+      "ruc": "2191775209001",
+      "fee": null
+    },
+    {
+      "row": 101,
+      "name": "CORDOVA TAPIA REBECA ALEJANDRA",
+      "ruc": "1104671704001",
+      "fee": 40
+    },
+    {
+      "row": 102,
+      "name": "MEDINA SUESCUN EDISON FABRICIO",
+      "ruc": "1105656704001",
+      "fee": 40
+    },
+    {
+      "row": 104,
+      "name": "ARELLANO MEJIA FERNANDO RODRIGO",
+      "ruc": "1102065008001",
+      "fee": 15
+    },
+    {
+      "row": 105,
+      "name": "OGOÑO VEGA STEFANY ALESSANDRA",
+      "ruc": "1150721601001",
+      "fee": 10
+    },
+    {
+      "row": 106,
+      "name": "NARVAEZ LOPEZ KEYTY NICOL",
+      "ruc": "302874706001",
+      "fee": 40
+    },
+    {
+      "row": 107,
+      "name": "BRAVO ALMEIDA DAVID ALEJANDRO",
+      "ruc": "1150453502001",
+      "fee": null
+    },
+    {
+      "row": 109,
+      "name": "SEMESTRAL",
+      "ruc": "",
+      "fee": null
+    },
+    {
+      "row": 110,
+      "name": "QUIZHPE QUIZHPE KARINA DEL CISNE",
+      "ruc": "1150327219001",
+      "fee": null
+    },
+    {
+      "row": 112,
+      "name": "ABAD CASTILLO ARELIS DEL CISNE",
+      "ruc": "1104655319001",
+      "fee": null
+    },
+    {
+      "row": 113,
+      "name": "SANCHEZ CAMPOS BRAYAN ADRIAN",
+      "ruc": "1104996317001",
+      "fee": null
+    },
+    {
+      "row": 114,
+      "name": "GONZAGA POMA JORGE ANTONIO",
+      "ruc": "1721860227001",
+      "fee": null
+    },
+    {
+      "row": 115,
+      "name": "ENCALADA OROZCO MANUEL DE JESUS",
+      "ruc": "1102737929001",
+      "fee": null
+    },
+    {
+      "row": 116,
+      "name": "STALIN SARANGO FLORES",
+      "ruc": "1104462328001",
+      "fee": null
+    },
+    {
+      "row": 117,
+      "name": "LOJAN SONGOR RONALD PAUL",
+      "ruc": "",
+      "fee": null
+    },
+    {
+      "row": 119,
+      "name": "GONZALEZ GRANDA ENITH GRACIELA",
+      "ruc": "1103200638001",
+      "fee": null
+    },
+    {
+      "row": 120,
+      "name": "SANCHEZ NEIRA VICTOR",
+      "ruc": "1101742441001",
+      "fee": null
+    },
+    {
+      "row": 121,
+      "name": "ROBLES AREVALO MANUEL ALEJANDRO",
+      "ruc": "1104610645001",
+      "fee": null
+    },
+    {
+      "row": 123,
+      "name": "CUENCA MAZA KATTY JOHANNA",
+      "ruc": "1104657745001",
+      "fee": null
+    },
+    {
+      "row": 124,
+      "name": "VASQUEZ VELASCO MARIA CRISTINA",
+      "ruc": "0301630547001",
+      "fee": null
+    },
+    {
+      "row": 125,
+      "name": "BRAVO ENCALADA CHRISTIAN RAFAEL",
+      "ruc": "1105756546001",
+      "fee": null
+    },
+    {
+      "row": 126,
+      "name": "SANCHEZ CAMPOS ANDY ALEXANDER",
+      "ruc": "1105439150001",
+      "fee": null
+    },
+    {
+      "row": 127,
+      "name": "AMALUZA SAS",
+      "ruc": "0195136157001",
+      "fee": null
+    },
+    {
+      "row": 129,
+      "name": "JUNTA DE AGUA LA ARGENTINA",
+      "ruc": "1191796960001",
+      "fee": null
+    },
+    {
+      "row": 130,
+      "name": "SANCHEZ ULLOA YAHAIRA DALILA",
+      "ruc": "1103805469001",
+      "fee": null
+    },
+    {
+      "row": 131,
+      "name": "CARRION SARMIENTO MARCO VINICIO",
+      "ruc": "1103640767001",
+      "fee": null
+    },
+    {
+      "row": 132,
+      "name": "GONZALEZ SARANGO ESTHELA MARGARITA",
+      "ruc": "0704751262001",
+      "fee": null
+    },
+    {
+      "row": 133,
+      "name": "BRAVO ENCALADA AURA JANETH",
+      "ruc": "1103848865001",
+      "fee": null
+    },
+    {
+      "row": 134,
+      "name": "ROJAS AGUIRRE ROBERTO CARLOS",
+      "ruc": "0401795869001",
+      "fee": null
+    },
+    {
+      "row": 135,
+      "name": "COMPAÑIA DE SERVICIO DE TRANSPORTE MIXTO DE PASAJEROS RIO CHAMBA S A",
+      "ruc": "1191750175001",
+      "fee": null
+    },
+    {
+      "row": 136,
+      "name": "VASQUEZ CARRION ANA MARIA",
+      "ruc": "1150016770001",
+      "fee": null
+    },
+    {
+      "row": 137,
+      "name": "FUNDACION EL QUINCHE LAB",
+      "ruc": "1793234975001",
+      "fee": null
+    },
+    {
+      "row": 138,
+      "name": "SEBASTIAN RIOFRIO LOJAN (DR)",
+      "ruc": "1103939888001",
+      "fee": null
+    },
+    {
+      "row": 139,
+      "name": "TOLEDO PARRA LUIS SAUL",
+      "ruc": "1105048886001",
+      "fee": null
+    },
+    {
+      "row": 143,
+      "name": "MASACHE ROMERO DEBORA RUBY",
+      "ruc": "1900478197001",
+      "fee": null
+    },
+    {
+      "row": 144,
+      "name": "JARAMILLO FIGUEROA ELSA PIEDAD",
+      "ruc": "1100252590001",
+      "fee": null
+    },
+    {
+      "row": 145,
+      "name": "CARRION GRANDA VICTOR MANUEL",
+      "ruc": "1105910093001",
+      "fee": null
+    },
+    {
+      "row": 146,
+      "name": "PUENTESTAR JARAMILLO ANDREA GUISSELLA",
+      "ruc": "1104135700001",
+      "fee": null
+    },
+    {
+      "row": 148,
+      "name": "ANUAL",
+      "ruc": "",
+      "fee": null
+    },
+    {
+      "row": 150,
+      "name": "Oswaldo kenton Hurtado Mendez",
+      "ruc": "1708860513001",
+      "fee": null
+    },
+    {
+      "row": 152,
+      "name": "SALAZAR MUÑOZ DIANA ESTEFANIA",
+      "ruc": "1722126719",
+      "fee": null
+    },
+    {
+      "row": 153,
+      "name": "MEDINA SUESCUN CHRISTIAN JHONATTAN",
+      "ruc": "1105235723",
+      "fee": null
+    },
+    {
+      "row": 154,
+      "name": "CHUICO MEDINA EDWIN ESTALIN",
+      "ruc": "0704557826",
+      "fee": null
+    },
+    {
+      "row": 155,
+      "name": "JIMENEZ CORDERO LUDY JURELIS",
+      "ruc": "0703689828",
+      "fee": null
+    },
+    {
+      "row": 156,
+      "name": "HILBIG JOSHUA ALBERT",
+      "ruc": "1717885337",
+      "fee": null
+    },
+    {
+      "row": 158,
+      "name": "MEDINA MAZA FLAVIO SOLANO",
+      "ruc": "1102550033",
+      "fee": null
+    },
+    {
+      "row": 159,
+      "name": "ALCOCER CEVALLOS DIANA ALEXANDRA",
+      "ruc": "1724406432001",
+      "fee": null
+    },
+    {
+      "row": 160,
+      "name": "CISNEROS JARAMILLO ELENA VIANEY",
+      "ruc": "1102543335001",
+      "fee": null
+    },
+    {
+      "row": 161,
+      "name": "CUENCA CUENCA ALBA DEL CARMEN",
+      "ruc": "1103052245001",
+      "fee": null
+    },
+    {
+      "row": 162,
+      "name": "SUQUILANDA ALVARADO MELVA MARIA",
+      "ruc": "1102718549001",
+      "fee": null
+    },
+    {
+      "row": 163,
+      "name": "MEJIA LEIVA EDWIN STALIN",
+      "ruc": "1103786149001",
+      "fee": null
+    },
+    {
+      "row": 164,
+      "name": "SISALIMA VALLE MILENA PATRICIA",
+      "ruc": "1104259542",
+      "fee": null
+    },
+    {
+      "row": 165,
+      "name": "ENCALADA OROZCO JUAN ROMAN",
+      "ruc": "1102083449",
+      "fee": null
+    },
+    {
+      "row": 167,
+      "name": "CASTILLO QUIZHPE ANA BELEN",
+      "ruc": "1104125081001",
+      "fee": null
+    },
+    {
+      "row": 168,
+      "name": "GARCES ORTEGA ANGEL ANIBAL",
+      "ruc": "1102599980",
+      "fee": null
+    },
+    {
+      "row": 169,
+      "name": "MUÑOZ TENESACA LUZ VICTORIA",
+      "ruc": "1101852588001",
+      "fee": null
+    },
+    {
+      "row": 171,
+      "name": "RODONDI JIMBIKT ALEXIS MICHAEL",
+      "ruc": "1900785781001",
+      "fee": null
+    },
+    {
+      "row": 172,
+      "name": "MARCHEMA OCHOA GILBER BENITO",
+      "ruc": "1104176498",
+      "fee": null
+    },
+    {
+      "row": 174,
+      "name": "ENCALADA OROZCO ELVIA MARIA",
+      "ruc": "110248839001",
+      "fee": null
+    },
+    {
+      "row": 176,
+      "name": "QUIZHPE ORDOÑEZ CLAUDIA REBECA",
+      "ruc": "1104217201001",
+      "fee": null
+    },
+    {
+      "row": 177,
+      "name": "ALARCON ESPINOSA SANTIAGO DAVID",
+      "ruc": "1104642101",
+      "fee": null
+    },
+    {
+      "row": 180,
+      "name": "COMPAÑIAS ANUAL",
+      "ruc": "",
+      "fee": null
+    },
+    {
+      "row": 183,
+      "name": "PASCAL-TECH S.A.S.",
+      "ruc": "1191796812001",
+      "fee": null
+    },
+    {
+      "row": 184,
+      "name": "PINDALITO ENCANTADO MINERO TRANS.COMER CIA LTDA",
+      "ruc": "1999313120001",
+      "fee": null
+    },
+    {
+      "row": 185,
+      "name": "ALRACEC S.A.S",
+      "ruc": "1793090737001",
+      "fee": null
+    },
+    {
+      "row": 186,
+      "name": "OFERTAS EN CAMINO OFERCAMIN CIA.LTDA.",
+      "ruc": "1191772330001",
+      "fee": null
+    },
+    {
+      "row": 187,
+      "name": "DEL VALLE AGENCIA ASESORA PRODUCTORA DE SEGUROS DELVALLESEG CIA. LTDA.",
+      "ruc": "1792702445001",
+      "fee": null
+    },
+    {
+      "row": 188,
+      "name": "ASOCIACION OBREROS DE MALACATOS",
+      "ruc": "1191745848001",
+      "fee": null
+    },
+    {
+      "row": 189,
+      "name": "NAT - LAB ANALITICA AMBIENTAL S.A.S.",
+      "ruc": "1793196556001",
+      "fee": null
+    },
+    {
+      "row": 190,
+      "name": "ALRAC ECUADOR BY WNETCOOP CIA.LTDA.",
+      "ruc": "1793203754001",
+      "fee": null
+    },
+    {
+      "row": 192,
+      "name": "COMPAÑIA DE SERVICIO DE TRANSPORTE MIXTO DE PASAJEROS RIO CHAMBA S A",
+      "ruc": "1191750175001",
+      "fee": null
+    },
+    {
+      "row": 194,
+      "name": "LYNX SEGUROS AGENCIA ASESORA PRODUCTORA DE SEGUROS",
+      "ruc": "1793207405001",
+      "fee": null
+    },
+    {
+      "row": 195,
+      "name": "SODA CM SAS",
+      "ruc": "1191795406001",
+      "fee": null
+    },
+    {
+      "row": 196,
+      "name": "ELO CONSTRUCTORA ELECTRO ORIENTE S A",
+      "ruc": "1191773361001",
+      "fee": null
+    },
+    {
+      "row": 197,
+      "name": "SUPERMARKETSAS S.A.S.",
+      "ruc": "0291526801001",
+      "fee": null
+    },
+    {
+      "row": 198,
+      "name": "POLLOS EL REY S.A.S.",
+      "ruc": "0291526787001",
+      "fee": null
+    },
+    {
+      "row": 199,
+      "name": "CONSTRUCCION-DISEÑO E INGENIERIA AMAZONAS",
+      "ruc": "2191774850001",
+      "fee": null
+    },
+    {
+      "row": 200,
+      "name": "GLOBAL-ENGINEERING SOLUTION AMBIENTALES",
+      "ruc": "2293536751001",
+      "fee": null
+    },
+    {
+      "row": 201,
+      "name": "YULEISIFARM S.A.S.",
+      "ruc": "0993393568001",
+      "fee": null
+    },
+    {
+      "row": 202,
+      "name": "GEREMCONASIS",
+      "ruc": "0993368966001",
+      "fee": null
+    },
+    {
+      "row": 203,
+      "name": "JUNTA DE AGUA LA ARGENTINA",
+      "ruc": "1191796960001",
+      "fee": null
+    },
+    {
+      "row": 204,
+      "name": "CLUB DEPORTIVO ESPECIALIZADO FORMATIVO ZARUMA TAEKWONDO",
+      "ruc": "1191795749001",
+      "fee": null
+    },
+    {
+      "row": 205,
+      "name": "DHARMA COSMETIC LABDHARMA S.A.S.",
+      "ruc": "1191797243001",
+      "fee": null
+    },
+    {
+      "row": 206,
+      "name": "ALIANZAMED-CENTROS-MÉDICOS S.A.S.",
+      "ruc": "1793218826001",
+      "fee": null
+    },
+    {
+      "row": 208,
+      "name": "IVA",
+      "ruc": "",
+      "fee": null
+    },
+    {
+      "row": 209,
+      "name": "MUÑOZ TENESACA LUZ VICTORIA",
+      "ruc": "1101852588001",
+      "fee": null
+    },
+    {
+      "row": 212,
+      "name": "OCHOA RODRIGUEZ CELMIRA URSULINA",
+      "ruc": "1101665576",
+      "fee": null
+    },
+    {
+      "row": 214,
+      "name": "ALVARADO SARANGO LORI ENIT",
+      "ruc": "1101488334",
+      "fee": null
+    },
+    {
+      "row": 215,
+      "name": "ANGEL JIMENEZ TENESACA",
+      "ruc": "1100012689001",
+      "fee": null
+    },
+    {
+      "row": 219,
+      "name": "SUESCUN NOELI",
+      "ruc": "1151664867",
+      "fee": null
+    },
+    {
+      "row": 223,
+      "name": "ESLSA JARAMILLO",
+      "ruc": "1100252590001",
+      "fee": null
+    },
+    {
+      "row": 224,
+      "name": "CORONEL PIÑA OLGUER WILSON",
+      "ruc": "1101446787001",
+      "fee": null
+    },
+    {
+      "row": 225,
+      "name": "ORDOÑEZ JARAMILLO MACLOVIA MARCIA SARBELIA",
+      "ruc": "1101081618",
+      "fee": null
+    },
+    {
+      "row": 226,
+      "name": "GOESSMAN MILDRED KAY",
+      "ruc": "0150427078",
+      "fee": null
+    },
+    {
+      "row": 227,
+      "name": "GOESSMAN JR CHARLES DOUGLAS",
+      "ruc": "0150650448",
+      "fee": null
+    },
+    {
+      "row": 229,
+      "name": "SANCHEZ ULLOA YAHAIRA DALILA",
+      "ruc": "1103805469001",
+      "fee": null
+    },
+    {
+      "row": 230,
+      "name": "CLAVES MAYRA CASTILLO",
+      "ruc": "",
+      "fee": null
+    },
+    {
+      "row": 231,
+      "name": "mayra.castillo02@gmail.com",
+      "ruc": "CORREOS",
+      "fee": null
+    },
+    {
+      "row": 238,
+      "name": "SACADOS",
+      "ruc": "",
+      "fee": null
+    },
+    {
+      "row": 239,
+      "name": "MARCHENA OCHOA AQUILES ALBARO",
+      "ruc": "1104367428001",
+      "fee": null
+    },
+    {
+      "row": 240,
+      "name": "MARIA PAULA RIOFRIO CRESPO",
+      "ruc": "1726079047001",
+      "fee": null
+    },
+    {
+      "row": 241,
+      "name": "FERNANDEZ ENRIQUE OLGA MARIA",
+      "ruc": "1102456843001",
+      "fee": null
+    },
+    {
+      "row": 242,
+      "name": "SRA. AURITA ENCALADA",
+      "ruc": "1102211255001",
+      "fee": null
+    },
+    {
+      "row": 243,
+      "name": "CRISTIAN TROYA",
+      "ruc": "1104774128001",
+      "fee": null
+    },
+    {
+      "row": 244,
+      "name": "SANTIAGO ISRAEL QUIZHPE ANGAMARCA",
+      "ruc": "1105654675",
+      "fee": null
+    },
+    {
+      "row": 245,
+      "name": "ZHIGUI SARAGURO MANUEL ARSENIO",
+      "ruc": "702603150001",
+      "fee": null
+    },
+    {
+      "row": 246,
+      "name": "MAYRA CUPON SENADI",
+      "ruc": "1103873962",
+      "fee": null
+    },
+    {
+      "row": 247,
+      "name": "SARA CABRERA",
+      "ruc": "1105050155001",
+      "fee": null
+    },
+    {
+      "row": 248,
+      "name": "YAJAIRA SANCHEZ",
+      "ruc": "110865359001",
+      "fee": null
+    },
+    {
+      "row": 250,
+      "name": "QUIZHPE ANGAMARCA ZORAYDA GABRIELA",
+      "ruc": "1150084695001",
+      "fee": null
+    },
+    {
+      "row": 251,
+      "name": "ZHIGUI GIA MARIA ALEXANDRA",
+      "ruc": "1150103032001",
+      "fee": null
+    },
+    {
+      "row": 252,
+      "name": "GUEVARA ARBOLEDA JAIME SANTIAGO",
+      "ruc": "1600502940001",
+      "fee": null
+    },
+    {
+      "row": 253,
+      "name": "RR INMOGRUPO S.A.S. (CERRADO)",
+      "ruc": "1191796421001",
+      "fee": null
+    },
+    {
+      "row": 254,
+      "name": "JIJIDE-CONSTRUCCIONES S.A.S.     (CERRADO)",
+      "ruc": "1191796741001",
+      "fee": null
+    },
+    {
+      "row": 255,
+      "name": "ING-JPJD S.A.S.           (CERRADO)",
+      "ruc": "1191796904001",
+      "fee": null
+    },
+    {
+      "row": 256,
+      "name": "ING-DJD CONSTRUCCIONES S.A.S.    (CERRADO)",
+      "ruc": "1191796902001",
+      "fee": null
+    },
+    {
+      "row": 257,
+      "name": "JIMENEZ DARIO",
+      "ruc": "0912558673",
+      "fee": null
+    },
+    {
+      "row": 258,
+      "name": "SANTIAGO VILLAVICENCIO",
+      "ruc": "1103872337001",
+      "fee": null
+    },
+    {
+      "row": 259,
+      "name": "RIVERA RAMON DEYBI JOSE",
+      "ruc": "1104884000001",
+      "fee": null
+    },
+    {
+      "row": 260,
+      "name": "HURTADO MENDEZ OSWALDO KENTON",
+      "ruc": "1708860513001",
+      "fee": null
+    },
+    {
+      "row": 261,
+      "name": "JIJIDE-CONSTRUCCIONES S.A.S.",
+      "ruc": "1191796741001",
+      "fee": null
+    },
+    {
+      "row": 262,
+      "name": "ING-JPJD S.A.S.",
+      "ruc": "1191796904001",
+      "fee": null
+    },
+    {
+      "row": 263,
+      "name": "ING-DJD CONSTRUCCIONES S.A.S.",
+      "ruc": "1191796902001",
+      "fee": null
+    },
+    {
+      "row": 269,
+      "name": "BDL",
+      "ruc": "",
+      "fee": null
+    }
+  ]
+}

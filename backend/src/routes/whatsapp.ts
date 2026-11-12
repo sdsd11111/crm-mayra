@@ -1,0 +1,645 @@
+// backend/src/routes/whatsapp.ts
+import { Router, Request, Response } from 'express';
+import { prisma } from '../lib/prisma';
+import { authenticateToken } from '../middleware/auth';
+import { WhatsAppBotEngine } from '../services/WhatsAppBotEngine';
+import { EvolutionApiService } from '../services/EvolutionApiService';
+
+import { BotOrchestrator } from '../services/bot/botOrchestrator';
+import { MediaIngestionService } from '../services/bot/mediaIngestionService';
+import { OutboundQueueService } from '../services/bot/outboundQueueService';
+import { io } from '../index';
+
+const router = Router();
+
+/**
+ * POST /api/whatsapp/webhook
+ * Receptor oficial de Webhooks de Evolution API (messages.upsert).
+ * Esta ruta no requiere JWT porque es invocada directamente por el servidor Evolution.
+ */
+router.post('/webhook', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const body = req.body;
+    const event = body?.event;
+    console.log('📩 [Evolution Webhook Event]:', event || 'Unknown');
+
+    const key = body?.data?.key;
+    const remoteJid = key?.remoteJid || '';
+    const messageId = key?.id;
+
+    // 1. Filtrar inmediatamente grupos (@g.us), difusiones y estados
+    if (!remoteJid || remoteJid.includes('@g.us') || remoteJid.includes('status@broadcast') || remoteJid.includes('@broadcast')) {
+      res.status(200).json({ status: 'IGNORED_GROUP_OR_BROADCAST' });
+      return;
+    }
+
+    const cleanPhone = remoteJid.replace('@s.whatsapp.net', '').replace(/\D/g, '');
+
+    // 2. Control de idempotencia anti-duplicados por messageId
+    if (messageId) {
+      const alreadyProcessed = await prisma.processedWebhookEvent.findUnique({
+        where: { messageId },
+      });
+      if (alreadyProcessed) {
+        res.status(200).json({ status: 'ALREADY_PROCESSED' });
+        return;
+      }
+      // Registrar evento recibido
+      await prisma.processedWebhookEvent.create({
+        data: { messageId },
+      }).catch(() => {});
+    }
+
+    let messageContent =
+      body.data?.message?.conversation ||
+      body.data?.message?.extendedTextMessage?.text ||
+      body.data?.message?.imageMessage?.caption ||
+      '';
+
+    let incomingMedia: any = null;
+
+    // 4. Ingesta Multimedia Real (Audio, Foto, Documento/PDF a BunnyCDN)
+    if (key?.fromMe !== true && body.data?.message) {
+      incomingMedia = await MediaIngestionService.processIncomingMedia({
+        phone: cleanPhone,
+        messageKeyId: messageId,
+        messageData: body.data.message,
+      });
+
+      if (incomingMedia) {
+        if (incomingMedia.mediaType === 'AUDIO' && incomingMedia.transcription) {
+          messageContent = `🎤 [Nota de voz]: "${incomingMedia.transcription}"`;
+        } else if (incomingMedia.mediaType === 'IMAGE') {
+          messageContent = messageContent ? `📷 [Foto]: ${messageContent}` : '📷 [Foto adjuntada por el cliente]';
+        } else if (incomingMedia.mediaType === 'DOCUMENT') {
+          messageContent = messageContent ? `📄 [Documento ${incomingMedia.fileName}]: ${messageContent}` : `📄 [Documento adjuntado: ${incomingMedia.fileName}]`;
+        }
+      }
+    }
+
+    // 3. Manejo de mensajes salientes (fromMe === true): Evitar auto-sabotaje y detectar intervención humana
+    if (key?.fromMe === true) {
+      // Buscar ticket activo
+      const ticket = await prisma.chatTicket.findFirst({
+        where: { whatsappPhone: cleanPhone },
+        orderBy: { updatedAt: 'desc' },
+      });
+
+      if (ticket && messageContent) {
+        // Guardar mensaje como intervención humana (desde celular físico o WhatsApp Web)
+        await prisma.chatMessage.create({
+          data: {
+            ticketId: ticket.id,
+            sender: 'HUMAN',
+            senderType: 'HUMAN',
+            evolutionMessageId: messageId || null,
+            content: messageContent,
+          },
+        });
+
+        // Pausar el bot para que no interrumpa al humano
+        await prisma.chatTicket.update({
+          where: { id: ticket.id },
+          data: { botPaused: true },
+        });
+
+        // Notificar al CRM por WebSocket
+        if (io) {
+          io.emit('whatsapp:new-message', {
+            ticketId: ticket.id,
+            queue: ticket.queueType,
+            clientPhone: cleanPhone,
+            botPaused: true,
+            isHumanReply: true,
+          });
+        }
+      }
+
+      res.status(200).json({ status: 'HUMAN_INTERVENTION_RECORDED' });
+      return;
+    }
+
+    // 4. Mensaje entrante del cliente
+    if (cleanPhone && messageContent) {
+      // Verificar si el ticket está pausado por intervención humana
+      const activeTicket = await prisma.chatTicket.findFirst({
+        where: { whatsappPhone: cleanPhone },
+        orderBy: { updatedAt: 'desc' },
+      });
+
+      if (activeTicket?.botPaused) {
+        // Solo guardar y emitir al CRM para las asistentes/Mayra, SIN disparar el bot
+        const clientMsg = await prisma.chatMessage.create({
+          data: {
+            ticketId: activeTicket.id,
+            sender: 'CLIENT',
+            senderType: 'CLIENT',
+            evolutionMessageId: messageId || null,
+            content: messageContent || (incomingMedia ? `[Archivo: ${incomingMedia.fileName}]` : 'Mensaje multimedia'),
+            mediaType: incomingMedia?.mediaType || null,
+            mediaUrl: incomingMedia?.mediaUrl || null,
+            mimeType: incomingMedia?.mimeType || null,
+            fileName: incomingMedia?.fileName || null,
+          },
+        });
+
+        if (io) {
+          io.emit('whatsapp:new-message', {
+            ticketId: activeTicket.id,
+            queue: activeTicket.queueType,
+            clientPhone: cleanPhone,
+            message: clientMsg,
+            botPaused: true,
+          });
+        }
+
+        res.status(200).json({ status: 'BOT_PAUSED_HUMAN_IN_CONTROL' });
+        return;
+      }
+
+      // Si el bot está activo, procesar mediante el BotOrchestrator
+      BotOrchestrator.processMessage({
+        fromPhone: cleanPhone,
+        senderName: body.data?.pushName,
+        messageText: messageContent || (incomingMedia ? `[Archivo adjunto: ${incomingMedia.fileName}]` : ''),
+        mediaInfo: incomingMedia || undefined,
+      }).catch((err) => console.error('[BotOrchestrator Error]:', err));
+    }
+
+    res.status(200).json({ status: 'SUCCESS' });
+  } catch (error) {
+    console.error('Error procesando webhook de Evolution API:', error);
+    res.status(500).json({ status: 'ERROR' });
+  }
+});
+
+// Todas las rutas siguientes requieren autenticación en el CRM
+router.use(authenticateToken);
+
+// Alias retrocompatible para el frontend
+router.get('/status', async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const result = await EvolutionApiService.getConnectionState();
+    res.json({
+      success: true,
+      instanceName: process.env.EVOLUTION_INSTANCE_NAME || 'mayra_castillo',
+      apiUrl: process.env.EVOLUTION_API_URL || 'http://178.238.238.158:8080',
+      ...result,
+    });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+/**
+ * GET /api/whatsapp/instance-status
+ * Consulta el estado de conexión de la instancia de Evolution API.
+ */
+router.get('/instance-status', async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const result = await EvolutionApiService.getConnectionState();
+    res.json({
+      success: true,
+      instanceName: process.env.EVOLUTION_INSTANCE_NAME || 'mayra_castillo',
+      apiUrl: process.env.EVOLUTION_API_URL || 'http://178.238.238.158:8080',
+      ...result,
+    });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+/**
+ * POST /api/whatsapp/instance-connect
+ * Solicita el código QR para conectar WhatsApp.
+ */
+router.post('/instance-connect', async (_req: Request, res: Response): Promise<void> => {
+  try {
+    // Si la instancia no está creada, intentamos crearla primero
+    await EvolutionApiService.createInstance();
+    const qrResult = await EvolutionApiService.getQrCode();
+    res.json(qrResult);
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+/**
+ * POST /api/whatsapp/instance-logout
+ * Desconecta la sesión de WhatsApp de Mayra.
+ */
+router.post('/instance-logout', async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const result = await EvolutionApiService.logoutInstance();
+    res.json(result);
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+/**
+ * POST /api/whatsapp/instance-restart
+ * Reinicia la instancia de WhatsApp.
+ */
+router.post('/instance-restart', async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const result = await EvolutionApiService.restartInstance();
+    res.json(result);
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+/**
+ * GET /api/whatsapp/chats
+ * Obtiene la lista de chats y tickets abiertos filtrados por bandeja.
+ *
+ * CONTROL DE ACCESO POR ROL:
+ * - ADMIN_MAYRA / COBRADOR → puede ver todas las colas o filtrar por ?queue=
+ * - ASISTENTE              → solo ve OPERATIVA_CHICAS (forzado a nivel backend)
+ */
+router.get('/chats', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userRole = req.user!.role;
+    const { queue } = req.query;
+
+    const where: any = {};
+
+    if (userRole === 'ASISTENTE') {
+      // MODO CIEGO DE COLA: Las asistentes SOLO ven OPERATIVA_CHICAS
+      where.queueType = 'OPERATIVA_CHICAS';
+    } else {
+      // ADMIN o COBRADOR pueden filtrar o ver todo
+      if (queue && queue !== 'ALL') {
+        where.queueType = queue;
+      }
+    }
+
+    const tickets = await prisma.chatTicket.findMany({
+      where,
+      include: {
+        clientOwner: {
+          include: {
+            taxpayers: {
+              include: {
+                documents: {
+                  take: 3,
+                  orderBy: { createdAt: 'desc' },
+                },
+              },
+            },
+          },
+        },
+      },
+      orderBy: { updatedAt: 'desc' },
+    });
+
+    res.json({
+      success: true,
+      count: tickets.length,
+      data: tickets,
+      userRole, // Frontend usa esto para decidir qué pestañas mostrar
+    });
+  } catch (error) {
+    console.error('Error al obtener chats:', error);
+    res.status(500).json({ success: false, message: 'Error al consultar chats.' });
+  }
+});
+
+/**
+ * POST /api/whatsapp/send-reply
+ * Envío manual de respuesta desde el CRM hacia el cliente.
+ * ASISTENTE solo puede responder tickets de OPERATIVA_CHICAS.
+ */
+router.post('/send-reply', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { phone, message, ticketId } = req.body;
+    const userRole = req.user!.role;
+
+    if (!phone || !message) {
+      res.status(400).json({ success: false, message: 'Faltan parámetros (phone, message).' });
+      return;
+    }
+
+    // Verificar que ASISTENTE solo pueda responder tickets OPERATIVA_CHICAS
+    if (userRole === 'ASISTENTE' && ticketId) {
+      const ticket = await prisma.chatTicket.findUnique({
+        where: { id: parseInt(ticketId, 10) },
+      });
+
+      if (!ticket || ticket.queueType !== 'OPERATIVA_CHICAS') {
+        res.status(403).json({
+          success: false,
+          message: 'Acceso denegado: Solo puedes responder tickets de tu cola OPERATIVA_CHICAS.',
+        });
+        return;
+      }
+    }
+
+    const result = await EvolutionApiService.sendTextMessage({
+      number: phone,
+      text: message,
+    });
+
+    if (ticketId) {
+      // Registrar mensaje humano en BD
+      await prisma.chatMessage.create({
+        data: {
+          ticketId: parseInt(ticketId, 10),
+          sender: 'HUMAN',
+          senderType: 'HUMAN',
+          content: message,
+        },
+      });
+
+      // Pausar automáticamente el bot para que no interrumpa al humano
+      await prisma.chatTicket.update({
+        where: { id: parseInt(ticketId, 10) },
+        data: {
+          status: 'EN_PROCESO',
+          assignedToId: req.user!.id,
+          botPaused: true,
+          pausedById: req.user!.id,
+        },
+      });
+
+      if (io) {
+        io.emit('whatsapp:new-message', {
+          ticketId: parseInt(ticketId, 10),
+          botPaused: true,
+          isHumanReply: true,
+        });
+      }
+    }
+
+    res.json({
+      success: true,
+      message: 'Mensaje enviado exitosamente vía Evolution API.',
+      data: result,
+    });
+  } catch (error) {
+    console.error('Error al responder chat:', error);
+    res.status(500).json({ success: false, message: 'Error interno al enviar mensaje.' });
+  }
+});
+
+/**
+ * PATCH /api/whatsapp/tickets/:id/toggle-bot
+ * Pausa o reactiva el bot para un ticket específico.
+ */
+router.patch('/tickets/:id/toggle-bot', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const id = parseInt(Array.isArray(req.params.id) ? req.params.id[0] : req.params.id, 10);
+    const { botPaused, closeTicket } = req.body;
+
+    const dataToUpdate: any = {};
+    if (botPaused !== undefined) {
+      dataToUpdate.botPaused = Boolean(botPaused);
+      dataToUpdate.pausedById = botPaused ? req.user!.id : null;
+    }
+
+    if (closeTicket) {
+      dataToUpdate.status = 'CERRADO';
+      dataToUpdate.botPaused = false; // Al cerrar el ticket, el bot queda reactivado para futuros mensajes
+    }
+
+    const updated = await prisma.chatTicket.update({
+      where: { id },
+      data: dataToUpdate,
+    });
+
+    if (io) {
+      io.emit('whatsapp:new-message', {
+        ticketId: updated.id,
+        botPaused: updated.botPaused,
+        status: updated.status,
+      });
+    }
+
+    res.json({
+      success: true,
+      message: `Bot ${updated.botPaused ? 'pausado' : 'activado'} correctamente.`,
+      ticket: updated,
+    });
+  } catch (error) {
+    console.error('Error al cambiar estado del bot:', error);
+    res.status(500).json({ success: false, message: 'Error interno al actualizar bot.' });
+  }
+});
+
+/**
+ * POST /api/whatsapp/test-message
+ * Simulador de mensaje entrante para pruebas en desarrollo (sin túnel webhook público).
+ */
+router.post('/test-message', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { phone, text, senderName } = req.body;
+
+    if (!phone || !text) {
+      res.status(400).json({ success: false, message: 'Faltan parámetros (phone, text).' });
+      return;
+    }
+
+    const botResponse = await WhatsAppBotEngine.handleIncomingMessage({
+      fromPhone: phone,
+      messageText: text,
+      senderName: senderName || 'Cliente Prueba',
+    });
+
+    res.json({
+      success: true,
+      message: 'Mensaje simulado y procesado por el Bot.',
+      botResponse,
+    });
+  } catch (error) {
+    console.error('Error en simulador de WhatsApp:', error);
+    res.status(500).json({ success: false, message: 'Error en simulación.' });
+  }
+});
+
+/**
+ * GET /api/whatsapp/tax-alerts
+ * Semáforo tributario y alertas de firma electrónica para el Dashboard.
+ * Retorna:
+ *   - clients con estado VERDE/AMARILLO/ROJO según declaraciones del mes
+ *   - firmas electrónicas que expiran en <= 5 días
+ */
+router.get('/tax-alerts', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const today = new Date();
+    const currentMonth = today.getMonth() + 1;
+    const currentYear = today.getFullYear();
+    const currentDay = today.getDate();
+
+    // SRI due day por dígito 9
+    const SRI_DUE_DAYS: Record<number, number> = {
+      1: 10, 2: 12, 3: 14, 4: 16, 5: 18,
+      6: 20, 7: 22, 8: 24, 9: 26, 0: 28,
+    };
+
+    // Obtener todos los taxpayers activos con documentos del mes actual
+    const taxpayers = await prisma.taxpayer.findMany({
+      where: {
+        regimen: { not: 'INACTIVO_CERRADO' },
+      },
+      include: {
+        clientOwner: true,
+        documents: {
+          where: {
+            periodYear: currentYear,
+            periodMonth: currentMonth,
+            category: { in: ['DECLARACION_IVA', 'DECLARACION_RENTA', 'ANEXO_ATS'] },
+          },
+        },
+      },
+    });
+
+    // Alertas de semáforo por declaración
+    const semaforo = taxpayers.map((t) => {
+      const digit = t.novenoDigito ?? 0;
+      const dueDay = SRI_DUE_DAYS[digit] ?? 28;
+      const hasDeclaration = t.documents.length > 0;
+      const daysUntilDue = dueDay - currentDay;
+
+      let estado: 'VERDE' | 'AMARILLO' | 'ROJO';
+      if (hasDeclaration) {
+        estado = 'VERDE';
+      } else if (daysUntilDue <= 1 && daysUntilDue >= 0) {
+        estado = 'ROJO'; // Vence hoy o mañana y no hay archivo
+      } else if (daysUntilDue < 0) {
+        estado = 'ROJO'; // Ya venció y no hay archivo
+      } else {
+        estado = 'AMARILLO'; // Pendiente pero aún tiene tiempo
+      }
+
+      return {
+        taxpayerId: t.id,
+        clientId: t.clientOwner.id,
+        razonSocial: t.razonSocial,
+        ruc: t.ruc,
+        claveSri: t.claveSri || null,
+        clientName: t.clientOwner.fullName,
+        novenoDigito: digit,
+        dueDay,
+        daysUntilDue,
+        hasDeclaration,
+        estado,
+      };
+    });
+
+    // Alertas de firma electrónica próximas a vencer (<= 5 días)
+    const fiveDaysFromNow = new Date(today);
+    fiveDaysFromNow.setDate(fiveDaysFromNow.getDate() + 5);
+
+    const firmasExpirando = await prisma.taxpayer.findMany({
+      where: {
+        firmaExpira: {
+          gte: today,
+          lte: fiveDaysFromNow,
+        },
+      },
+      include: { clientOwner: true },
+      orderBy: { firmaExpira: 'asc' },
+    });
+
+    const firmaAlerts = firmasExpirando.map((t) => {
+      const daysLeft = Math.ceil(
+        (t.firmaExpira!.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+      );
+      return {
+        taxpayerId: t.id,
+        razonSocial: t.razonSocial,
+        ruc: t.ruc,
+        clientName: t.clientOwner.fullName,
+        whatsappPhone: t.clientOwner.whatsappPhone,
+        firmaExpira: t.firmaExpira,
+        daysLeft,
+      };
+    });
+
+    res.json({
+      success: true,
+      semaforo: {
+        verde: semaforo.filter((s) => s.estado === 'VERDE').length,
+        amarillo: semaforo.filter((s) => s.estado === 'AMARILLO').length,
+        rojo: semaforo.filter((s) => s.estado === 'ROJO').length,
+        items: semaforo,
+      },
+      firmaAlerts: {
+        count: firmaAlerts.length,
+        items: firmaAlerts,
+      },
+    });
+  } catch (error) {
+    console.error('Error en tax-alerts:', error);
+    res.status(500).json({ success: false, message: 'Error al obtener alertas tributarias.' });
+  }
+});
+
+/**
+ * GET /api/whatsapp/queue-status
+ * Retorna el estado en tiempo real de la cola de salida anti-baneo persistente.
+ */
+router.get('/queue-status', authenticateToken, async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const status = await OutboundQueueService.getQueueStatus();
+    res.json({ success: true, ...status });
+  } catch (error) {
+    console.error('Error al consultar queue-status:', error);
+    res.status(500).json({ success: false, message: 'Error al obtener estado de la cola' });
+  }
+});
+
+/**
+ * GET /api/whatsapp/messages/:ticketId
+ * Devuelve todos los mensajes de un ticket ordenados cronológicamente.
+ * Usado por /whatsapp (Centro WhatsApp) para reemplazar los mensajes dummy.
+ */
+router.get('/messages/:ticketId', authenticateToken, async (req: Request, res: Response): Promise<void> => {
+  try {
+    const rawTicketId = Array.isArray(req.params.ticketId) ? req.params.ticketId[0] : req.params.ticketId;
+    const ticketId = parseInt(rawTicketId, 10);
+    if (isNaN(ticketId)) {
+      res.status(400).json({ success: false, message: 'ticketId inválido' });
+      return;
+    }
+    const messages = await prisma.chatMessage.findMany({
+      where: { ticketId },
+      orderBy: { createdAt: 'asc' },
+    });
+    res.json({ success: true, data: messages });
+  } catch (error) {
+    console.error('Error al obtener mensajes del ticket:', error);
+    res.status(500).json({ success: false, message: 'Error al obtener mensajes' });
+  }
+});
+
+/**
+ * GET /api/whatsapp/client/:clientOwnerId/tickets
+ * Devuelve todos los tickets (conversaciones) de un cliente con sus mensajes.
+ * Usado por la pestaña "Chat" en el perfil /clientes/[id].
+ */
+router.get('/client/:clientOwnerId/tickets', authenticateToken, async (req: Request, res: Response): Promise<void> => {
+  try {
+    const rawClientId = Array.isArray(req.params.clientOwnerId) ? req.params.clientOwnerId[0] : req.params.clientOwnerId;
+    const clientOwnerId = parseInt(rawClientId, 10);
+    if (isNaN(clientOwnerId)) {
+      res.status(400).json({ success: false, message: 'clientOwnerId inválido' });
+      return;
+    }
+    const tickets = await prisma.chatTicket.findMany({
+      where: { clientOwnerId },
+      include: {
+        messages: { orderBy: { createdAt: 'asc' } },
+        assignedTo: { select: { id: true, fullName: true } },
+      },
+      orderBy: { updatedAt: 'desc' },
+    });
+    res.json({ success: true, data: tickets });
+  } catch (error) {
+    console.error('Error al obtener tickets del cliente:', error);
+    res.status(500).json({ success: false, message: 'Error al obtener historial de chat' });
+  }
+});
+
+export default router;

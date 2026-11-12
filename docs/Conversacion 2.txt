@@ -1,0 +1,18 @@
+aplicación es un de Entonces la contadora quiere que le hagamos un sistema, que nos conectemos a la SRI para hacer tipo de declaraciones. Eh, y eso es justamente lo que venía averiguar. ¿Qué no más puedo hacer eh poniéndome di vía API con el SR? ¿Qué no más se puede hacer?
+O sea, todo lo que de lo que yo tengo entendido eh aquí lo de la facturación electrónica, pero decir que un sistema se va conectar para hacer declaraciones directamente al sistema. Eso es imposible. ¿Puede usted en el sistema elaborar que le haga un resumen de declaración? Sí.
+Ya.
+Sí. Igual todo está en la página, están los manuales, están los códigos, todo. Pero decir que hay un sistema de que externo que envíe una declaración al SRI, siempre va a tener que loguearse al SRI en la información en el SRI y enviar. Pero un sistema contable lo que puede hacer es enviar un resumen, ¿sí? De la información.
+Ya. Sí. No, esa parte ya está entendido. Sé cómo hacer eso. Lo que queríamos era ver si se podía, por ejemplo, automatizar el el tema de descargo de facturas, reportes o siempre tiene que ser desde logueado con el el del cliente, no puede ser como la contadora,
+¿no? Siempre con el cliente, siempre porque es información personal. Ahora, si el el cliente le quiere dar información a la contadora es bajo su responsabilidad,
+¿ya? Entonces, con de esa manera cliente y accedo y hago así.
+Vía API, no hay problema.
+Sí, no hay problema.
+Perfecto. Eh, y dice Todo está en la página.
+Sí.
+No, no, no he vistado todavía. Realmente acá estoy levantando RIT recién información. Entonces, sería fácil ahí, ¿no?
+Sí.
+Con todo, de pronto algún departamento de soporte.
+Eh, sí. Lo único que hay es para factura electrónica, nada más que se está cargada en la misma página del Sr. Solo para eso.
+Ya. Perfecto. Listo.
+Un gusto.
+Igualmente. S.

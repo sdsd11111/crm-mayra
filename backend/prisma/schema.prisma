@@ -1,0 +1,320 @@
+// backend/prisma/schema.prisma — MySQL remoto (StackCP)
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ==========================================
+// 1. USUARIOS DEL CRM (LOGIN SOLO CON USERNAME)
+// ==========================================
+enum UserRole {
+  ADMIN_MAYRA
+  ASISTENTE
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  username     String   @unique
+  passwordHash String
+  fullName     String
+  avatarUrl    String?  @db.Text
+  role         UserRole @default(ASISTENTE)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+
+  uploadedDocs  Document[]
+  ledgerEntries LedgerEntry[]
+  assignedChats ChatTicket[]
+  createdTasks  Task[]        @relation("TaskCreatedBy")
+  assignedTasks Task[]        @relation("TaskAssignedTo")
+}
+
+// ==========================================
+// 2. CLIENTE PRINCIPAL / DUEÑO PAGADOR
+// ==========================================
+model ClientOwner {
+  id                Int      @id @default(autoincrement())
+  fullName          String
+  whatsappPhone     String   @unique
+  securityPin       String   @default("0000")
+  isVip             Boolean  @default(false)
+  dataConsentSigned Boolean  @default(false)
+  notes             String?  @db.Text
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  taxpayers       Taxpayer[]
+  ledgerEntries   LedgerEntry[]
+  paymentPromises PaymentPromise[]
+  chatTickets     ChatTicket[]
+}
+
+// ==========================================
+// 3. EMPRESAS / RUCs (TABLA FIJA DE MAYRA)
+// ==========================================
+enum TaxRegime {
+  MENSUAL
+  SEMESTRAL
+  ANUAL
+  COMPANIA_SUPERCIAS
+  DEVOLUCION_IVA_3RA_EDAD
+  INACTIVO_CERRADO
+}
+
+enum BillingFrequency {
+  NONE
+  MENSUAL
+  SEMESTRAL
+  ANUAL
+}
+
+model Taxpayer {
+  id            Int         @id @default(autoincrement())
+  clientOwnerId Int
+  clientOwner   ClientOwner @relation(fields: [clientOwnerId], references: [id], onDelete: Cascade)
+
+  razonSocial  String
+  ruc          String?   @unique
+  fechaDecla   String?
+  novenoDigito Int?
+  regimen      TaxRegime @default(MENSUAL)
+  email        String?
+
+  claveSri       String?
+  claveFirma     String?
+  firmaFileUrl   String?
+  firmaExpira    DateTime?
+  claveSalar     String?
+  claveSut       String?
+  claveIess      String?
+  claveSupercias String?
+  expSupercias   String?
+  claveSercop    String?
+
+  checkDecla     Boolean @default(false)
+  checkIce       Boolean @default(false)
+  checkAnexo     Boolean @default(false)
+  checkIva       Boolean @default(false)
+  checkSalar     Boolean @default(false)
+  checkSut       Boolean @default(false)
+  checkIess      Boolean @default(false)
+  checkSupercias Boolean @default(false)
+  checkPatente   Boolean @default(false)
+
+  // Obligaciones Tributarias y Laborales (Valores de texto, número, año o nota, ej: 'SI', '2022', '30', '?', etc.)
+  declaDetalle   String?
+  iceDetalle     String?
+  anexoDetalle   String?
+  ivaDetalle     String?
+  salarDetalle   String?
+  sutDetalle     String?
+  iessDetalle    String?
+  superciasDetalle String?
+  patenteDetalle String?
+
+  autoBillFreq   BillingFrequency @default(NONE)
+  autoBillAmount Decimal          @default(0.00) @db.Decimal(10, 2)
+  appliesVat     Boolean          @default(false)
+  devIvaPercent  Decimal          @default(10.00) @db.Decimal(5, 2)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  documents     Document[]
+  ledgerEntries LedgerEntry[]
+  devIvaRecords DevIvaRecord[]
+}
+
+// ==========================================
+// 4. BÓVEDA DIGITAL DE ARCHIVOS
+// ==========================================
+enum DocCategory {
+  DECLARACION_IVA
+  DECLARACION_RENTA
+  ANEXO_ATS
+  DECLARACION_ICE
+  SUPERCIAS_ESTADOS
+  RUC_CERTIFICADO
+  NOMBRAMIENTO_ESCRITURA
+  PLANILLA_IESS_SUT
+  FACTURA_EMITIDA
+  PROYECCION_RENTA
+  FIRMA_ELECTRONICA_P12
+  OTRO_DOCUMENTO
+}
+
+model Document {
+  id         Int         @id @default(autoincrement())
+  taxpayerId Int
+  taxpayer   Taxpayer    @relation(fields: [taxpayerId], references: [id], onDelete: Cascade)
+
+  category       DocCategory
+  title          String
+  periodYear     Int
+  periodMonth    Int?
+  bunnyPath      String
+  bunnyUrl       String
+  fileType       String
+
+  uploadedById   Int
+  uploadedBy     User    @relation(fields: [uploadedById], references: [id])
+  sentByWhatsapp Boolean @default(false)
+  createdAt      DateTime @default(now())
+}
+
+// ==========================================
+// 5. CONTABILIDAD / CARTERA (BOLSA DE DEUDA)
+// ==========================================
+enum EntryType {
+  CARGO_AUTOMATICO
+  CARGO_MANUAL
+  CARGO_COMISION_DEV
+  ABONO_PAGO
+  DESCUENTO_CRUCE
+}
+
+enum BankAccount {
+  NO_APLICA
+  BANCO_PICHINCHA
+  BANCO_DE_LOJA
+  COOPERATIVA_JEP
+  EFECTIVO
+  CRUCE_CUENTAS
+}
+
+model LedgerEntry {
+  id            Int         @id @default(autoincrement())
+  clientOwnerId Int
+  clientOwner   ClientOwner @relation(fields: [clientOwnerId], references: [id], onDelete: Cascade)
+  taxpayerId    Int?
+  taxpayer      Taxpayer?   @relation(fields: [taxpayerId], references: [id], onDelete: SetNull)
+
+  entryType   EntryType
+  concept     String
+  periodText  String?
+  amount      Decimal     @db.Decimal(10, 2)
+  bankAccount BankAccount @default(NO_APLICA)
+  receiptUrl  String?
+  entryDate   DateTime    @default(now())
+
+  createdById Int?
+  createdBy   User? @relation(fields: [createdById], references: [id])
+}
+
+// ==========================================
+// 6. DEVOLUCIÓN DE IVA (MODO CIEGO)
+// ==========================================
+model DevIvaRecord {
+  id              Int      @id @default(autoincrement())
+  taxpayerId      Int
+  taxpayer        Taxpayer @relation(fields: [taxpayerId], references: [id], onDelete: Cascade)
+  periodYear      Int
+  periodMonth     Int
+  requestedAmount Decimal  @db.Decimal(10, 2)
+  commissionPct   Decimal  @db.Decimal(5, 2)
+  commissionTotal Decimal  @db.Decimal(10, 2)
+  createdAt       DateTime @default(now())
+}
+
+// ==========================================
+// 7. PROMESAS DE PAGO Y TICKETS WHATSAPP
+// ==========================================
+model PaymentPromise {
+  id             Int         @id @default(autoincrement())
+  clientOwnerId  Int
+  clientOwner    ClientOwner @relation(fields: [clientOwnerId], references: [id], onDelete: Cascade)
+  promisedDate   DateTime
+  promisedAmount Decimal?    @db.Decimal(10, 2)
+  status         String      @default("PENDIENTE")
+  notes          String?
+  createdAt      DateTime    @default(now())
+}
+
+model ChatTicket {
+  id            Int          @id @default(autoincrement())
+  clientOwnerId Int?
+  clientOwner   ClientOwner? @relation(fields: [clientOwnerId], references: [id])
+  whatsappPhone String
+  queueType     String       @default("OPERATIVA_CHICAS") // OPERATIVA_CHICAS, GERENCIAL_MAYRA, COBRANZA
+  subject       String
+  status        String       @default("ABIERTO")
+  aiSummary     String?      @db.Text
+  botPaused     Boolean      @default(false)
+  pausedById    Int?
+  assignedToId  Int?
+  assignedTo    User?        @relation(fields: [assignedToId], references: [id])
+  messages      ChatMessage[]
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+}
+
+model ChatMessage {
+  id                 Int        @id @default(autoincrement())
+  ticketId           Int
+  ticket             ChatTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  sender             String     // CLIENT, SYSTEM, AGENT
+  senderType         String     @default("CLIENT") // CLIENT, BOT, HUMAN
+  evolutionMessageId String?
+  content            String     @db.Text
+  mediaType          String?    // AUDIO, IMAGE, DOCUMENT
+  mediaUrl           String?
+  mimeType           String?
+  fileName           String?
+  createdAt          DateTime   @default(now())
+}
+
+model OutboundQueueJob {
+  id            Int       @id @default(autoincrement())
+  whatsappPhone String
+  jobType       String    // COBRANZA_MENSUAL, PROMESA_HOY, FIRMA_CADUCA, PROYECCION_RENTA
+  textContent   String    @db.Text
+  mediaUrl      String?
+  fileName      String?
+  status        String    @default("PENDING") // PENDING, PROCESSING, SENT, FAILED
+  attempts      Int       @default(0)
+  lastError     String?   @db.Text
+  scheduledFor  DateTime  @default(now())
+  sentAt        DateTime?
+  createdAt     DateTime  @default(now())
+}
+
+model BotSession {
+  id                Int       @id @default(autoincrement())
+  whatsappPhone     String    @unique
+  currentFlow       String    @default("IDLE") // IDLE, FIRMA_STEPS, AWAITING_PIN
+  pinVerifiedUntil  DateTime?
+  flowData          Json?     // Requisitos de firma, datos temporales
+  lastInteractionAt DateTime  @default(now())
+}
+
+model ProcessedWebhookEvent {
+  id        Int      @id @default(autoincrement())
+  messageId String   @unique
+  createdAt DateTime @default(now())
+}
+
+// ==========================================
+// 8. TAREAS OPERATIVAS Y RECORDATORIOS
+// ==========================================
+model Task {
+  id           Int       @id @default(autoincrement())
+  title        String
+  description  String?   @db.Text
+  priority     String    @default("MEDIA") // BAJA, MEDIA, ALTA, URGENTE
+  status       String    @default("PENDIENTE") // PENDIENTE, EN_PROCESO, COMPLETADA, CANCELADA
+  dueDate      DateTime?
+  
+  createdById  Int
+  createdBy    User      @relation("TaskCreatedBy", fields: [createdById], references: [id])
+  
+  assignedToId Int
+  assignedTo   User      @relation("TaskAssignedTo", fields: [assignedToId], references: [id])
+  
+  completedAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}

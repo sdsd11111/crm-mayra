@@ -1,0 +1,337 @@
+// backend/src/services/BillingCron.ts
+import cron from 'node-cron';
+import { prisma } from '../lib/prisma';
+import { EntryType, BankAccount, BillingFrequency } from '@prisma/client';
+import { PdfService } from './PdfService';
+import { BunnyStorageService } from './BunnyStorageService';
+import { OutboundQueueService } from './bot/outboundQueueService';
+import { calculateClientBalance } from '../utils/balanceUtils';
+
+export class BillingCron {
+  /**
+   * Ejecuta la facturación automática para un mes y año específico.
+   * Utilizable tanto por el Cron programado como manualmente para pruebas.
+   */
+  public static async executeBillingRun(referenceDate: Date = new Date()): Promise<{
+    processed: number;
+    createdEntries: number;
+    totalAmount: number;
+  }> {
+    const currentMonth = referenceDate.getMonth() + 1;
+    const currentYear = referenceDate.getFullYear();
+    const periodText = `${currentYear}-${String(currentMonth).padStart(2, '0')}`;
+
+    console.log(`⏰ [BillingCron] Iniciando ciclo de facturación para período ${periodText}...`);
+
+    const taxpayers = await prisma.taxpayer.findMany({
+      where: {
+        autoBillFreq: { not: BillingFrequency.NONE },
+        autoBillAmount: { gt: 0 },
+      },
+      include: { clientOwner: true },
+    });
+
+    let createdEntries = 0;
+    let totalAmount = 0;
+
+    for (const t of taxpayers) {
+      let shouldBill = false;
+      let conceptLabel = '';
+
+      if (t.autoBillFreq === BillingFrequency.MENSUAL) {
+        shouldBill = true;
+        conceptLabel = `Honorarios Contables Mensuales (${periodText})`;
+      } else if (t.autoBillFreq === BillingFrequency.SEMESTRAL) {
+        if (currentMonth === 1 || currentMonth === 7) {
+          shouldBill = true;
+          conceptLabel = `Honorarios Semestrales Semestre ${currentMonth === 1 ? 'I' : 'II'}/${currentYear}`;
+        }
+      } else if (t.autoBillFreq === BillingFrequency.ANUAL) {
+        if (
+          (t.regimen === 'COMPANIA_SUPERCIAS' && currentMonth === 4) ||
+          (t.regimen !== 'COMPANIA_SUPERCIAS' && currentMonth === 3)
+        ) {
+          shouldBill = true;
+          conceptLabel = `Honorarios Declaración Anual ${currentYear}`;
+        }
+      }
+
+      if (!shouldBill) continue;
+
+      const existing = await prisma.ledgerEntry.findFirst({
+        where: {
+          taxpayerId: t.id,
+          entryType: EntryType.CARGO_AUTOMATICO,
+          periodText,
+        },
+      });
+
+      if (existing) {
+        console.log(`   ⭕ Empresa ${t.razonSocial} ya tiene cargo en ${periodText}. Omitiendo.`);
+        continue;
+      }
+
+      const baseAmount = Number(t.autoBillAmount);
+      const finalAmount = t.appliesVat ? Number((baseAmount * 1.15).toFixed(2)) : baseAmount;
+      const fullConcept = t.appliesVat
+        ? `${conceptLabel} - ${t.razonSocial} ($${baseAmount.toFixed(2)} + 15% IVA)`
+        : `${conceptLabel} - ${t.razonSocial}`;
+
+      await prisma.ledgerEntry.create({
+        data: {
+          clientOwnerId: t.clientOwnerId,
+          taxpayerId: t.id,
+          entryType: EntryType.CARGO_AUTOMATICO,
+          concept: fullConcept,
+          periodText,
+          amount: finalAmount,
+          bankAccount: BankAccount.NO_APLICA,
+        },
+      });
+
+      createdEntries++;
+      totalAmount += finalAmount;
+    }
+
+    console.log(
+      `✅ [BillingCron] Ciclo finalizado: ${createdEntries} cargos generados por un total de $${totalAmount.toFixed(2)}.`
+    );
+
+    return {
+      processed: taxpayers.length,
+      createdEntries,
+      totalAmount: Number(totalAmount.toFixed(2)),
+    };
+  }
+
+  /**
+   * Encola el Estado de Cuenta (PDF) por WhatsApp a todos los clientes con saldo > $0
+   * a través de la cola OutboundQueueService (anti-baneo con cadencia 25-55s en horario laboral).
+   * Se dispara automáticamente los días 1-5 de cada mes a las 09:00 AM.
+   * También puede dispararse manualmente desde el Dashboard.
+   */
+  public static async executeCollectionRun(): Promise<{ enqueued: number; errors: number }> {
+    console.log('📲 [BillingCron] Iniciando encolamiento masivo de cobranza por WhatsApp...');
+
+    // Obtener todos los ClientOwners con saldo pendiente
+    const clients = await prisma.clientOwner.findMany({
+      where: { whatsappPhone: { not: '' } },
+      include: {
+        taxpayers: true,
+        ledgerEntries: true,
+      },
+    });
+
+    let enqueued = 0;
+    let errors = 0;
+
+    for (const client of clients) {
+      // Calcular saldo total usando la fuente única de verdad
+      const balance = calculateClientBalance(client.ledgerEntries);
+
+      if (balance <= 0) continue;
+
+      try {
+        const monthName = new Date().toLocaleString('es-EC', { month: 'long', year: 'numeric' });
+        const textContent =
+          `Estimado/a *${client.fullName}*, le saludamos del Estudio Contable Mayra Castillo. 🏢\n\n` +
+          `Le adjuntamos su *Estado de Cuenta de ${monthName}*. Su saldo pendiente es de *$${balance.toFixed(2)}*.\n\n` +
+          `Para cancelar puede hacerlo a nuestras cuentas bancarias (Pichincha, Banco de Loja o JEP) ` +
+          `y enviar el comprobante a este mismo número. ¡Gracias por su confianza! 🙏`;
+
+        // Generar PDF estado de cuenta y subirlo a BunnyStorage
+        const pdfBuffer = await PdfService.generateStatement(client.id);
+        const fileName = `Estado_Cuenta_${client.fullName.replace(/\s+/g, '_')}_${Date.now()}.pdf`;
+        const uploadResult = await BunnyStorageService.uploadWhatsappMedia({
+          phone: client.whatsappPhone,
+          fileName,
+          fileBuffer: pdfBuffer,
+          contentType: 'application/pdf',
+        });
+
+        await OutboundQueueService.enqueue({
+          whatsappPhone: client.whatsappPhone,
+          jobType: 'COBRANZA_MENSUAL',
+          textContent,
+          mediaUrl: uploadResult?.bunnyUrl || undefined,
+          fileName: `Estado_Cuenta_${client.fullName.replace(/\s+/g, '_')}.pdf`,
+        });
+
+        enqueued++;
+        console.log(`   📥 Cobranza encolada para ${client.fullName} (${client.whatsappPhone}) — Saldo: $${balance.toFixed(2)}`);
+      } catch (err) {
+        errors++;
+        console.error(`   ❌ Error encolando cobranza para ${client.fullName}:`, err);
+      }
+    }
+
+    console.log(`📲 [CobranzaCron] Finalizado: ${enqueued} encolados, ${errors} errores.`);
+    return { enqueued, errors };
+  }
+
+  /**
+   * Revisa promesas de pago vencidas/pendientes y envía recordatorios WhatsApp.
+   * Cron diario a las 09:00 AM.
+   */
+  public static async executePromiseReminders(): Promise<{ enqueued: number }> {
+    console.log('⏰ [BillingCron] Revisando promesas de pago pendientes para encolar...');
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    const duePromises = await prisma.paymentPromise.findMany({
+      where: {
+        status: 'PENDIENTE',
+        promisedDate: { lte: tomorrow },
+      },
+      include: {
+        clientOwner: true,
+      },
+    });
+
+    let enqueued = 0;
+
+    for (const promise of duePromises) {
+      const client = promise.clientOwner;
+      if (!client.whatsappPhone) continue;
+
+      const isPastDue = promise.promisedDate < today;
+
+      const message = isPastDue
+        ? `Hola *${client.fullName}*, le saludamos del Estudio Contable Mayra Castillo. 👋\n\n` +
+          `Le recordamos que tenía un compromiso de pago pendiente con nosotros. ` +
+          `¿Pudo realizar el depósito/transferencia? Por favor envíenos el comprobante cuando pueda. 🙏\n\n` +
+          `Nuestras cuentas: Banco Pichincha, Banco de Loja o Cooperativa JEP.`
+        : `Hola *${client.fullName}*, le saludamos del Estudio Contable Mayra Castillo. 📅\n\n` +
+          `Le recordamos que hoy es la fecha acordada para su pago pendiente. ` +
+          `Puede realizar el depósito a nuestras cuentas bancarias y enviarnos el comprobante. ¡Gracias! 💙`;
+
+      try {
+        await OutboundQueueService.enqueue({
+          whatsappPhone: client.whatsappPhone,
+          jobType: 'PROMESA_HOY',
+          textContent: message,
+        });
+
+        if (isPastDue) {
+          await prisma.paymentPromise.update({
+            where: { id: promise.id },
+            data: { status: 'VENCIDA' },
+          });
+        }
+
+        enqueued++;
+        console.log(`   📱 Recordatorio de promesa encolado para ${client.fullName}`);
+      } catch (err) {
+        console.error(`   ❌ Error encolando recordatorio a ${client.fullName}:`, err);
+      }
+    }
+
+    console.log(`⏰ [PromisesReminder] Finalizado: ${enqueued} promesas encoladas.`);
+    return { enqueued };
+  }
+
+  public static async checkFirmaExpiry(): Promise<{ enqueued: number }> {
+    console.log('🔑 [BillingCron] Verificando firmas electrónicas por expirar para encolar...');
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const alertThreshold = new Date(today);
+    alertThreshold.setDate(alertThreshold.getDate() + 5);
+
+    const expiringTaxpayers = await prisma.taxpayer.findMany({
+      where: {
+        firmaExpira: {
+          gte: today,
+          lte: alertThreshold,
+        },
+      },
+      include: {
+        clientOwner: true,
+      },
+    });
+
+    let enqueued = 0;
+
+    for (const taxpayer of expiringTaxpayers) {
+      const client = taxpayer.clientOwner;
+      if (!client.whatsappPhone) continue;
+
+      const daysLeft = Math.ceil(
+        (taxpayer.firmaExpira!.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+      );
+
+      const message =
+        `🔑 *Aviso Importante* — Estudio Contable Mayra Castillo\n\n` +
+        `Estimado/a *${client.fullName}*, su Firma Electrónica de *${taxpayer.razonSocial}* ` +
+        `vence en *${daysLeft} día${daysLeft !== 1 ? 's' : ''}* (${taxpayer.firmaExpira!.toLocaleDateString('es-EC')}).\n\n` +
+        `Por favor coordine la *renovación de su firma .p12* a la brevedad para evitar ` +
+        `inconvenientes en sus trámites tributarios. 📋\n\n` +
+        `Contáctenos para iniciar el proceso. ¡Estamos para servirle! 😊`;
+
+      try {
+        await OutboundQueueService.enqueue({
+          whatsappPhone: client.whatsappPhone,
+          jobType: 'FIRMA_CADUCA',
+          textContent: message,
+        });
+        enqueued++;
+        console.log(`   🔑 Alerta firma encolada para ${client.fullName} — ${taxpayer.razonSocial} vence en ${daysLeft} días`);
+      } catch (err) {
+        console.error(`   ❌ Error encolando alerta firma a ${client.fullName}:`, err);
+      }
+    }
+
+    console.log(`🔑 [FirmaExpiry] Finalizado: ${enqueued} alertas encoladas.`);
+    return { enqueued };
+  }
+
+  public static init(): void {
+    // Iniciar worker de la cola anti-baneo persistente
+    OutboundQueueService.startWorker();
+
+    // 1. Facturación automática: Día 1 de cada mes a las 00:05 AM
+    cron.schedule('5 0 1 * *', async () => {
+      try {
+        await this.executeBillingRun();
+      } catch (err) {
+        console.error('❌ Error ejecutando BillingCron:', err);
+      }
+    });
+
+    // 2. Cobranza masiva WhatsApp: Días 1 al 5 de cada mes a las 09:00 AM
+    cron.schedule('0 9 1-5 * *', async () => {
+      try {
+        await this.executeCollectionRun();
+      } catch (err) {
+        console.error('❌ Error ejecutando CobranzaCron:', err);
+      }
+    });
+
+    // 3. Recordatorios de promesas de pago: Diario a las 09:00 AM
+    cron.schedule('0 9 * * *', async () => {
+      try {
+        await this.executePromiseReminders();
+      } catch (err) {
+        console.error('❌ Error ejecutando PromisesReminder:', err);
+      }
+    });
+
+    // 4. Alertas de firma electrónica por expirar: Diario a las 08:00 AM
+    cron.schedule('0 8 * * *', async () => {
+      try {
+        await this.checkFirmaExpiry();
+      } catch (err) {
+        console.error('❌ Error ejecutando FirmaExpiryCron:', err);
+      }
+    });
+
+    console.log('⏰ BillingCron iniciado con 4 jobs programados:');
+    console.log('   📋 Facturación automática: Día 1 de mes a las 00:05 AM');
+    console.log('   📲 Cobranza WhatsApp: Días 1-5 de mes a las 09:00 AM');
+    console.log('   📅 Recordatorio promesas: Diario a las 09:00 AM');
+    console.log('   🔑 Alerta firmas .p12: Diario a las 08:00 AM');
+  }
+}

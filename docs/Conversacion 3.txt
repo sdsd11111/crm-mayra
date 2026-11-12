@@ -1,0 +1,438 @@
+A ver, mira, aquí traje. Compa.
+Sí,
+yo sé que mi información no va a salir de ahí.
+No, gracias.
+Mire, este, por ejemplo, es un es un cuadro donde está toda la cartera de mis clientes. Creo que faltan unos dos o tres que todavía no los hemos añadido, pero no hay problema. Este cuadro tiene, por ejemplo,
+vamos a ver acá
+la fecha de vencimiento de las obligaciones, por ejemplo, una de las partes que me gustaría que el sistema tenga.
+A ver. Ya, gracias. Acá me siento perfecto. Entonces, ahorita Abel es el que tiene que entender.
+A ver, es, a ver, perdón, esa yo creo que es mi cartera de clientes. Sí, esa es la cartera de clientes. De todos sus clientes,
+de todos. Bueno, me faltan unos dos ahí que me están viendo Sí. Ya.
+Ajá. Ya. Ah, tiene todito eso.
+Ajá.
+Esos qué son
+lo que el trabajo que se ha hecho.
+Ya. Cinco. ¿Qué es o el valor?
+Ya.
+Ya. Todo. O sea, lleva de toditos los años ahí.
+Sí, pero esa es la información histórica. Claro. Pero a mí, por ejemplo, lo que me gustaría Abel es que Cuando el sistema me mande a mí un una alerta a mis clientes con un pequeño resumen, así usted me está diendo tanto
+ya
+y al siguiente mes, como ya se aumenta el valor es tanto, de acá valor de estado de cuenta tanto, tanto, tanto, tanto, todo el tiempo
+que le vaya alimentando, digamos.
+Sí.
+Entonces, yo me imagino que ahí, por ejemplo, yo tendré que ir alimentando cuánto les cobro de honorario mensual para que el sistema me vaya dando el el Eso es que tú ya vas a configurar eso. Ah, eso es, por ejemplo, debería poder configurar en función de los servicios cuánto les cobra. Y esto es un poco personalizado porque de pronto yo les ruego ayudo.
+Sí, es que hay algunos que les cobro menos, hay algunos que les cobro más, o sea, sí depende, ¿no? Es que también depende del trabajo. Hay algunos que les ha que no siguen cero, hay otros que tienen poco movimiento, que tienen mucho movimiento, todo depende también de eso, ¿no?
+Ya, perfecto.
+Entonces, ese criterio realmente yo lo manejaría y lo alimentaría al rato que ya cierro la negociación con el cliente.
+Tú lo vas configurando. Entonces, eso sería ía de poder configurar en el rato de que se crea el cliente, eh, configurar el el precio.
+Entonces, no tendríamos precios fijos.
+Es lo que se hizo.
+Bueno, ahí tiene usted eh una cantidad de servicios, o sea, tiene todos sus servicios enotados, tal vez,
+¿no? Pero las tengo las chicas trabajando en Giss.
+Ya, ya, porque el primer paso que nosotros queremos es primero entender Pero mire, César, yo no tengo problema si ustedes me crean la digamos la opción yo crearlo, o sea, hago con el sistema cont
+ah claro,
+no tengo problema ir creando un nuevo producto y poniéndole el precio,
+¿ya?
+O hacerlo por cliente y ponerle el precio. O sea, no te lo que yo necesito es que el sistema me permita hacer eso,
+no básicamente que di usted me tienen que dejar todo listo, sino el sistema me permite registrar, yo registro.
+Claro.
+O las chicas registran. Entonces, con eso nosotros ya trabajamos.
+Eso está
+eso. Ahora, el otro archivo. ¿Cuál le he pasado? Déjenme ver.
+Este,
+ya le he pasado el de cartera. Ahora le voy a pasar un archivo donde están si mis clientes. Ese archivo tiene otro tipo de información. Por ejemplo, ábrale, por favor.
+Te paso el número de ese. Miren, ese de ahí tiene fechas y claves. Por ejemplo, tiene la fecha en que en que se debe hacer la declaración.
+Esta es la clave, ¿no?
+Y las claves tanto del del SRI como de las firmas electrónicas, del Ministerio de Trabajo, obviamente no de todos. Está ahí.
+Ah, este es el historial de, bueno, los datos que tiene de cada cliente, por así ser.
+Exactamente. Es un general de todos los clientes.
+¿Y esto qué es? Este, esto es lo que le cobra o cómo
+no eso que estáendo. No lo es.
+Lo que para sumar
+algo sumar
+no no
+puede quitarle no más
+por qué esta parte es justamente la que crearía el archivo de cada cliente.
+Exactamente. Entonces ahí lo entre más datos podamos eh recolectar nos sirve para lo que te decía de fidelización. Yo voy buscándole todos los la forma útil, ¿no? Entonces si tú en algún momento, digamos ahí tienes las los cumpleaños, pues le sacas, se agrega ahí y se sigue agregando cualquier cosita, cualquier detalle. Entonces ahí podríamos,
+pero como digo, esto tiene lo primordial, que son los nombres completos, el número de identidad, las claves, creo que faltan algunas, no hay problema, las puedo aumentar.
+E eso qué es.
+Ya, a ver, verá, los de arriba son clientes que la obligación es mensual.
+Ya, esos de aquí son
+todos esos son mensuales. Más abajo, como claramente lo dice, son clientes. obligación, pero algunos se van a duplicar porque tengo clientes que el anexo se hace mensual, pero la declaración se hace semestral.
+Entonces, unos cuantos están duplicados en la parte de abajo. También tengo clientes anuales que son que la declaración es anual.
+Ya.
+Sí.
+Esto sería para los avisos, ¿no?
+Claro. Por ejemplo, los avisos. Claro. Por ejemplo, esto yo en junio, ya les aviso que en julio tenemos que declarar Y eso es para eso por lo general es para compañías. Ah, ya,
+porque las compañías tienen otro tipo de obligaciones adicionales.
+¿Qué tiene todito? Y esto iba. ¿Qué es esto?
+Ah, esos son para los de la tercera edad devolución de IVA.
+Ya. Patentes.
+No, eso no.
+Alguna vez pensó usar, pero no se usó, solo es el el archivo principal. Ahora, claro, por ejemplo, otra cosa que se puede poner ahí aumentar es, por ejemplo, ¿qué obligaciones tiene cada uno? ¿A qué instituciones no más aportun? Sí se puede hacer ya
+sí lo Pero básicamente esos son los archivos con los que yo todo el tiempo trabajo,
+archivos de clientes claves.
+Eso es justamente lo que queremos. Ese se llama sistema para nosotros, entender eso.
+A partir de ahí Exactamente. O sea, yo parto desde que el cliente me llama y me da su usuario y su contraseña. ¿Cómo cómo sería ese flujo que usted generalmente trabaja?
+Ya, pero eso eso también este le explico a él porque eso es primordial para mí. Como le explicaba a César, estoy perdiendo demasiado tiempo. Todo llega a mí y yo redirecciono
+y me demoro medio día en redireccionar. Entonces, no quiero eso. Quiero que toda la información llegue a la persona correcta. Por ejemplo, yo tengo una persona que se encarga de facturación, de hacer de de descargar requisitos y todos estos, pero me piden a mí, yo le paso a ella, ella descarga, me pasa a mí y yo paso al cliente. Imagínese cuánto tiempo perdí en hacer eso, ¿no? Entonces, me voy a tener un número específico de la oficina que me va a redireccionar. Entonces, yo, por ejemplo, quiero, usted me escribe a mí y el número le envía rápidamente una opción. ¿Qué es ese servicio necesita? Asesoría. contabilidad conmigo, facturación, requisitos, ta ta ta. Les dir que trabajan en la oficina,
+ya
+para que ellas hagan eso. Entonces, llega el requisito. Si el cliente, si es un cliente que llega por primera vez, va directo donde mí porque yo tengo que revisar qué tipo de cliente es, qué tipo de de obligaciones tiene y cuánto le puedo cobrar y cierro el negocio. Yo puedo hacer esto mensualmente, le va a costar esto, ta ta ta. Cierro el negocio. Una vez que cierra el negocio, yo le pongo ahí y lo paso a las chicas para que ellas ya tengan el archivo completo.
+¿Ya? Entonces, en este caso, primero sería usted como la cabeza de todo. Entonces, aquí en el en el sistema que les vamos a realizar deberíamos de tener prácticamente como similar a esto de que usted puede ir agregando sus clientes aquí.
+Claro. Pero, por ejemplo, sí quisiera que en el sistema la primera alerta diga, "¿Eres cliente nuevo?"
+Cliente nuevo direccionado de mí.
+Si es si necesitas facturas. ya pasa directo donde las chicas para que no tenga que estarme llegando ese requerimiento a mí.
+Claro, eso sí. Lo lo que necesito entender es la facturación, lo de lo que dice las chicas, eh, ocuparían este sistema para hacer eso o eso es aporte. No, no, no, la facturación la hacen ellos en el Sr. Lo que yo quiero es que, por ejemplo, les llega la notificación, ellas hacen la factura y envían directo.
+Ya no me llega a mí, ya no me pasan a mí para yo recibir al cliente. Ellas reciben la solicitud, hacen su trabajo. y
+se acabó
+y se ponen en contacto con el cliente.
+Claro, básicamente en ese tema.
+Ya, eso está vi a ver. Ya. Entonces, el flujo primero que hace usted es crear el el I el cliente.
+Exactamente.
+Y le coloca toda la información aquí, los lo separa por según esto, ¿no? Según la razón social.
+Claro. Según no. Más bien ellos se separan según A ver, primer grupo, si es personal natural, si es compañía, si hace semestral.
+Ajá.
+En segundo lugar, dependiendo del noveno dígito, porque es la fecha en la que se va a vencer su su declaración.
+Ya.
+Ya. Entonces, dependiendo del noveno dígito, lo ubico en en la tabla,
+en la tabla de prioridad, por decir,
+exactamente, ya,
+porque no puedo colocar el último uno que tengo que declarar el 10.
+Se me va a vencer la obligación.
+Entonces, yo analizo el noveno dígito y le pongo Ahí le coloco en la tablita. Como usted puede ver, está ordenado, ¿no es cierto?
+Esto caduca el nu, el nu el 9, el nu caduque el 10, el 10, el 12, el 12, el 15, el 17.
+Ese fecha es la que se le va a caducar la obligación
+y eso es de acuerdo a este
+al noveno dígito.
+Ah, ya.
+Bueno, y esto esto lo agrega, lo agrega. Todos tienen lo mismo, ¿no? Todos tienen las mismas tablas,
+básicamente. Sí, me parece que no está llenada toda la de todos, pero básicamente sí, todos tienen firma electrónica, todos este facturan electrónicamente. Entonces tienen ICE, anexo, IVA, firma mensual.
+Es que no todos declaran ISE.
+Mm. O sea, eso eso se puede lo que me lo que me refiero es eso se puede generar a todos las mismas tablas y solo a los que necesiten, pues ya exactamente. Bueno, eso ya eso ya es su chama y yo no me trato de explicar cómo es. Es mi trabajo.
+¿Sabes quién estamos? Un el que nos digas, por ejemplo, hice, que significa el para para después, digamos, no va a haber una confusión, ¿no? El de azúcar.
+Bueno, son diferentes tipos de impuestos. Eles es un impuesto a los consumos especiales que solo graban los que venden tabaco, licor,
+¿ya? Entonces, por ejemplo, en este caso solo tengo una o dos compañías, creo que tiene nada más,
+pero es preferible dejar configurado
+para todos.
+Eso. Entonces, esas etiquetas tú simplemente lo asignas, no tienes que decir, "¿Y ahora cómo lo pondría?" No, aquí están todas las etiquetas posibles. Él es y clic ahí y quedar el rato que yo creo el cliente como cuando configuro la contabilidad de alguado a llamar contabilidad. Sí,
+eso
+está in sí. Esa agente de retención sí yo le marco tan tan. Entonces ya pues después la información se genera solo. Cierto. Es como al configurar yo el sistema contable pongo todo lo que hace Conciliación bancaria va a ir al Banco Internacional, número de cuenta tal tal. El rato que yo hago la conciliación bancaria se va automáticamente a esa cuenta del banco.
+Ya.
+Ya. Entonces, el momento que yo creo el cliente se va automáticamente que vamos a tener que hacer IFE, que vamos a tener que ser IVA, que vamos a tener que hacer ATS.
+Mira, entonces te puede arrojar un estimado, puede decir, digamos que, no sé, yo le mando a alguien a que te salga una cotización de cuánto tú manejarías la empresa. Entonces, literalmente te vas pidiendo eso. Clic, clic, clic, clic, clic y te puede salir eh un mensual de, no sé, $10, lo que sea.
+Podría ser como una guía, ¿no?
+Porque las chicas también cotizan,
+¿no? No, precios manejo solo yo.
+Ya. Entonces,
+de hecho, ellas casi no ellas nunca tienen contacto con los clientes.
+De hecho, que nos hemos estado manejando así por mi factura, todo ellas hacían y me enviaban a mí, yo pasaba. Pero precisamente ese es el problema. Estoy estancada en esos tiempos demasiado largos. Exacto. justamente en que yo invierto en contestar algo que que es básico, que las chicas sí podrían hacerlo y que yo me demore en hacerlo. Entonces,
+eso sería
+otra cosa ahí, ¿cómo se conecta esta tabla que tiene los datos que son sus clientes y aquí que tiene los otros datos?
+Solo está en mi cabeza,
+¿no? O sea, pero lo que quiero entender es estos valores de aquí. Ejemplo, en este de aquí, honorarios de Darma,
+ya.
+De Dharma.
+Dharma está acá. Es una empresa A ver,
+una compañía
+este arma cosmético.
+Exactamente. Entonces, por ejemplo, yo a ellos el honoraria mensual, algunos, por ejemplo, les cobro, me quedamos en un mensual,
+salga lo que salga de hacer y con otros es por trabajo.
+Ah, claro, está bien.
+Ajá. Entonces, ya depende la negociación.
+Claro.
+Ajá.
+Ya. Entonces, Digamos, este Dharma Cosmetic dice que se le vence el 15.
+Ajá.
+Bueno, aquí tiene sus datos, pero este de aquí, este horario es el que usted quedó con ellos, ¿cierto? Tiene 69 que lleva toditos estos pagados y esto es un montón. ¿Esto qué es? O sea, esto qué tiene de sear.
+Ya es el mismo gerente dos empresas.
+Ah,
+él es el dueño de Dharma y el dueño de de de Tulos allá.
+Entonces, en el mismo cuadro yo le hago a Pedro, a Pedro debería decir abajo Pedro Delgado.
+Sí, Rojas.
+Pedro Rojas. Pedro Rojas y ya porque yo le hago también el personal de él. Si ven, le hago el personal de él, el lo de Tool Farma y lo de Darme.
+Ya. Okay. Entonces, eso habría que conectar de De acuerdo a esto de acá.
+Mmm.
+Ahí es donde se complica. Velito. Sí. Lo principal aquí es de entender cómo cómo lo divide este
+cómo lo fusiono yo, ¿no? O sea, yo. Claro.
+Claro. Porque tú tienes un sistema, nosotros no vamos a replicar lo mismo. Tenemos que entender para que te pueda
+lo que pasa es que si vamos a replicar lo mismo, yo voy a tener el mismo problema.
+Porque, por ejemplo, yo a veces ya se me necesito dinero.
+Ay, tengo que cobrarle a dar y hace rato me pongo ver de cuántos meses me está debiendo y alimento estos cuadros para martarles a ellos.
+Pero ese no es, o sea, eso es lo que básicamente a mí me está robando demasiado tiempo,
+como que ya el sistema mismo mensualmente va sumando. Me estabas debiendo 300, pasó octubre 60 más, 369, pasó noviembre 60 más. Se el sistema automáticamente va alimentando y automáticamente envía
+el aviso. Entonces ya no tengo yo que estar, ay, ay, de cuántos meses me debía, voy a revisar, ¿no? A ver, hace un ag abono. Ese rato alimentamos el abono y queda ahí registrado.
+Claro.
+Eso sí esto. Sí está viable. Lo que lo que quiero entender aquí bien es cómo divide usted, porque aquí hay varias como empresas, ¿no? Digamos de dharma. Cada uno usted digamos habla con un cliente y este tiene varias empresas, serían distintos como servicios, ¿no?
+Claro, porque por ejemplo, si usted puede ver ahí a Darma le cobro 69
+porque ellos son roles de pagos, pero por ejemplo a Tool solo le cobro 23 porque ellos todavía están declarando el cero.
+Ya.
+Mm. Entonces todo depende del tipo de servicio que se da y de la condición en que está todavía en cada empresa. Pero Tur todavía está en cero.
+Ellos están con el capital inicial que obviamente hay que declarar todos los meses.
+Esa parte sí que estoy claro. Se crea el cliente y se puede configurar eso. Eso eso vas a manejarlo igualito. No hay problema.
+O sea, es que no es necesario que a Pedro Rojas le llegue así.
+A Pedro Rojas le puede llegar del caso que o rojas. Ah, no sé, rojas, rojas le pueden llegar, eh, de darma me estás debiendo tanto, de tul me estás debiendo tanto y de peso rojos de eso te pueden un pdf, un informe PDF para que quede muy informal esa parte.
+Claro.
+No, ahí está chévere en realidad.
+Verás lo que, o sea, yo tal vez esté suponiendo mal, lo que tú estabas buscando era cómo relacionar con el que va a pagar, porque una cosa es pagas ese Reyes, pero son tres negocios de distintos nombres.
+Sí, era solo como dividir pues qué servicios tiene, digamos, desarrollos en realidad.
+Ya. Mandar tiene los servicios y lo único que sería es ponerle una variable para el que le va a cobrar. Entonces, si en la variable siempre pone César Reyes, César Reyes, ya no importa. El informe se va de tres empresas, pero a César Reyes
+se va. O incluso podríamos poner, por ejemplo, el contacto de WhatsApp del mismo.
+Claro, por eso es que eso es lo que es lo que busca para poderle enviar el contacto de los de Pedro Delgado para que él le llegue los tres informes, los tres estados de cuenta.
+Claro.
+Ah, ahí mira a ver ahí analízale. Cuando se haga esa no sería conciliación, sería eh la configuración de a quién se le va a enviar. Debería poder añadir el nombre. A César Reyes le pone como ya se sabe los nombres, es Darma, es otro nombre, otro nombre.
+Claro, el rato que yo creo
+para que se vaya ese a quién se iría el estado de un poquito.
+Claro, claro, porque las empresas incluso Puede estar con gerente, con otro gerente,
+exactamente, porque puede ser el dueño uno y el gerente otro.
+Es, pero a la final paga el dueño, señor.
+Ya, eso nada más. Me parece que está bien esa
+Sí, eso básicamente yo yo cre a ver, déjenme mire, aquí las chicas me acaban de pasar Otra cosa, ábralo, por favor. A ver, ya porque no. A ver, César me pasó por aquí su número de una vez o no no lo había pasado.
+Se pasó a sí mismo.
+No,
+yo siempre me paso a mí mismo. Me estás mandando el audio a te estaba me pasast ¿Cómo? ¿Cómo me llamó este? No, no sé cómo vos. Yo se pon el último. Yo no sé cómo se llama. Llegado.
+Y usted tiene
+187.
+Ah, no, pues esto ya.
+No
+voy a hacer 9 6 7 49 18 Sí,
+ya ese es para que lo tengas.
+Ah, entonces pasémoslo de una vez. Entonces ahí cualquier cosa igual me comunica no más. A ver, ya
+vamos con a ver, veamos qué hicieron porque no sé como ellas ellas son las que manejan, ellas están ahí haciendo algo. Ve por ejemplo ellas ahí han puesto listado de clientes una sola, ¿no es cierto? Al lado le ha puesto los que hay que hacer patentes, creo, o requisitos para patentes, no sé.
+Aquí aquí se r claves s Sri. Ah, aquí se refiere. No, no tiene nada que hecho para la super sería lo mismo.
+Creo que lo han unido.
+Ah, ahí le han puesto.
+Por ejemplo, dice de la sociedad de hecho productores agropecuarios y es no está mal. M tengo que trabajar con ellas eso no no captan lo que quiero. Ya. Bueno, ese no es para ya porque está mal elaborado, no sé ni qué quieren poner, ¿no? Pero ahora yo la entiendo bien lo que queda de su sistema,
+literalmente tener todo ordenado de clientes, de lo que deben y lo que se ingresado.
+Claro, mira lo a ver, eso sería, por ejemplo, que un día antes el sistema me diga que ya se va a vencer la declaración de de de Juan Perm
+para nosotros tener Ya a sacar la información. Sí,
+ya
+que me dio una alerta.
+Como ya tiene usted las fechas, que el sistema nos alerta.
+Segundo, que yo pueda tener toda la documentación de mis clientes. Verá, verá a ver porque cuál es el tema. Uno de mis clientes quiere sacar un préstamo y es ingeniera, páseme la declaración del 2025 de renta, páseme iba, enero, febrero, marzo y ese rato tenemos que ponernos a descargar y pasar eso. Entonces, yo quis quisiera que en el mismo sistema se pueda almacenar esa información. Por ejemplo, hago la declaración de de IVA del de enero de Juan Pérez y la guardo.
+Ahí mismo guardo el RUC, ahí mismo guardo nombramientos, lo que sea. Me piden y yo ya tengo que estar metiéndome ahí descargar. A ratos no hay página
+y es un problema, no se carga la página, no se carga. Entonces, yo lo que quiero es minimizar al máximo esas pérdidas de
+ya.
+Entonces, hago la declaración y la guardo. Si me piden les paso. De hecho, eso sí hablamos para que sea e con el voto. Entonces nosotros instruimos esas reglas. Si me preguntan por WhatsApp que si le puedo pasar la declaración del 2025, si ya viene con el número directo de ellos, le paso. Si no, le pregunto, pero es cliente, alguna cosa. Entonces lo encuentra como cliente y se lo pasa directamente. No han hecho nada. Ustedes
+sí los datos que ustedes miren
+exactamente por eso las chicas hacen la declaración de PF y dejan cargando la declaración, ponen el archivo y lo cargan.
+De hecho, ahí te quería preguntar algo, porque nosotros estábamos pensando en hacer un software. ¿Lo podes hablar el de la bot? Para bueno, como que tienes un software donde puedes ir trabajando las declaraciones, pero yo me estoy imaginando, no sé cómo las cómo trabajas tú, dónde las trabajas las declaraciones
+en el SI.
+Ah. Ah, ya, ya. Entonces, ya
+yo me estaba imaginando como que en el dashboard de nosotros te creábamos para que hagas eso. Entonces, tú tienes el SRI,
+o sea, el tema es que una vez que yo declaro el SRI me da un comprobante de que declarado y la declaración. Entonces, ¿qué hago yo? Esos dos documentos los descargo y los dejo guardando en la carpetita del mismo cliente en el sistema.
+Ya, perfecto.
+El cliente me pide y simplemente se pasa,
+listo.
+Y ya no tengo yo que estar buscando si la página no funciona perdiendo 10 minutos en tratar de recargar la página, ¿no? Porque yo ya la tengo descargada y listo.
+No tienes que hacer nada,
+solamente pasita que es para hacer las declaraciones de las personas naturales. Ahí se guarda todo, todo. Yo no hay página, yo me voy ahí, descargo las facturas, no las declaraciones, pero sí las facturas. Entonces, no es mayor problema. Ahí están toditos los PDFs, los XML, todo. Entonces yo quisiera lo mismo acá en este caso, que se me cargue las declaraciones, los PDFs de las declaraciones para que si el cliente necesite, automáticamente se le pasa. Ella ya no tengo que estar buscando ni perdiendo tiempo ni haciéndolas a las chicas distarer de lo que están haciendo para yo poder hacer esto,
+¿no? Eso sí te va a ayudar solito. De hecho, para que veas, mira, ayer lanzamos una campaña donde literalmente hizo lo que estamos comendando. Toditos estos, toditos estos es el voto. Toditos, toditos estos. Llega, contesta, envía, envía los videos, todos así sería. Se activa. Quiero una factura. Quiero esto, como los armamos en regla, él solito empieza a enviar y no tendrá no te ha topado tu tiempo. Ya, de hecho, eso podemos dejar hasta con métricas de que te diga cuántas veces al mes César se metió a pedir tal cosa. Entonces, el rato que diga, "No, si usted me está cobrando ni hace nada." ¿Cómo? A ver, usted aquí solito me ha pedido 10 veces esto, este otro historial completito.
+Claro, por ejemplo, eso sí me gustaría César porque hay mucha gente. Tuve un inconveniente con un un gerente de Transur. Ellos, yo trabajaba de contador en la empresa con mi independicon en pagarme un horario mensual por asesoría porque vino la contadora nueva. Entonces, bueno, yo hacía unas cosas, iban otando asesoría y no me habían pagado como 6 meses. Entonces, cuando les pasé el estado de cuenta, me estaban debiendo mil y pico de dólares
+y casi se cae para atrás que le cobré pura asesoría y yo no tenía ningún respaldo de las veces que las chicas me llamaban a molestar todo el tiempo. Era todo, yo que acordaba que cómo hago esto, pero era todo el tiempo así, era altísimas veces y yo no tenía ningún respaldo de que les di como 150 asesorías, no tenía
+y y fue un problema, no me quería pagar, después al final ya me tuve que parar dura, le tuve que hacer un descuento, o sea, fue un problema César.
+Entonces, eso para mí sí, o sea, ha sido pérdida de dinero y tiempo,
+en verdad.
+Claro, acá si te registraríamos eso por lo menos todo lo digital, ¿no? Es como el todo, ¿no? Todo lo que quede registrado del cliente queda con todo
+lo que venga del WhatsApp y todo lo que se se trabaje del CRM se queda guardado
+todito.
+Ya. Ahora, César, ustedes me dieron un honorario de 2500 por la creación del del sistema, ¿no es cierto?
+Ahora yo quiero saber eh esto va a estar en la nube, me imagino, ¿o no?
+Sí, sí, sí. Espera que lo manejes tú.
+O sea, va a estar eh sí o sí ocupa lo que es un VPS, que es una Exactamente. Que lo puedo revisar en línea, ¿no es cierto?
+Ya. Entonces, el mantenimiento de ese espacio en la nube, ¿cuánto es anual?
+Verás, ahí son el el pago es mensual, pero es bajo. El se tiene que pagar, a ver, con el servidor de
+de si
+de $7. Sí.
+Y y en inteligencia artificial, eh, por ejemplo, que le recargues unos $10 ya de la doc,
+no no se no se ocupa casi nada, nada,
+pero ese es el ese es en cambio el motor de eso,
+o sea, básicamente sería como unos mensuales
+más o menos. Exagerado,
+más o menos. Ya, perfecto, no hay problema.
+Eso. Entonces, e con eso ya funciona ahí. Ahora, el tema es nosotros te vamos a hacer primero con solo enlazando tu teléfono o el que lo vayas a dejar con
+o sea, este sí, César, ahí queda, pero yo voy a conseguir un personal para mí porque le juro sábados, domingos, feriados, ya la gente piensa que yo no tengo vida. Claro,
+sea literal.
+Pero sí te vamos a notificar a eso. ¿Por qué? Porque habrán cosas emergentes. Tú mismo me vas a decir, esto es emergente. Claro, es pero justo le iba a decir, pero hay un cliente al que yo le tengo que contestar de madrugada, el feriado, en las vacaciones, lo que sea. Ese cliente sí es fijo que de ley tiene que rebotar a mi personal, pero solamente él. Los demás pueden esperar,
+realmente pueden esperar porque si no, ¿qué me sacame? Que no tengo vida, o sea, no tengo vida,
+yo me voy a descansar y yo y es un problema.
+Claro. Mi esposo a veces ya se enfada, dice, "¿Qué no puedes dejar ese teléfono un ratito?"
+Claro, no, no, al final tú tienes que cuidar eso. Verás, eh tenemos dos formas de conectar el WhatsApp. La API oficial, que es la que nosotros recomendaríamos, sin embargo, para mensajes de salida va a tener un costo. ¿Ya? Entonces, ¿qué sucede ahí? Que como a ti te tienen registrados tus clientes, nosotros pensamos que con la segunda salida que es Evolution se llama, sería suficiente. En el peor de los casos, si por AOB nos eh primero te van a banear, digamos, eh 2 horas, 8 horas, alguna cosa, nos llega una notificación. Si pasara eso, nosotros escalamos al API oficial, ¿ya? Pero al principio nos gustaría hacerlo solamente con Evolution. No creo que vayas a tener problema. Yo estoy haciendo, yo me estoy poniendo en riesgo un chip, un chip, pero porque envío mensajes a gente que no me conoce, que yo tengo sus números y sus nombres, entonces ellos sí me pueden denunciar porque ¿Por qué me estás escribiendo? Y hasta ahorita no ha habido problema. Recién nada más. Y lo tuyo como los clientes de ley te tienen que tener registrado.
+Son mis clientes. Sí. Ya. Entonces, ahí
+y como le digo al cliente no me pasa a mí para poderlo registrar, entonces no habría problema. De hecho, no me gusta trabajar mucho con gente que no conozco. Siempre pregunto, ¿quién me recomendó?
+Ya, chévere. Y bonito.
+Ya me hackearon una vez.
+Ya,
+ya me hackearon. Ya fue un problema, tuve que denunciar la fiscalía, les hicieron les robaron como cuatro o cinco clientes en mi nombre. O sea, fue problemas casi de
+Entonces no. Entonces yo ahorita siempre pregunto, ¿quién me recomendó?
+A ver, y nosotros no hemos considerado eso en el otro sentido. ¿Qué tal alguien quiere sacarse el rot de alguien
+y sabe tu número? Un empleo, un empleo puede saber tu número.
+Puede ser
+entonces no. Yo soy el doctor J rey, necesito este, estoy escribiendo el número de mi hija.
+No, no, ahí sí tenemos que poner un filtro, ahí sí tenemos que poner un bloqueo solamente números que ya están registrados que son de los clientes para pasar. Esto es estuvo bien.
+Sí, sí, sí. Que si no
+pues aquí sí. Bueno, la contraseña esa no va a ver. No, esa
+claro.
+No de
+no.
+O sea, pero sí ruj.
+Ah, no, pues ellos sí pueden pedir la contraseña.
+A veces piden. Si me puede pasar mi
+la firma electrónica, la clave
+primerito. Después sí te puede pedir y tiene que tener un un filtro porque si no en realidad un empleado cabreado le va dejando siendo pendejado. Sí, sí, sí. Eso sí.
+Un chi, ¿cuánto le cuesta? 350, huevo. Ahí está. Lo jodo por por alguna cosa. Sí, está bien. Entonces, solo responderíamos ese tipo de información solamente a
+esa información que es sensible es así únicamente al número que está registrado,
+que es el del click. Información sencilla.
+Igual si tú crees conveniente se puede pedir una clave de acceso. Ajá. Podemos cualquiera.
+Podemos crearles un pin para los clientes cuando ya sea este tema de información. Sí. ¿Por qué? Porque teléfono también se lo pueden se lo pueden servir.
+El teléfono a mí me pasó, o sea, ya.
+Claro.
+Y no tiene idea de todo lo que perdí cuando perde. Y eso que tiene aquí aquí si te roban, te roban un hacker de esos rusos, esos norcoreanos te barren. Pero hasta oye, se meten hasta en el wifi. Madre mía. Desde el wifi se meten a cualquier cosa. Es es literalmente como imaginarse un virus que te meten en el cuerpo. ía terrible. Claro,
+una cosa, pero espantosa. Entonces si hay que tener eh cuidado,
+mucho cuidado. Sí, sí. Yo por ejemplo números extranjerosita los bloqueo. Eso eso eso de de car eso. A ver, a ver, este, le comento, tengo también otro problema muy grave que es la recuperación de carretera. A mí me están debiendo como unos $,000 ya,
+mucho, mucho dinero. Entonces sí necesitaría que ese tema de estar mviendo el estado sea como estamos. por lo menos una vez al mes.
+Eso está poquito. Nosotros cuando les hicimos para los de tres poníamos cada dos, cada tres días. Es que el sistema no le da vergüenza.
+Ahí ahí el tema es ahí el tema es el cómo es tu relación con ellos. Entonces, por ejemplo, el cliente que dice, "A ese sí le tengo que atender, sea lo que sea." Pues imagínate ese que le mande en nuestro sistema por descuido, le mande todos los días uno de esos. Te quedas sin cliente. Habrá gente que No, yo me contento que que cada vez al mes actualice porque yo creo que eso no les va a molestar.
+De hecho, se mantienen informados de cuánto están debiendo, ¿no es cierto? O sea,
+estás debiendo tanto, el siguiente mes ya debes tanto, ya debes tanto. Una vez al mes.
+Yo te recomendaría siempre terminar con un compromiso. O sea, ¿qué quiere decir? Digamos nosotros aquí terminamos la sesión y te digo, eh, ya me quedamos en esto, entonces quedamos para el siguiente 11 a la siguiente reunión. ¿Qué quiero decir? Que en cobranzas podría ser lo mismo. Te recuerdo este saldito podrías ¿Para qué día me entregas? Dejo la pregunta es, o sea, busco, busco ese compromiso y eso me permite mandar un mensajito a la semana, decir, eh, César, quedamos en esta semana o César, ¿no me confirmaste para qué fecha es? ¿Ves? No es molestia, estoy continuando el hilo. Lo que pasa es que hay que aprovechar el sistema que no le va a dar vergüenza, lo va a escribir. Entonces, si en la respuesta dice, eh, Mairita, no sabita, espérame hasta el 15. Perfecto, hoy 15 lo registra y el 15 le envía nuevamente el recordatorio. Entonces, te libramos de de esa de eso de ahí porque él ya se encarga de hacerle el seguimiento.
+¿Quién me traería las llaves?
+Que me las tra
+ya porque mí esto. A ver,
+los valores que le tienen en deuda son los mismos que están en este Excel que me pasó, los que no dicen pagado. O o son cuarta o tiene
+M este de aquí.
+Anita, espérame por favor unos 10. Anita, espérame unos 10 o 15 minutitos y nos te digo dónde nos encontremos para darte la llave. Ya. Ay, no. Tranquilo. Mira este de aquí. O sea, es brutal lo que Pero así. Salva. Ahí está. Ah, desde el 2023.
+Tom un montón.
+Claro.
+Y así les tiene a los de más o solo tiene ese esas
+todos los ahí le pasé este un código
+del Excel que de este de aquí, ¿no?
+Mm. Mire, por ejemplo, abajo ya está apagado. Pagado. Eso. A ver, ¿quién es este?
+Este es
+Silvina. No, ella no me está debiendo. Está hasta donde está pagado él tampoco.
+¿Y cómo le ve eso?
+Ahí está. Por ejemplo,
+este dice pagado. Ah, este no es
+este, por ejemplo, hasta ahí está pagado, pero desde septiembre no está pagado.
+Ah, ya. Pendiente, pendiente, pendiente, pendiente. Me está debiendo 390 más 115. Así.
+Ah, ya. Listo.
+Creo que ahí está. Por ejemplo, él me debe todo eso me va abonando.
+Eso. Entonces, sí se le puede decir eso.
+¿Y qué te parece si me es un abono?
+Por ejemplo, ahí tenemos el lo de él es 382, pero mi abonado 100, después 40 y 30. y me sigue debiendo 162.
+Y es que de piten en pite se es aquí. Sí.
+Qué bestia, César. O sea, yo a veces me pongo a sumar tu to. Ay, Dios mío. Ya hubiera apagado el carro. Sí, sí, de verdad.
+Le juro. Sí.
+Oye, está interesante lo que te digo. Acuérdate a ver que en el bot cuando haga lo de las cobranzas y diga, "No, espéreme Maidita, hasta el 15 ya le pago." Hagamos una cosa, hágame un abono de unos 20 dolaritos y yo le espero hasta el 15. O sea, darle la la iniciativa. Entonces el otro por quitarse de encima tenga 20, pero ya te cae
+algo
+ahí le quería explicar a a Belvera, en el tema de la devolución de IVA de los de la tercera edad,
+yo cobro el 10% de comisión de lo recuperado. Entonces, por ejemplo, ahí está todo lo que nosotros pedimos, digamos. Yo le pido 1573 y mi contribución.
+Bueno, ese viejito es especial, creo. Es es Marcita.
+Ya, eso, eso. Este, entonces, a ver, por ejemplo, Marcita, deme de bajando, por favor. Por ejemplo, Marcita, eso de ahí ya me pagó. Yo no lo he actualizado.
+Este de aquí
+todo ya me pagó. Eso es 34 con 36. Eso ya me pagó.
+Ah, ya.
+Pero bueno, eso no habría problema porque lo que podemos es crear la función y nosotros lo vamos alimentando. Van actualizando Ya.
+Sí. Lo que sí me gustaría es que ya sea automático. Una vez que nosotros ya lo alimentamos, de enelante sí ya sea automático.
+Claro. Lo lo que sí pues ustedes siempre deberían de colocar los abonos que ingresen.
+Exactamente. Pero por ejemplo, ya digamos en esto sí, pero por ejemplo en el tema de honorarios yo coloco, pero que el rato que el sistema emite automáticamente, por ejemplo, me abonaste 100, me sigues debiendo 400 más los 69 que se sumó de este mes, 469. Claro. Y eso nos comentaba que era una vez al mes. Creía que
+solo una vez al mes.
+Una vez al mes.
+Ya. Y eso de una vez al mes, ¿qué tiene una fecha específica de
+Sí, quisiera que sea máximo hasta el cinco
+porque del uno al cinco la gente compra
+ya después ya me dicen que ya no tiene dinero
+ya? Entonces del uno al cinco. Okay. Lo lo que sí eh habría que dividir, ¿no? digamos, se la hace todo eso separado de servicio me debe esto por esto, estos meses y bla bla bla, o sea, dividir por servicios, servicios, servicios y el total y lo que decía es esa que estaba chévere lo del abono y todo eso.
+Ya. Entonces, eso sí se puede automatizar bien en realidad.
+Eh, una última cosa, pero no me importar. Vean, nosotros mensualmente, anualmente hacemos lo que es el tema de la Superintendencia de compañías. La Superintendencia de Compañías recibe estados financieros y unos documentos que son una Ja, pero que sí creo que se puede automatizar. ¿Cómo? Por ejemplo, yo alimento los datos del estado financiero, podemos poner ahí el el la plantilla, ¿no es cierto?
+Y él automáticamente me va diciendo, por ejemplo, el sistema tiene una cosa que se llama notas en los estados financios. que coge cada cuenta y va haciendo un detalle de por qué está así. Entonces, por ejemplo, yo cojo el libro bancos y yo lo pongo. La cuenta bancos a final del periodo del 2016 tiene $100. Eso dices, "No, jod es una tontera, pero lo hacen hacer." Entonces, no sé si podríamos incluirles automatización
+con ejemplo.
+¿Para qué? Para yo llenar, por ejemplo, pongo los otros empresas arma, ta ta ta. Cajas 100, bancos 300, ta ta ta. Yo lleno y ese me da el la
+ya la parte matemática o un informe,
+un informe nada más.
+XML, así
+ya claro.
+Entonces, lo que yo puedo hacer este es pasarle unos modelos que yo tengo
+ya
+con las cuentas. ¿Para qué? Para que usted simplemente le haga y yo le sabe por qué es más me interesa porque quiero que se almacene ahí todo.
+En el mismo sistema se almacene todo, todo, todo. Ay, que dónde están las notas de las financieras del 2026. Ahí está, porque si no tenemos que estar buscando en el peleo. Oye, a ti te pasé el archivo, ¿dónde está? Es un problema.
+Entonces, yo ya tengo ahí.
+Es más por eso que porque si nosotros tenemos una plantilla y le hemos venido llenando todos estos años, al final lo podríamos volver a hacer, pero no puedo tenerla a mano organizada. Eso
+no. De hecho, nosotros el software lo que va a hacer es cuando vayas a la carpeta de dharma, clic ahí y ahí está todo. ¿Qué es todo? Por eso te decía todos los servicios que necesitamos. Vos me dices todos los servicio. Así, así solo hayas llenado uno por un cliente, no importa, pero constan toditos. Entonces, cada vez que subas cualquier declaración, lo del lo de la sú, lanzan guardar en la carpeta y él solito ya se ubica en la columna que sea.
+Eso. Entonces, nunca te vas a nunca vas a tener ese problema decir dónde está, no. Siempre está en la carpeta del cliente. Punto. Ahí llegas a la a donde tiene que buscas simplemente y te y te lo arroja.
+De hecho, hasta te podemos poner la parte, digamos, que tuvo desde tu tu desde tu dashboard, digamos, nosotros te llamamos así, puedas ir viendo cada cliente. Pon buscador, ta ta ta ta, listo, salió, enter toda la la verdad de tu cliente.
+Exacto. Exacto. Usted sabe porque a veces, por ejemplo, yo necesito trabajar con el estado del año pasado para elaborar este ensalando al anterior.
+Busca dónde está esa información. Ay, cuánto que vengaje el año pasado, ¿dónde está? Es un problema. Entonces, tenerlo ahí todo listo, todo organizado.
+O sea, yo tengo esa información porque tengo que tenerlo, pero el tema es qué carpeta. se guardó.
+Claro.
+Entonces el el punto es tenerlo ahí ya listo. No uso el rato y para mí va a ser una gran ganancia de tiempo porque tengo un plan, un proyecto de negocio super bueno para el año que viene, pues no tengo tiempo de ejecutarlo por estar perdiendo mi tiempo en cosas que se podían automatizar.
+Ya, nosotros te diamos en esa parte está comprendido.
+Porque si yo le estaba comentando a César el plan que tengo, no puedo ejecutarlo y tengo ese plan 2 años.
+Sí, hablamos de de lo de investigar todas las compañías. Ah, sí,
+sí,
+claro. Eso
+eso. Sí,
+no he podido, no he podido ejecutarlo porque no tengo tiempo.
+Hay que hacerlo. Ahí hay plata. A mí sí me gustó esa idea. Sí, sigue comercial que
+comercial como automatizar
+eso, o sea, investigar en todo lado.
+Claro.
+Claro. Y de ahí sí me pongo el negocio con cada uno y que nos vayan saliendo los trabajitos.
+Déjeme revisar. Nosotros hicimos una plantilla, me parece que fue el anteaño pasado, pero no la completamos. ¿Dónde estaba un listado de de de compañías,
+ya,
+pero eh no hemos podido no la pudimos terminar. Déjenme revisar si todavía está ahí la tenemos para
+a ver si podemos porque ya teníamos un montón de comp, o sea, hay miles de compañías que tienen problemas,
+miles de compañías que no han enviado los estados del 2025, 2026, que la s las ha conselado por cualquier cosa, que están atrasadísimas, están multadas y que a veces la gente dice, "Eso es un problema, yo lo que quiero es deshacerme de eso. No habrá manera de liquidarla, de cerrarla, que se muera."
+Pero no pueden porque está todo ahí.
+Claro.
+Entonces, la idea del negocio de nosotros es, yo te arreglo, van donde cualquier contador y le dice, "Sí, yo le arreglo 3,000m
+y la gente dice, yo no tengo $3,000, pero yo sí les puedo hacer por $500. Yo puedo hacerlo porque el trabajo es sencillísimo. Yo lo hago en un día.
+En un día yo hay compañías que están solo con el capital social, no movieron nada más. Entonces yo cuadro eso, envío los ningún día les puedo hacer por $500 y yo te soluciono y te dejo cerrado, te la liquido, te igualo todo por 500 y te la liquido por otros 500, te deshiciste del problema
+y nosotros tenemos trabajo. Mm. Dale. Ver de veras ese archivo ahí.
+Sí, voy a tratar de buscar eso. Ya. Entonces voy a hacer el anticipo ahorita porque de aquí ya me voy y me siento en la computadora y se acabó.
+¿Tienes más dudas?
+Eh, no más del último flujo que dijo de la automatización, pero Pero cuando me envíe el ejemplo ya le ya para
+ah ya lo de las compañías, de hecho yo lo tengo un poco claro.
+Eso es lo que conversamos la otra vez, ¿te acuerdas?
+Claro. Lo que pasa es que, a ver, a ver, explico. La superintendencia de compañías, subo los estados financieros en unos eh archivos que llaman TXT,
+que tengo un un software ahí para elaborarlos.
+Elaborar los TXT, pero adicional como anexo tengo que enviar el acta de la junta de accionistas, las notas a los estados financieros y un informe del gerente, que eso es la joda preparar. Entonces, ¿qué hacemos? Tenemos una plantilla donde yo este cliente solo tiene cuatro cuentas, capital, e banco, capital, a veces tienen solo dos cuentas. Entonces, ¿qué hago? Lendo en el banco el capital, lleno el capital y automáticamente el sistema me da el informe del gerente donde dice que no ha habido que ha habido cero movimiento de gestión, solo nos encontramos con la cuenta de capital. Las notas a los estados financieros, donde coge la cuenta capital, capital inicial depositado en el banco, la cuenta bancos capital correspondiente al capital inicial par cont se acabó.
+Entonces llena automáticamente la
+sería más o menos como un formulario.
+Exacto.
+Llenas el formulario y te arroja los tres informes.
+Exactamente.
+Eso, eso se
+Ah, entonces está más simple. Ya.
+Sí. Si no es tan complicado. Es solo que hacerlo manual si es de ser ya. Buenazo, no hay problema. Entonces, le hacemos con eso de Ya, ahí está ya.
+Eso sería por favor.
+Ya.
+A ver, la cuenta es del banco
+del
+dele ser bestia. Entonces, de aquí de aparte ya tenemos todos los archivos o quedó pendiente. No, sí, sí tenemos todo.
+Ya, perfecto.
+Sí.
+Y el front le ponemos en la página tercero.
+Ah, qué chévere. Miren, en tu unido página web te le ponemos el admin. En la página le ponemos ingresar al sistema y ahí entran ustedes.
+Buenas.
+Para no estar haciendo otras cosas.
+Ah, ya ya voy a trabajar la información,
+¿no? Con con lo que tenemos ya podemos nosotros actualizar, o sea, hecho Sí, hay que hay que hacer eso.
+Ya estamos más de un año.
+Ya más de un año. Hoja, ¿no es cierto? Hoja. Corriente o ahorras. Ahorro. Ya. Ay, ayúdame con el número ya, porque me tocaría abrir el WhatsApp.
+Eh, que la
+el número de cuentas. Sí.
+Ah, solo el número o es
+es que no tengo el número.
+2901 86 18.
+Número de célula
+11. 05 10 686 Creo que no hay suficiente internet aquí. una vez más. A ver, otra vez por e 2901. 86 18 82 115 10 686 ya está registrada. ¿Qué pasó? Cristo. Tenemos algún problema con la de voy a hacerme la mía de 5 del sí le aparecía la cuenta, ¿no?
+Sí, pero me dice que por seguridad no se puede transferir a esa cuenta. Entonces, César, Vera, ahorita les voy a transferir 300,
+¿ya?
+Y la otra semana los otros 300, ¿ya? Y de ahí conversamos para ver cómo hacemos el el los otros pagos.
+Ya. Listo. El A ver, mira, tu cuenta. No, está bloqueada, ¿no? No quiere transferir a su cuenta el cuento. A código 1 86 18 82. Sí. Envía el
+Ahí está.
+Listo.
+Ya. Entonces la factura lesamos saludos.
+Sí, sí. No pasa nada. Santiago, ¿cómo le va? Perdonen mil disculpas. Ya, entonces estamos. Muchas gracias, mucho gusto. Entonces ahí cualquier cosa estamos en toca.
+Ajá. Ya. Hasta luego.
+Hasta luego. H
