@@ -1,0 +1,15 @@
+services:
+  crm-mayra-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: crm-mayra-app
+    restart: always
+    ports:
+      - "3011:3000"
+      - "4005:4000"
+    env_file:
+      - ./backend/.env
+    environment:
+      - PORT=4000
+      - NODE_ENV=production
