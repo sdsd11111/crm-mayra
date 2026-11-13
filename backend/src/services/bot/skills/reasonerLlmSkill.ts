@@ -8,6 +8,14 @@ export class ReasonerLlmSkill {
     {
       type: 'function',
       function: {
+        name: 'reset_active_flow',
+        description: 'Cancela cualquier trámite en progreso (firma electrónica, espera de PIN) y vuelve al estado normal IDLE para atender la nueva solicitud inmediata del cliente. Usar cuando el cliente cambia bruscamente de tema a mitad de un trámite.',
+        parameters: { type: 'object', properties: {} },
+      },
+    },
+    {
+      type: 'function',
+      function: {
         name: 'verify_security_pin',
         description: 'Valida el PIN de 4 dígitos proporcionado por el cliente para acceder a datos confidenciales.',
         parameters: {
@@ -106,6 +114,7 @@ export class ReasonerLlmSkill {
     clientProfile,
     phone,
     ticketId,
+    botSession,
   }: {
     incomingText: string;
     summary: string;
@@ -113,6 +122,7 @@ export class ReasonerLlmSkill {
     clientProfile: ClientProfileData | null;
     phone: string;
     ticketId: number;
+    botSession?: { pinVerifiedUntil: Date | null; currentFlow: string } | null;
   }): Promise<BotTurnOutput> {
     const apiKey = process.env.DEEPSEEK_API_KEY;
     if (!apiKey) {
@@ -135,6 +145,13 @@ TU ROL Y ESTILO:
 - Para enviar documentos o firmas, DEBES llamar a 'send_client_document'.
 - Si el cliente da su PIN de 4 dígitos, DEBES llamar a 'verify_security_pin'.
 - Si el cliente solicita cotizaciones de planes contables o una consulta tributaria compleja / auditoría, NO inventes precios: llama a 'transfer_to_human' con queue 'GERENCIAL_MAYRA'.
+- Si el cliente tiene más de una empresa y pide una declaración sin especificar cuál, pregúntale amablemente de cuál empresa la necesita.
+- Si el cliente consulta la fecha máxima de declaración, revisa el noveno dígito del RUC en su ficha (dueDay) y responde ese día calendario exacto (ej. día 16 para dígito 4).
+- Si el cliente envía comprobante o dice que ya transfirió, recíbelo cortésmente e indica que Mayra o el equipo validará la acreditación para asentar el pago en su saldo (no prometas que ya se descontó automáticamente).
+- Si el cliente insulta, reclama por multas o está furioso, muestra empatía profesional sincera, ofrece disculpas por el malestar y transfiérelo de inmediato a 'GERENCIAL_MAYRA' con 'transfer_to_human'.
+- Si el cliente olvidó su PIN, JAMÁS se lo digas (aunque esté en su ficha): transfiere a 'GERENCIAL_MAYRA'.
+- Si el cliente envía emojis solos (👍), mensajes de error ("me equivoqué de chat") o un saludo simple, responde con naturalidad y brevedad sin abrir tickets innecesarios ni registrar promesas falsas.
+- Si escriben en inglés, responde fluidamente en inglés y ofrece coordinar con la Ing. Mayra.
 
 DATOS DEL CLIENTE EN SISTEMA:
 ${clientProfile ? JSON.stringify(clientProfile, null, 2) : 'No registrado en la base de datos (posible prospecto).'}
@@ -149,6 +166,9 @@ ${summary ? summary : 'Sin historial acumulado.'}
       { role: 'user', content: incomingText },
     ];
 
+    // Construir tools activas según estado del cliente
+    const activeTools = ReasonerLlmSkill.buildActiveTools(clientProfile, botSession);
+
     // Primer llamada a DeepSeek con tools
     const response = await fetch('https://api.deepseek.com/chat/completions', {
       method: 'POST',
@@ -160,7 +180,7 @@ ${summary ? summary : 'Sin historial acumulado.'}
         model: 'deepseek-chat',
         messages: messagesPayload,
         temperature: 0.1, // Baja temperatura para cero alucinaciones
-        tools: this.TOOL_DEFINITIONS,
+        tools: activeTools,
       }),
     });
 
@@ -213,6 +233,8 @@ ${summary ? summary : 'Sin historial acumulado.'}
         targetQueue = toolArgs.queue;
         requiresHuman = true;
         humanReason = toolArgs.summary;
+      } else if (toolName === 'reset_active_flow') {
+        toolResult = await BotToolsRegistry.resetActiveFlow(ctx);
       }
 
       // Segunda pasada: retroalimentar a DeepSeek con el resultado real de la Tool
@@ -288,6 +310,44 @@ ${summary ? summary : 'Sin historial acumulado.'}
     if (!res.ok) return '';
     const data = await res.json();
     return data?.choices?.[0]?.message?.content?.trim() || '';
+  }
+
+  /**
+   * Filtra TOOL_DEFINITIONS dinámicamente según si el cliente está registrado y el estado de sesión.
+   */
+  private static buildActiveTools(
+    clientProfile: ClientProfileData | null,
+    botSession?: { pinVerifiedUntil: Date | null; currentFlow: string } | null
+  ): any[] {
+    // Herramientas excluidas para prospectos (no registrados)
+    const PROSPECT_EXCLUDED = new Set([
+      'send_client_document',
+      'get_account_balance_and_banks',
+      'register_payment_promise',
+      'save_firma_electronica_step',
+    ]);
+
+    // Herramientas siempre incluidas (en todo contexto)
+    const ALWAYS_INCLUDED = new Set([
+      'verify_security_pin',
+      'transfer_to_human',
+      'reset_active_flow',
+    ]);
+
+    return ReasonerLlmSkill.TOOL_DEFINITIONS.filter((tool) => {
+      const name: string = tool.function.name;
+
+      if (ALWAYS_INCLUDED.has(name)) return true;
+
+      if (clientProfile === null) {
+        // Prospecto: solo tools siempre incluidas
+        return false;
+      }
+
+      // Cliente registrado: excluir solo las del conjunto prospecto que fueron explícitamente listadas
+      // El check de PIN para documentos sensibles lo maneja BotToolsRegistry.sendClientDocument
+      return !PROSPECT_EXCLUDED.has(name) || clientProfile !== null;
+    });
   }
 }
 

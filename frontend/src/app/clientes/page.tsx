@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect, useMemo, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { AuthProvider, useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/AuthContext';
 import Navbar from '@/components/Navbar';
 import { ClientOwnerItem, TaxpayerItem, TaxRegime } from '@/types/client';
 import Link from 'next/link';
@@ -1747,15 +1747,13 @@ function ClientesView() {
 
 export default function ClientesPage() {
   return (
-    <AuthProvider>
-      <Suspense fallback={
-        <div className="min-h-screen bg-gradient-to-br from-[#EEF3FA] to-[#E2EAF6] flex items-center justify-center">
-          <div className="w-8 h-8 border-3 border-[#166BA3] border-t-transparent rounded-full animate-spin" />
-        </div>
-      }>
-        <ClientesView />
-      </Suspense>
-    </AuthProvider>
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-[#EEF3FA] to-[#E2EAF6] flex items-center justify-center">
+        <div className="w-8 h-8 border-3 border-[#166BA3] border-t-transparent rounded-full animate-spin" />
+      </div>
+    }>
+      <ClientesView />
+    </Suspense>
   );
 }
 

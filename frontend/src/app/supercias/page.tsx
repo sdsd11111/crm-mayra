@@ -3,7 +3,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { AuthProvider, useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/AuthContext';
 import Navbar from '@/components/Navbar';
 import {
   FileText,
@@ -222,9 +222,5 @@ function SuperciasView() {
 }
 
 export default function SuperciasPage() {
-  return (
-    <AuthProvider>
-      <SuperciasView />
-    </AuthProvider>
-  );
+  return <SuperciasView />;
 }

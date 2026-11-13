@@ -108,8 +108,8 @@ export class BotOrchestrator {
     const bubbles = HumanBubbleSkill.splitBubbles(turnResult.replyText);
 
     for (let i = 0; i < bubbles.length; i++) {
-      if (i > 0) {
-        // Pausa de 1.2s entre burbujas para simular escritura humana
+      if (i > 0 && process.env.BOT_DEBOUNCE_MS === undefined) {
+        // Pausa de 1.2s entre burbujas para simular escritura humana (solo en producción)
         await new Promise((r) => setTimeout(r, 1200));
       }
       const sendRes = await EvolutionApiService.sendTextMessage({

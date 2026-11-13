@@ -216,5 +216,38 @@ export class OutboundQueueService {
       });
     }
   }
-}
 
+  /**
+   * Encola múltiples jobs en una sola query SQL (batch insert).
+   * Mucho más rápido que llamar enqueue() en un loop para cobranza masiva.
+   * Target: 50 registros en < 400ms contra MySQL remoto.
+   */
+  public static async enqueueBatch(jobs: Array<{
+    whatsappPhone: string;
+    jobType: 'COBRANZA_MENSUAL' | 'PROMESA_HOY' | 'FIRMA_CADUCA' | 'PROYECCION_RENTA';
+    textContent: string;
+    mediaUrl?: string;
+    fileName?: string;
+    scheduledFor?: Date;
+  }>): Promise<{ count: number }> {
+    if (jobs.length === 0) return { count: 0 };
+
+    const now = new Date();
+    const result = await prisma.outboundQueueJob.createMany({
+      data: jobs.map(j => ({
+        whatsappPhone: j.whatsappPhone.replace(/\D/g, ''),
+        jobType: j.jobType,
+        textContent: j.textContent,
+        mediaUrl: j.mediaUrl,
+        fileName: j.fileName,
+        scheduledFor: j.scheduledFor || now,
+        status: 'PENDIENTE',
+      })),
+      skipDuplicates: false,
+    });
+
+    // Iniciar el worker si está dormido
+    this.startWorker();
+    return { count: result.count };
+  }
+}

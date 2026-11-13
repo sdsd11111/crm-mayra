@@ -358,6 +358,17 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
       },
     });
 
+    // Vincular retroactivamente tickets previos de este número a la nueva ficha creada
+    await prisma.chatTicket.updateMany({
+      where: {
+        whatsappPhone: cleanPhone,
+        clientOwnerId: null,
+      },
+      data: {
+        clientOwnerId: created.id,
+      },
+    });
+
     res.status(201).json({
       success: true,
       message: 'Cliente creado con éxito.',

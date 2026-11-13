@@ -58,36 +58,34 @@ export class BillingCron {
 
       if (!shouldBill) continue;
 
-      const existing = await prisma.ledgerEntry.findFirst({
-        where: {
-          taxpayerId: t.id,
-          entryType: EntryType.CARGO_AUTOMATICO,
-          periodText,
-        },
-      });
-
-      if (existing) {
-        console.log(`   ⭕ Empresa ${t.razonSocial} ya tiene cargo en ${periodText}. Omitiendo.`);
-        continue;
-      }
-
       const baseAmount = Number(t.autoBillAmount);
       const finalAmount = t.appliesVat ? Number((baseAmount * 1.15).toFixed(2)) : baseAmount;
       const fullConcept = t.appliesVat
         ? `${conceptLabel} - ${t.razonSocial} ($${baseAmount.toFixed(2)} + 15% IVA)`
         : `${conceptLabel} - ${t.razonSocial}`;
 
-      await prisma.ledgerEntry.create({
-        data: {
-          clientOwnerId: t.clientOwnerId,
-          taxpayerId: t.id,
-          entryType: EntryType.CARGO_AUTOMATICO,
-          concept: fullConcept,
-          periodText,
-          amount: finalAmount,
-          bankAccount: BankAccount.NO_APLICA,
-        },
-      });
+      // Idempotencia atómica: el @@unique(taxpayerId, periodText, entryType) en MySQL
+      // garantiza que dos runs concurrentes nunca dupliquen el cargo.
+      try {
+        await prisma.ledgerEntry.create({
+          data: {
+            clientOwnerId: t.clientOwnerId,
+            taxpayerId: t.id,
+            entryType: EntryType.CARGO_AUTOMATICO,
+            concept: fullConcept,
+            periodText,
+            amount: finalAmount,
+            bankAccount: BankAccount.NO_APLICA,
+          },
+        });
+      } catch (err: any) {
+        // P2002 = Unique constraint violation → cargo ya existe (race condition ganada por otro proceso)
+        if (err?.code === 'P2002') {
+          console.log(`   ⭕ Empresa ${t.razonSocial} ya tiene cargo en ${periodText} (constraint MySQL). Omitiendo.`);
+          continue;
+        }
+        throw err;
+      }
 
       createdEntries++;
       totalAmount += finalAmount;

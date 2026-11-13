@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect, useCallback, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { AuthProvider, useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/AuthContext';
 import Navbar from '@/components/Navbar';
 import {
   Settings,
@@ -1035,10 +1035,8 @@ function ConfiguracionView() {
 
 export default function ConfiguracionPage() {
   return (
-    <AuthProvider>
-      <Suspense fallback={<div className="min-h-screen bg-[#EEF3FA] flex items-center justify-center"><div className="w-8 h-8 border-3 border-[#166BA3] border-t-transparent rounded-full animate-spin" /></div>}>
-        <ConfiguracionView />
-      </Suspense>
-    </AuthProvider>
+    <Suspense fallback={<div className="min-h-screen bg-[#EEF3FA] flex items-center justify-center"><div className="w-8 h-8 border-3 border-[#166BA3] border-t-transparent rounded-full animate-spin" /></div>}>
+      <ConfiguracionView />
+    </Suspense>
   );
 }

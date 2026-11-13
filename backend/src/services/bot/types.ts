@@ -13,6 +13,7 @@ export interface ClientProfileData {
   fullName: string;
   whatsappPhone?: string | null;
   securityPin?: string | null;
+  isVip?: boolean;
   taxpayers: Array<{
     id: number;
     razonSocial: string;

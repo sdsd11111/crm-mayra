@@ -54,6 +54,7 @@ export class ClientLookupSkill {
           fullName: found.fullName,
           whatsappPhone: found.whatsappPhone,
           securityPin: found.securityPin,
+          isVip: found.isVip,
           taxpayers: found.taxpayers.map(t => {
             return {
               id: t.id,

@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { AuthProvider, useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/AuthContext';
 import Navbar from '@/components/Navbar';
 import { ClientOwnerItem, TaxpayerItem, TaxRegime, BillingFrequency } from '@/types/client';
 import {
@@ -40,6 +40,7 @@ import {
   FileAudio,
   FileIcon,
   RefreshCw,
+  Send,
 } from 'lucide-react';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -390,6 +391,8 @@ function ClientDetailView() {
   const [chatLoading, setChatLoading] = useState(false);
   const [chatError, setChatError] = useState<string | null>(null);
   const [selectedTicketId, setSelectedTicketId] = useState<number | null>(null);
+  const [clientReplyText, setClientReplyText] = useState('');
+  const [sendingClientReply, setSendingClientReply] = useState(false);
 
   // ── Toast copiar clave ────────────────────────────────────────────────────
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
@@ -1676,6 +1679,56 @@ function ClientDetailView() {
                             );
                           })}
                         </div>
+
+                        {/* Input para responder directo desde la ficha */}
+                        <form
+                          onSubmit={async (e) => {
+                            e.preventDefault();
+                            if (!token || !client?.whatsappPhone || !clientReplyText.trim() || sendingClientReply) return;
+                            const textToSend = clientReplyText.trim();
+                            setSendingClientReply(true);
+                            setClientReplyText('');
+
+                            try {
+                              const res = await fetch('/api/whatsapp/send-reply', {
+                                method: 'POST',
+                                headers: {
+                                  'Content-Type': 'application/json',
+                                  Authorization: `Bearer ${token}`,
+                                },
+                                body: JSON.stringify({
+                                  phone: client.whatsappPhone,
+                                  message: textToSend,
+                                  ticketId: activeTicket.id,
+                                }),
+                              });
+                              if (res.ok) {
+                                await fetchChatTickets();
+                              }
+                            } catch (err) {
+                              console.error('Error enviando mensaje desde ficha:', err);
+                            } finally {
+                              setSendingClientReply(false);
+                            }
+                          }}
+                          className="p-3 bg-white border-t border-slate-200 flex items-center gap-2"
+                        >
+                          <input
+                            type="text"
+                            value={clientReplyText}
+                            onChange={(e) => setClientReplyText(e.target.value)}
+                            placeholder={`Enviar mensaje de WhatsApp a ${client.fullName}...`}
+                            className="flex-1 px-3.5 py-2 rounded-xl border border-slate-200 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-[#166BA3] focus:border-[#166BA3]"
+                          />
+                          <button
+                            type="submit"
+                            disabled={sendingClientReply || !clientReplyText.trim()}
+                            className="bg-[#166BA3] text-white px-3.5 py-2 rounded-xl hover:bg-[#135887] active:scale-95 transition-all text-xs font-semibold flex items-center gap-1.5 disabled:opacity-40"
+                          >
+                            <Send className="w-3.5 h-3.5" />
+                            <span>Enviar</span>
+                          </button>
+                        </form>
                       </>
                     );
                   })()}
@@ -1906,9 +1959,5 @@ function ClientDetailView() {
 }
 
 export default function ClientDetailPage() {
-  return (
-    <AuthProvider>
-      <ClientDetailView />
-    </AuthProvider>
-  );
+  return <ClientDetailView />;
 }

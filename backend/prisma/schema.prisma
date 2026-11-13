@@ -203,6 +203,8 @@ model LedgerEntry {
 
   createdById Int?
   createdBy   User? @relation(fields: [createdById], references: [id])
+
+  @@unique([taxpayerId, periodText, entryType], name: "unique_billing_charge")
 }
 
 // ==========================================

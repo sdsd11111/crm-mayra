@@ -121,6 +121,49 @@ router.post('/webhook', async (req: Request, res: Response): Promise<void> => {
 
     // 4. Mensaje entrante del cliente
     if (cleanPhone && messageContent) {
+      // 4.1 COMANDO DE RESET: Si el usuario escribe /reset o /reiniciar, limpiar tickets e historial para pruebas
+      const trimmedText = messageContent.trim().toLowerCase();
+      if (trimmedText === '/reset' || trimmedText === '/reiniciar') {
+        const tickets = await prisma.chatTicket.findMany({
+          where: {
+            OR: [
+              { whatsappPhone: cleanPhone },
+              { whatsappPhone: { endsWith: cleanPhone.slice(-9) } },
+            ],
+          },
+          select: { id: true },
+        });
+
+        const ticketIds = tickets.map((t) => t.id);
+        if (ticketIds.length > 0) {
+          // Eliminar mensajes asociados
+          await prisma.chatMessage.deleteMany({
+            where: { ticketId: { in: ticketIds } },
+          });
+          // Eliminar tickets
+          await prisma.chatTicket.deleteMany({
+            where: { id: { in: ticketIds } },
+          });
+        }
+
+        // Enviar confirmación al WhatsApp
+        await EvolutionApiService.sendTextMessage({
+          number: cleanPhone,
+          text: '🔄 *Historial reiniciado exitosamente.*\nSe borraron tus tickets y mensajes previos. Ahora puedes iniciar una conversación desde cero como cliente nuevo.',
+        });
+
+        // Notificar al CRM por WebSocket
+        if (io) {
+          io.emit('whatsapp:new-message', {
+            action: 'RESET',
+            clientPhone: cleanPhone,
+          });
+        }
+
+        res.status(200).json({ status: 'RESET_COMPLETED', cleanedTickets: ticketIds.length });
+        return;
+      }
+
       // Verificar si el ticket está pausado por intervención humana
       const activeTicket = await prisma.chatTicket.findFirst({
         where: { whatsappPhone: cleanPhone },

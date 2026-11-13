@@ -1,0 +1,47 @@
+{
+  "generatedAt": "2026-11-13T16:36:23.981Z",
+  "totalMs": 1900,
+  "summary": {
+    "total": 5,
+    "passed": 5,
+    "failed": 0
+  },
+  "invariants": [
+    {
+      "name": "INV-0 AutoSabotaje",
+      "passed": true,
+      "durationMs": 0,
+      "details": "deepStrip elimina 4/4 campos financieros y conserva campos seguros"
+    },
+    {
+      "name": "INV-1 ConservaciónContable",
+      "passed": true,
+      "durationMs": 66,
+      "details": "100 runs fast-check: Cargos - (Abonos + Cruces) = Saldo con desviación ≤ $0.01"
+    },
+    {
+      "name": "INV-2 NormalizaciónRUC",
+      "passed": true,
+      "durationMs": 12,
+      "details": "8 casos Excel corruptos + 200 runs fast-check idempotencia — todos correctos"
+    },
+    {
+      "name": "INV-3 NoInterferenciaHTTP",
+      "passed": true,
+      "durationMs": 1,
+      "details": "20 payloads contaminados → 0 fugas financieras en JSON de salida"
+    },
+    {
+      "name": "INV-4 IdempotenciaConcurrente",
+      "passed": true,
+      "durationMs": 1608,
+      "details": "10 inserts concurrentes → 1 success + 9 P2002 (MySQL @unique garantiza idempotencia)",
+      "rawSamples": [
+        {
+          "successes": 1,
+          "p2002s": 9
+        }
+      ]
+    }
+  ]
+}

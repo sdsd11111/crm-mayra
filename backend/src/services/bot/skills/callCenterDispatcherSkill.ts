@@ -86,7 +86,8 @@ export class CallCenterDispatcherSkill {
       botMsg = await prisma.chatMessage.create({
         data: {
           ticketId: ticket.id,
-          sender: 'SYSTEM',
+          sender: 'BOT',
+          senderType: 'BOT',
           content: responseText,
         },
       });

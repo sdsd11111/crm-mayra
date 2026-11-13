@@ -1,4 +1,5 @@
 // backend/src/services/bot/tools/botToolsRegistry.ts
+import { Prisma } from '@prisma/client';
 import { prisma } from '../../../lib/prisma';
 import { EvolutionApiService } from '../../EvolutionApiService';
 import { calculateClientBalance } from '../../../utils/balanceUtils';
@@ -79,14 +80,31 @@ export class BotToolsRegistry {
     if (args.month) whereDoc.periodMonth = Number(args.month);
 
     if (args.ruc) {
-      const tp = await prisma.taxpayer.findUnique({ where: { ruc: args.ruc } });
-      if (tp) whereDoc.taxpayerId = tp.id;
+      if (!ctx.clientOwnerId) {
+        return { success: false, message: 'Operación no permitida para usuarios no registrados.' };
+      }
+      const tp = await prisma.taxpayer.findFirst({
+        where: {
+          ruc: args.ruc,
+          clientOwnerId: ctx.clientOwnerId, // ESCUDO ESTRICTO MULTI-TENANT
+        },
+      });
+      if (tp) {
+        whereDoc.taxpayerId = tp.id;
+      } else {
+        return {
+          success: false,
+          message: 'No posee ninguna empresa asociada a su cuenta con el RUC indicado.',
+        };
+      }
     } else if (ctx.clientOwnerId) {
       const taxpayers = await prisma.taxpayer.findMany({
         where: { clientOwnerId: ctx.clientOwnerId },
         select: { id: true },
       });
       whereDoc.taxpayerId = { in: taxpayers.map(t => t.id) };
+    } else {
+      return { success: false, message: 'Operación no autorizada.' };
     }
 
     const doc = await prisma.document.findFirst({
@@ -246,6 +264,23 @@ _Por favor enviar el comprobante con la referencia para conciliar en su estado d
     return {
       success: true,
       message: `Conversación transferida a ${args.queue}. Bot pausado para atención humana.`,
+    };
+  }
+
+  /**
+   * 7. reset_active_flow: Cancela trámite en curso y vuelve a IDLE sin pausar el bot
+   */
+  public static async resetActiveFlow(
+    ctx: ToolExecutionContext
+  ): Promise<{ success: boolean; message: string }> {
+    await prisma.botSession.upsert({
+      where: { whatsappPhone: ctx.phone },
+      update: { currentFlow: 'IDLE', flowData: Prisma.DbNull, lastInteractionAt: new Date() },
+      create: { whatsappPhone: ctx.phone, currentFlow: 'IDLE' },
+    });
+    return {
+      success: true,
+      message: 'Trámite anterior cancelado. Ahora puede procesar su nueva solicitud.',
     };
   }
 }

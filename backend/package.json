@@ -9,7 +9,8 @@
     "start": "node dist/index.js",
     "db:push": "prisma db push",
     "db:generate": "prisma generate",
-    "db:seed": "tsx prisma/seed.ts"
+    "db:seed": "tsx prisma/seed.ts",
+    "qa:bot": "tsx src/scripts/qa_bot_redteam_runner.ts"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",
@@ -33,7 +34,10 @@
     "@types/express": "^5.0.0",
     "@types/jsonwebtoken": "^9.0.7",
     "@types/node": "^22.9.0",
+    "@types/supertest": "^7.2.1",
+    "fast-check": "^4.10.2",
     "prisma": "^5.22.0",
+    "supertest": "^7.3.2",
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
     "tsx": "^4.19.0",

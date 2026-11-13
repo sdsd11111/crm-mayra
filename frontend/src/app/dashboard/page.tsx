@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { AuthProvider, useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/AuthContext';
 import Navbar from '@/components/Navbar';
 import Link from 'next/link';
 import {
@@ -1255,9 +1255,5 @@ function DashboardView() {
 }
 
 export default function DashboardPage() {
-  return (
-    <AuthProvider>
-      <DashboardView />
-    </AuthProvider>
-  );
+  return <DashboardView />;
 }
