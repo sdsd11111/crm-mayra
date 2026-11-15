@@ -122,6 +122,7 @@ function ClientesView() {
   const [newClaveSut, setNewClaveSut] = useState('');
   const [newClaveSalar, setNewClaveSalar] = useState('');
   const [newClaveSupercias, setNewClaveSupercias] = useState('');
+  const [newClaveSercop, setNewClaveSercop] = useState('');
   // Obligaciones (Checks y valores en texto o número del Excel)
   const [newCheckDecla, setNewCheckDecla] = useState(true);
   const [newCheckIce, setNewCheckIce] = useState(false);
@@ -142,7 +143,10 @@ function ClientesView() {
   const [newIessDetalle, setNewIessDetalle] = useState('');
   const [newSuperciasDetalle, setNewSuperciasDetalle] = useState('');
   const [newPatenteDetalle, setNewPatenteDetalle] = useState('');
-  // Paso 3: Cobro (Solo Mayra)
+  // Paso 3: Cobro (Solo Mayra) - Soporta múltiples servicios dinámicos
+  const [billServices, setBillServices] = useState<Array<{ id: string; concepto: string; monto: string; freq?: string }>>([
+    { id: '1', concepto: 'Honorarios Contables Mensuales', monto: '0.00', freq: 'MENSUAL' },
+  ]);
   const [newAutoBillFreq, setNewAutoBillFreq] = useState<'NONE' | 'MENSUAL' | 'SEMESTRAL' | 'ANUAL'>('MENSUAL');
   const [newAutoBillAmount, setNewAutoBillAmount] = useState('0.00');
   const [newAppliesVat, setNewAppliesVat] = useState(false);
@@ -288,6 +292,15 @@ function ClientesView() {
 
       // 2. Si ingresó datos de Razón Social / RUC, registrar su empresa de una vez
       if (newRazonSocial && newRazonSocial.trim()) {
+        const totalAmount = billServices.reduce((acc, s) => acc + (Number(s.monto) || 0), 0);
+        const serializedServices = JSON.stringify(
+          billServices.map(s => ({
+            concepto: s.concepto.trim() || 'Servicio Contable',
+            monto: Number(s.monto) || 0,
+            freq: s.freq || 'MENSUAL',
+          }))
+        );
+
         const resTax = await fetch(`/api/clients/${clientOwnerId}/taxpayers`, {
           method: 'POST',
           headers: {
@@ -307,6 +320,7 @@ function ClientesView() {
             claveSut: newClaveSut || null,
             claveSalar: newClaveSalar || null,
             claveSupercias: newClaveSupercias || null,
+            claveSercop: newClaveSercop || null,
             checkDecla: newCheckDecla,
             checkIce: newCheckIce,
             checkAnexo: newCheckAnexo,
@@ -317,6 +331,7 @@ function ClientesView() {
             checkSupercias: newCheckSupercias,
             checkPatente: newCheckPatente,
             declaDetalle: newDeclaDetalle || null,
+            servicesBreakdown: serializedServices,
             iceDetalle: newIceDetalle || null,
             anexoDetalle: newAnexoDetalle || null,
             ivaDetalle: newIvaDetalle || null,
@@ -325,9 +340,9 @@ function ClientesView() {
             iessDetalle: newIessDetalle || null,
             superciasDetalle: newSuperciasDetalle || null,
             patenteDetalle: newPatenteDetalle || null,
-            autoBillFreq: newAutoBillFreq,
-            autoBillAmount: Number(newAutoBillAmount || 0),
-            appliesVat: newAppliesVat,
+            autoBillFreq: 'MENSUAL',
+            autoBillAmount: totalAmount,
+            appliesVat: false,
             devIvaPercent: Number(newDevIvaPercent || 10),
           }),
         });
@@ -426,6 +441,15 @@ function ClientesView() {
     if (!token || !selectedClientId) return;
     setSaving(true);
     try {
+      const totalAmount = billServices.reduce((acc, s) => acc + (Number(s.monto) || 0), 0);
+      const serializedServices = JSON.stringify(
+        billServices.map(s => ({
+          concepto: s.concepto.trim() || 'Servicio Contable',
+          monto: Number(s.monto) || 0,
+          freq: s.freq || 'MENSUAL',
+        }))
+      );
+
       const res = await fetch(`/api/clients/${selectedClientId}/taxpayers`, {
         method: 'POST',
         headers: {
@@ -441,8 +465,12 @@ function ClientesView() {
           claveIess: newClaveIess,
           claveSut: newClaveSut,
           claveFirma: newClaveFirma,
-          autoBillAmount: Number(newAutoBillAmount),
-          appliesVat: newAppliesVat,
+          claveSercop: newClaveSercop || null,
+          declaDetalle: newDeclaDetalle || null,
+          servicesBreakdown: serializedServices,
+          autoBillFreq: 'MENSUAL',
+          autoBillAmount: totalAmount,
+          appliesVat: false,
           devIvaPercent: Number(newDevIvaPercent),
           checkDecla: true,
           checkIva: true,
@@ -671,32 +699,32 @@ function ClientesView() {
                                     {t.razonSocial}
                                   </span>
                                   {semaforo?.estado === 'VERDE' && (
-                                    <span className="inline-flex items-center gap-0.5 px-1 py-0.2 rounded-full bg-emerald-100 text-emerald-800 text-[8px] font-bold shrink-0">
-                                      🟢 Al día
+                                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/60 text-[8px] font-semibold shrink-0">
+                                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Al día
                                     </span>
                                   )}
                                   {semaforo?.estado === 'ROJO' && (
-                                    <span className="inline-flex items-center gap-0.5 px-1 py-0.2 rounded-full bg-rose-100 text-rose-800 text-[8px] font-bold shrink-0">
-                                      🔴 Vence
+                                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200/60 text-[8px] font-semibold shrink-0">
+                                      <span className="w-1.5 h-1.5 rounded-full bg-rose-500" /> Vence
                                     </span>
                                   )}
                                   {(!semaforo || semaforo?.estado === 'AMARILLO') && (
-                                    <span className="inline-flex items-center gap-0.5 px-1 py-0.2 rounded-full bg-amber-100 text-amber-800 text-[8px] font-bold shrink-0">
-                                      🟡 Pendiente
+                                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200/60 text-[8px] font-semibold shrink-0">
+                                      <span className="w-1.5 h-1.5 rounded-full bg-amber-500" /> Pendiente
                                     </span>
                                   )}
                                 </div>
 
                                 {/* Línea 2: RUC + Fecha Decla */}
-                                <div className="flex items-center justify-between text-[10px] text-gray-500 font-mono">
-                                  <span className="truncate max-w-[120px]">{t.ruc || 'Sin RUC'}</span>
-                                  <span className="px-1 py-0.2 rounded bg-blue-50 text-[#166BA3] font-semibold text-[9px]">
+                                <div className="flex items-center justify-between text-[10px] text-slate-500 font-mono">
+                                  <span className="truncate max-w-[120px] font-semibold text-slate-700">{t.ruc || 'Sin RUC'}</span>
+                                  <span className="px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 font-medium text-[9px] border border-slate-200/60">
                                     {t.fechaDecla || '10C/MES'}
                                   </span>
                                 </div>
 
                                 {/* Línea 3: Claves Rápidas en 1 clic */}
-                                <div className="flex flex-wrap items-center gap-1 pt-0.5 border-t border-gray-200/50">
+                                <div className="flex flex-wrap items-center gap-1 pt-1 border-t border-slate-200/60">
                                   {t.claveSri && (
                                     <button
                                       type="button"
@@ -704,12 +732,12 @@ function ClientesView() {
                                         e.stopPropagation();
                                         handleCopy(t.claveSri!, 'SRI');
                                       }}
-                                      className="inline-flex items-center gap-0.5 px-1.5 py-0.2 bg-white border border-gray-200 rounded hover:border-[#166BA3] hover:text-[#166BA3] font-mono text-[9px]"
+                                      className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-white border border-slate-200 rounded hover:border-[#166BA3] hover:text-[#166BA3] font-mono text-[9px] text-slate-600 transition-colors shadow-2xs"
                                       title="Copiar Clave SRI"
                                     >
-                                      <Key size={9} className="text-amber-500" />
+                                      <Key size={9} className="text-slate-400" />
                                       <span>SRI</span>
-                                      <Copy size={8} className="text-gray-400" />
+                                      <Copy size={8} className="text-slate-400" />
                                     </button>
                                   )}
                                   {t.claveIess && (
@@ -719,12 +747,12 @@ function ClientesView() {
                                         e.stopPropagation();
                                         handleCopy(t.claveIess!, 'IESS');
                                       }}
-                                      className="inline-flex items-center gap-0.5 px-1.5 py-0.2 bg-white border border-gray-200 rounded hover:border-[#166BA3] hover:text-[#166BA3] font-mono text-[9px]"
+                                      className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-white border border-slate-200 rounded hover:border-[#166BA3] hover:text-[#166BA3] font-mono text-[9px] text-slate-600 transition-colors shadow-2xs"
                                       title="Copiar Clave IESS"
                                     >
-                                      <Key size={9} className="text-emerald-500" />
+                                      <Key size={9} className="text-slate-400" />
                                       <span>IESS</span>
-                                      <Copy size={8} className="text-gray-400" />
+                                      <Copy size={8} className="text-slate-400" />
                                     </button>
                                   )}
                                   {t.claveFirma && (
@@ -734,27 +762,27 @@ function ClientesView() {
                                         e.stopPropagation();
                                         handleCopy(t.claveFirma!, 'Firma');
                                       }}
-                                      className="inline-flex items-center gap-0.5 px-1.5 py-0.2 bg-white border border-gray-200 rounded hover:border-[#166BA3] hover:text-[#166BA3] font-mono text-[9px]"
+                                      className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-white border border-slate-200 rounded hover:border-[#166BA3] hover:text-[#166BA3] font-mono text-[9px] text-slate-600 transition-colors shadow-2xs"
                                       title="Copiar Clave de Firma"
                                     >
-                                      <ShieldCheck size={9} className="text-blue-500" />
+                                      <ShieldCheck size={9} className="text-slate-400" />
                                       <span>Firma</span>
-                                      <Copy size={8} className="text-gray-400" />
+                                      <Copy size={8} className="text-slate-400" />
                                     </button>
                                   )}
                                   {!t.claveSri && !t.claveIess && !t.claveFirma && (
-                                    <span className="text-gray-300 text-[9px]">Sin claves</span>
+                                    <span className="text-slate-400 text-[9px]">Sin claves</span>
                                   )}
                                 </div>
 
-                                {/* Línea 4: Badges de Obligaciones */}
-                                <div className="flex flex-wrap items-center gap-1 text-[8px] pt-0.5">
-                                  {t.checkDecla && <span className="px-1 py-0.2 rounded bg-emerald-50 text-emerald-700 font-bold">DECLA</span>}
-                                  {t.checkIva && <span className="px-1 py-0.2 rounded bg-blue-50 text-blue-700 font-bold">IVA</span>}
-                                  {t.checkAnexo && <span className="px-1 py-0.2 rounded bg-purple-50 text-purple-700 font-bold">ANX</span>}
-                                  {t.checkIess && <span className="px-1 py-0.2 rounded bg-amber-50 text-amber-700 font-bold">IESS</span>}
-                                  {t.checkSut && <span className="px-1 py-0.2 rounded bg-indigo-50 text-indigo-700 font-bold">SUT</span>}
-                                  {t.checkSupercias && <span className="px-1 py-0.2 rounded bg-gray-100 text-gray-700 font-bold">SUP</span>}
+                                {/* Línea 4: Badges de Obligaciones (Paleta limpia y uniforme) */}
+                                <div className="flex flex-wrap items-center gap-1 text-[8px] pt-1">
+                                  {t.checkDecla && <span className="px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 font-semibold border border-slate-200/60">DECLA</span>}
+                                  {t.checkIva && <span className="px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 font-semibold border border-slate-200/60">IVA</span>}
+                                  {t.checkAnexo && <span className="px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 font-semibold border border-slate-200/60">ANX</span>}
+                                  {t.checkIess && <span className="px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 font-semibold border border-slate-200/60">IESS</span>}
+                                  {t.checkSut && <span className="px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 font-semibold border border-slate-200/60">SUT</span>}
+                                  {t.checkSupercias && <span className="px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 font-semibold border border-slate-200/60">SUP</span>}
                                 </div>
                               </div>
                             );
@@ -956,9 +984,6 @@ function ClientesView() {
                                 ) : (
                                   <span className="text-xs font-semibold text-[#1E2A3C]">
                                     ${Number(t.autoBillAmount || 0).toFixed(2)}
-                                    {t.appliesVat && (
-                                      <span className="text-[10px] text-gray-400 ml-1">+IVA</span>
-                                    )}
                                   </span>
                                 )}
                               </td>
@@ -1266,6 +1291,16 @@ function ClientesView() {
                           className="w-full px-2.5 py-1.5 rounded-lg border border-gray-200 bg-white text-xs font-mono"
                         />
                       </div>
+                      <div>
+                        <label className="text-[10px] text-gray-500 font-semibold block mb-0.5">Clave SERCOP</label>
+                        <input
+                          type="text"
+                          value={newClaveSercop}
+                          onChange={(e) => setNewClaveSercop(e.target.value)}
+                          placeholder="SERCOP..."
+                          className="w-full px-2.5 py-1.5 rounded-lg border border-gray-200 bg-white text-xs font-mono"
+                        />
+                      </div>
                     </div>
                   </div>
 
@@ -1315,73 +1350,130 @@ function ClientesView() {
                   </div>
                 </div>
 
-                {/* ═══════════════ PASO 3: CUÁNTO Y CÓMO SE COBRA (SOLO MAYRA) ═══════════════ */}
+                {/* ═══════════════ PASO 3: CUÁNTO Y CÓMO SE COBRA ═══════════════ */}
                 {!isAssistant && (
-                  <div className="bg-amber-50/70 border border-amber-200/80 rounded-2xl p-4 space-y-3">
-                    <span className="text-xs font-bold text-amber-900 uppercase tracking-wide block">
-                      🟡 PASO 3: Regla de Cobro de Cartera (Solo lo ve Mayra)
-                    </span>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-3">
+                    <div className="flex items-center justify-between">
                       <div>
-                        <label className="block text-xs font-semibold text-gray-700 mb-1">
-                          Cobro Automático por Cron
-                        </label>
-                        <select
-                          value={newAutoBillFreq}
-                          onChange={(e) => setNewAutoBillFreq(e.target.value as any)}
-                          className="w-full px-3 py-2 rounded-xl border border-gray-200 text-xs bg-white focus:ring-2 focus:ring-[#166BA3]/40 focus:outline-none"
-                        >
-                          <option value="MENSUAL">Mensual (Día 1 de cada mes)</option>
-                          <option value="SEMESTRAL">Semestral (Enero y Julio)</option>
-                          <option value="ANUAL">Anual (Marzo / Abril)</option>
-                          <option value="NONE">Sin cobro automático</option>
-                        </select>
+                        <span className="text-xs font-bold text-[#1E2A3C] uppercase tracking-wide block">
+                          Paso 3: Regla de Cobro de Cartera
+                        </span>
+                        <span className="text-[11px] text-gray-500">
+                          Agrega los servicios y honorarios mensuales a cobrar
+                        </span>
                       </div>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setBillServices((prev) => [
+                            ...prev,
+                            { id: Date.now().toString(), concepto: '', monto: '0.00' },
+                          ])
+                        }
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#166BA3] text-white text-xs font-semibold hover:bg-[#135887] shadow-xs active:scale-95 transition-all"
+                      >
+                        <Plus size={13} /> Agregar Servicio
+                      </button>
+                    </div>
 
-                      <div>
+                    <div className="space-y-2">
+                      {billServices.map((service, index) => (
+                        <div key={service.id} className="flex items-center gap-2 bg-white p-2.5 rounded-xl border border-gray-200">
+                          <div className="flex-1">
+                            <label className="block text-[10px] font-semibold text-gray-500 mb-0.5">
+                              Servicio #{index + 1}
+                            </label>
+                            <input
+                              type="text"
+                              value={service.concepto}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                setBillServices((prev) =>
+                                  prev.map((s) => (s.id === service.id ? { ...s, concepto: val } : s))
+                                );
+                              }}
+                              placeholder="Ej: Honorarios Contables, Declaración SRI..."
+                              className="w-full px-2.5 py-1.5 rounded-lg border border-gray-200 text-xs text-[#1E2A3C] focus:ring-1 focus:ring-[#166BA3]"
+                            />
+                          </div>
+
+                          <div className="w-28">
+                            <label className="block text-[10px] font-semibold text-gray-500 mb-0.5">
+                              Frecuencia
+                            </label>
+                            <select
+                              value={service.freq || 'MENSUAL'}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                setBillServices((prev) =>
+                                  prev.map((s) => (s.id === service.id ? { ...s, freq: val } : s))
+                                );
+                              }}
+                              className="w-full px-2 py-1.5 rounded-lg border border-gray-200 text-xs text-[#1E2A3C] bg-white font-medium focus:ring-1 focus:ring-[#166BA3]"
+                            >
+                              <option value="MENSUAL">Mensual</option>
+                              <option value="SEMESTRAL">Semestral</option>
+                              <option value="ANUAL">Anual</option>
+                            </select>
+                          </div>
+
+                          <div className="w-24">
+                            <label className="block text-[10px] font-semibold text-gray-500 mb-0.5">
+                              Honorario ($)
+                            </label>
+                            <input
+                              type="number"
+                              step="0.01"
+                              value={service.monto}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                setBillServices((prev) =>
+                                  prev.map((s) => (s.id === service.id ? { ...s, monto: val } : s))
+                                );
+                              }}
+                              placeholder="0.00"
+                              className="w-full px-2 py-1.5 rounded-lg border border-gray-200 text-xs font-bold text-[#1E2A3C] focus:ring-1 focus:ring-[#166BA3]"
+                            />
+                          </div>
+
+                          {billServices.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => setBillServices((prev) => prev.filter((s) => s.id !== service.id))}
+                              className="p-1.5 text-gray-400 hover:text-rose-500 rounded-lg hover:bg-rose-50 mt-4 transition-colors"
+                              title="Eliminar servicio"
+                            >
+                              <X size={15} />
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="pt-2 border-t border-slate-200/80 flex items-center justify-between text-xs">
+                      <span className="text-gray-500 font-medium">
+                        Total mensual de la cartera:
+                      </span>
+                      <span className="font-mono font-extrabold text-[#1E2A3C] text-sm">
+                        ${billServices.reduce((acc, s) => acc + (Number(s.monto) || 0), 0).toFixed(2)}
+                      </span>
+                    </div>
+
+                    {newRegimen === 'DEVOLUCION_IVA_3RA_EDAD' && (
+                      <div className="pt-2 border-t border-slate-200/80">
                         <label className="block text-xs font-semibold text-gray-700 mb-1">
-                          Honorario Mensual ($)
+                          % Comisión de Devolución IVA (3ra Edad)
                         </label>
                         <input
                           type="number"
                           step="0.01"
-                          value={newAutoBillAmount}
-                          onChange={(e) => setNewAutoBillAmount(e.target.value)}
-                          placeholder="69.00"
-                          className="w-full px-3 py-2 rounded-xl border border-gray-200 text-xs bg-white focus:ring-2 focus:ring-[#166BA3]/40 focus:outline-none font-bold text-[#1E2A3C]"
+                          value={newDevIvaPercent}
+                          onChange={(e) => setNewDevIvaPercent(e.target.value)}
+                          placeholder="10.00"
+                          className="w-full sm:w-48 px-3 py-2 rounded-xl border border-gray-200 text-xs bg-white font-bold"
                         />
                       </div>
-
-                      <div className="flex items-center gap-2 pt-5">
-                        <input
-                          type="checkbox"
-                          id="vatCheckModal"
-                          checked={newAppliesVat}
-                          onChange={(e) => setNewAppliesVat(e.target.checked)}
-                          className="rounded text-[#166BA3]"
-                        />
-                        <label htmlFor="vatCheckModal" className="text-xs font-semibold text-gray-700">
-                          + IVA 15% automático
-                        </label>
-                      </div>
-
-                      {newRegimen === 'DEVOLUCION_IVA_3RA_EDAD' && (
-                        <div className="sm:col-span-3 pt-2">
-                          <label className="block text-xs font-semibold text-gray-700 mb-1">
-                            % Comisión de Devolución IVA (3ra Edad)
-                          </label>
-                          <input
-                            type="number"
-                            step="0.01"
-                            value={newDevIvaPercent}
-                            onChange={(e) => setNewDevIvaPercent(e.target.value)}
-                            placeholder="10.00"
-                            className="w-full sm:w-48 px-3 py-2 rounded-xl border border-gray-200 text-xs bg-white font-bold"
-                          />
-                        </div>
-                      )}
-                    </div>
+                    )}
                   </div>
                 )}
 
@@ -1482,11 +1574,51 @@ function ClientesView() {
                   </div>
                 </div>
 
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-600 mb-1">
+                      Clave SERCOP
+                    </label>
+                    <input
+                      type="text"
+                      value={newClaveSercop}
+                      onChange={(e) => setNewClaveSercop(e.target.value)}
+                      placeholder="SERCOP..."
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-xs focus:ring-2 focus:ring-[#166BA3]/40 focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-600 mb-1">
+                      Firma Caduca El
+                    </label>
+                    <input
+                      type="date"
+                      value={newFirmaExpira}
+                      onChange={(e) => setNewFirmaExpira(e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-xs focus:ring-2 focus:ring-[#166BA3]/40 focus:outline-none"
+                    />
+                  </div>
+                </div>
+
                 {!isAssistant && (
                   <div className="pt-2 border-t border-gray-100 space-y-3">
-                    <span className="text-[11px] font-bold text-[#166BA3] block">
-                      Configuración de Cartera (Solo Mayra)
-                    </span>
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] font-bold text-[#166BA3] block">
+                        Configuración de Cartera
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setBillServices((prev) => [
+                            ...prev,
+                            { id: Date.now().toString(), concepto: '', monto: '0.00' },
+                          ])
+                        }
+                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-[#166BA3] text-white text-[11px] font-semibold hover:bg-[#135887]"
+                      >
+                        <Plus size={12} /> Agregar Servicio
+                      </button>
+                    </div>
 
                     {newRegimen === 'DEVOLUCION_IVA_3RA_EDAD' ? (
                       <div>
@@ -1502,29 +1634,81 @@ function ClientesView() {
                         />
                       </div>
                     ) : (
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <label className="block text-xs font-semibold text-gray-600 mb-1">
-                            Monto Cobro ($)
-                          </label>
-                          <input
-                            type="number"
-                            step="0.01"
-                            value={newAutoBillAmount}
-                            onChange={(e) => setNewAutoBillAmount(e.target.value)}
-                            className="w-full px-3.5 py-2 rounded-xl border border-gray-200 text-xs"
-                          />
-                        </div>
-                        <div className="flex items-center gap-2 pt-4">
-                          <input
-                            type="checkbox"
-                            id="vatCheck"
-                            checked={newAppliesVat}
-                            onChange={(e) => setNewAppliesVat(e.target.checked)}
-                          />
-                          <label htmlFor="vatCheck" className="text-xs text-gray-700">
-                            + IVA 15%
-                          </label>
+                      <div className="space-y-2">
+                        {billServices.map((service, index) => (
+                          <div key={service.id} className="flex items-center gap-2 bg-slate-50 p-2 rounded-xl border border-gray-200">
+                            <div className="flex-1">
+                              <label className="block text-[10px] font-semibold text-gray-500 mb-0.5">
+                                Servicio #{index + 1}
+                              </label>
+                              <input
+                                type="text"
+                                value={service.concepto}
+                                onChange={(e) => {
+                                  const val = e.target.value;
+                                  setBillServices((prev) =>
+                                    prev.map((s) => (s.id === service.id ? { ...s, concepto: val } : s))
+                                  );
+                                }}
+                                placeholder="Ej: Honorarios Contables..."
+                                className="w-full px-2.5 py-1 rounded-lg border border-gray-200 text-xs text-[#1E2A3C] bg-white"
+                              />
+                            </div>
+                            <div className="w-28">
+                              <label className="block text-[10px] font-semibold text-gray-500 mb-0.5">
+                                Frecuencia
+                              </label>
+                              <select
+                                value={service.freq || 'MENSUAL'}
+                                onChange={(e) => {
+                                  const val = e.target.value;
+                                  setBillServices((prev) =>
+                                    prev.map((s) => (s.id === service.id ? { ...s, freq: val } : s))
+                                  );
+                                }}
+                                className="w-full px-2 py-1 rounded-lg border border-gray-200 text-xs text-[#1E2A3C] bg-white font-medium focus:ring-1 focus:ring-[#166BA3]"
+                              >
+                                <option value="MENSUAL">Mensual</option>
+                                <option value="SEMESTRAL">Semestral</option>
+                                <option value="ANUAL">Anual</option>
+                              </select>
+                            </div>
+
+                            <div className="w-24">
+                              <label className="block text-[10px] font-semibold text-gray-500 mb-0.5">
+                                Honorario ($)
+                              </label>
+                              <input
+                                type="number"
+                                step="0.01"
+                                value={service.monto}
+                                onChange={(e) => {
+                                  const val = e.target.value;
+                                  setBillServices((prev) =>
+                                    prev.map((s) => (s.id === service.id ? { ...s, monto: val } : s))
+                                  );
+                                }}
+                                placeholder="0.00"
+                                className="w-full px-2 py-1 rounded-lg border border-gray-200 text-xs font-bold text-[#1E2A3C] bg-white"
+                              />
+                            </div>
+                            {billServices.length > 1 && (
+                              <button
+                                type="button"
+                                onClick={() => setBillServices((prev) => prev.filter((s) => s.id !== service.id))}
+                                className="p-1 text-gray-400 hover:text-rose-500 rounded mt-3"
+                              >
+                                <X size={14} />
+                              </button>
+                            )}
+                          </div>
+                        ))}
+
+                        <div className="pt-1 flex items-center justify-between text-xs">
+                          <span className="text-gray-500 font-medium">Total mensual cartera:</span>
+                          <span className="font-mono font-extrabold text-[#1E2A3C]">
+                            ${billServices.reduce((acc, s) => acc + (Number(s.monto) || 0), 0).toFixed(2)}
+                          </span>
                         </div>
                       </div>
                     )}

@@ -160,6 +160,7 @@ function DashboardView() {
   // Bloque Tareas
   const [tasks, setTasks] = useState<TaskItem[]>([]);
   const [tasksLoading, setTasksLoading] = useState(true);
+  const [isTasksModalOpen, setIsTasksModalOpen] = useState(false);
 
   // Bloque Atención de Mayra
   const [mayraAttention, setMayraAttention] = useState<MayraAttention | null>(null);
@@ -490,50 +491,48 @@ function DashboardView() {
 
         {/* BANDA DE IMPACTO SUPERIOR: RECAUDACIÓN (Solo ADMIN) Y SEMÁFORO SRI */}
         <div className={`grid grid-cols-1 ${!isAssistant ? 'xl:grid-cols-12' : 'xl:grid-cols-2'} gap-5 items-stretch`}>
-          {/* Tarjeta de Recaudación del Mes — total arriba, 4 cuentas abajo dentro de la card */}
+          {/* Tarjeta de Recaudación del Mes — Clickeable para abrir desglose de cuentas en popup */}
           {!isAssistant && (
             <div className="xl:col-span-4 flex flex-col">
-
               {summaryLoading ? (
                 <KpiSkeleton />
               ) : (
-                <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex flex-col h-full gap-4">
-                  {/* Cabecera con total */}
-                  <div>
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                <div
+                  onClick={() => setIsBankBreakdownOpen(true)}
+                  className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm flex flex-col justify-between h-full cursor-pointer hover:border-[#166BA3]/50 hover:shadow-md transition-all group relative overflow-hidden"
+                  title="Haz clic para ver el desglose por banco"
+                >
+                  {/* Cabecera */}
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <span className="text-xs font-bold uppercase tracking-wider text-slate-500 block">
                         Recaudado (Mes)
                       </span>
-                      <TrendingUp size={16} className="text-[#166BA3]" />
+                      <span className="text-[11px] text-slate-400">
+                        Cuentas conciliadas
+                      </span>
                     </div>
-                    <div className="text-4xl font-extrabold font-mono tracking-tight text-[#1E2A3C]">
-                      +${summary?.totalRecaudadoMes.toFixed(2) ?? '0.00'}
+                    <div className="w-10 h-10 rounded-xl bg-[#166BA3]/10 text-[#166BA3] flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <TrendingUp size={20} />
                     </div>
-                    <span className="text-[10px] text-slate-500 font-semibold block mt-0.5">
-                      Cuentas conciliadas
-                    </span>
                   </div>
 
-                  {/* Divisor */}
-                  <div className="border-t border-slate-100" />
+                  {/* Valor Principal centrado ocupando el cuerpo de la card */}
+                  <div className="flex-1 flex flex-col items-center justify-center py-6 text-center">
+                    <div className="text-5xl sm:text-6xl font-extrabold font-mono tracking-tight text-[#1E2A3C] group-hover:text-[#166BA3] transition-colors leading-none">
+                      +${summary?.totalRecaudadoMes.toFixed(2) ?? '0.00'}
+                    </div>
+                    <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold border border-emerald-100">
+                      <CheckCircle size={13} /> Conciliado al día
+                    </div>
+                  </div>
 
-                  {/* 4 cuentas siempre visibles, llenando la card */}
-                  <div className="grid grid-cols-2 gap-2.5 flex-1">
-                    {[
-                      { label: 'Pichincha', key: 'pichincha' as const, icon: <Landmark size={14} className="text-[#166BA3]" /> },
-                      { label: 'JEP',       key: 'jep'       as const, icon: <Landmark size={14} className="text-[#166BA3]" /> },
-                      { label: 'Loja',      key: 'loja'      as const, icon: <Landmark size={14} className="text-[#166BA3]" /> },
-                      { label: 'Efectivo',  key: 'efectivo'  as const, icon: <Banknote  size={14} className="text-slate-500" /> },
-                    ].map(({ label, key, icon }) => (
-                      <div key={key} className="bg-slate-50 border border-slate-200 rounded-xl p-3 flex flex-col justify-between">
-                        <span className="flex items-center gap-1.5 text-[11px] text-gray-500 font-medium">
-                          {icon} {label}
-                        </span>
-                        <span className="text-xl font-mono font-bold text-[#1E2A3C] mt-2">
-                          ${summary?.banks[key].toFixed(2) ?? '0.00'}
-                        </span>
-                      </div>
-                    ))}
+                  {/* Footer */}
+                  <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-[#166BA3] font-semibold">
+                    <span className="flex items-center gap-1 group-hover:underline">
+                      Ver desglose por banco (4 cuentas)
+                    </span>
+                    <ChevronRight size={15} className="group-hover:translate-x-1 transition-transform" />
                   </div>
                 </div>
               )}
@@ -686,423 +685,323 @@ function DashboardView() {
               </div>
             )}
           </div>
+        </div>
 
-          {/* Tareas Pendientes — para ASISTENTE van aquí dentro del mismo grid xl:grid-cols-2 */}
-          {isAssistant && (
-            <div className="bg-white border border-slate-200 shadow-sm rounded-2xl p-5 sm:p-6 flex flex-col">
-              <div className="mb-4">
-                <h2 className="text-base font-bold text-[#1E2A3C] flex items-center gap-2">
-                  <CheckSquare className="text-[#166BA3]" size={18} />
-                  Tareas Pendientes
-                </h2>
-                <p className="text-xs text-gray-400">Tus tareas asignadas</p>
+        {/* 4 CARDS ALINEADAS EN UNA SOLA FILA:
+            1. Tareas Pendientes (máx 5 + popup modal al hacer clic)
+            2. Top Deudores (solo visible para Mayra/Cobrador)
+            3. Directorio Rápido
+            4. Firmas p12 y Accesos
+        */}
+        <div className={`grid grid-cols-1 md:grid-cols-2 ${isAssistant ? 'xl:grid-cols-3' : 'xl:grid-cols-4'} gap-5 items-stretch`}>
+          {/* CARD 1: TAREAS PENDIENTES */}
+          <div className="bg-white border border-slate-200 shadow-sm rounded-2xl p-5 flex flex-col justify-between h-[390px]">
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg bg-[#166BA3]/10 text-[#166BA3] flex items-center justify-center">
+                    <CheckSquare size={17} />
+                  </div>
+                  <div>
+                    <h2 className="text-sm font-bold text-[#1E2A3C] leading-none">Tareas Pendientes</h2>
+                    <span className="text-[10px] text-gray-400">
+                      {isAdmin ? 'Tus pendientes' : 'Asignadas a ti'}
+                    </span>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsTasksModalOpen(true)}
+                  className="text-[11px] font-bold text-[#166BA3] hover:underline flex items-center gap-0.5 bg-sky-50 px-2 py-0.5 rounded-lg border border-sky-100"
+                >
+                  Ver todas <ChevronRight size={12} />
+                </button>
               </div>
+
               {tasksLoading ? (
-                <div className="text-xs text-gray-400 py-4 text-center">Cargando tareas...</div>
+                <div className="space-y-2 py-4">
+                  {[1, 2, 3].map((n) => (
+                    <div key={n} className="h-10 bg-slate-100 animate-pulse rounded-lg" />
+                  ))}
+                </div>
               ) : pendingTasks.length === 0 ? (
-                <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center justify-between text-xs text-slate-600 font-medium">
-                  <span className="flex items-center gap-2">
-                    <CheckCheck size={15} className="text-[#166BA3]" /> Sin tareas pendientes por el momento.
-                  </span>
+                <div className="py-8 text-center text-xs text-gray-400 flex flex-col items-center justify-center gap-1.5">
+                  <CheckCheck size={24} className="text-[#166BA3]" />
+                  <span>Sin tareas pendientes.</span>
+                  <Link href="/configuracion?tab=TAREAS&action=new-task" className="text-[11px] text-[#166BA3] underline font-semibold mt-1">
+                    + Crear tarea
+                  </Link>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 gap-3 flex-1">
-                  {pendingTasks.slice(0, 4).map((t) => (
+                <div className="space-y-1.5 overflow-hidden">
+                  {pendingTasks.slice(0, 5).map((t) => (
                     <div
                       key={t.id}
-                      className="bg-slate-50/70 border border-slate-200/60 rounded-xl p-3.5 flex flex-col justify-between"
+                      className="p-2 rounded-xl bg-slate-50 border border-slate-200/70 flex items-center justify-between gap-2 text-xs hover:bg-slate-100/70 transition-colors"
                     >
-                      <div>
-                        <div className="flex items-center justify-between gap-1 mb-1.5">
-                          <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-1.5 mb-0.5">
+                          <span className={`text-[8px] font-extrabold px-1.5 py-0.2 rounded ${
                             t.priority === 'URGENTE' ? 'bg-rose-100 text-rose-700' :
                             t.priority === 'ALTA' ? 'bg-amber-100 text-amber-800' :
-                            'bg-slate-200/70 text-slate-700'
+                            'bg-slate-200 text-slate-700'
                           }`}>
                             {t.priority}
                           </span>
-                          {t.dueDate && (
-                            <span className="text-[10px] text-gray-400">
-                              {new Date(t.dueDate).toLocaleDateString('es-EC')}
-                            </span>
-                          )}
-                        </div>
-                        <h3 className="text-xs font-bold text-[#1E2A3C] block truncate">{t.title}</h3>
-                        {t.description && (
-                          <p className="text-[11px] text-gray-500 line-clamp-1 mt-0.5">{t.description}</p>
-                        )}
-                      </div>
-                      <div className="mt-3 pt-2 border-t border-slate-200/50 flex items-center justify-between">
-                        <span className="text-[10px] text-gray-400">
-                          Asignado: <strong className="text-slate-600">{t.assignedTo?.fullName || 'Mayra'}</strong>
-                        </span>
-                        <button
-                          onClick={() => handleToggleTask(t.id, t.status)}
-                          className="text-[10px] font-semibold text-[#166BA3] hover:text-emerald-700 flex items-center gap-1"
-                        >
-                          <CheckCheck size={11} /> Listo
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* BLOQUE: TAREAS + ATENCIÓN DE MAYRA — solo para ADMIN (lado a lado) */}
-        {!isAssistant && (
-        <div className={`grid grid-cols-1 xl:grid-cols-2 gap-5 items-start`}>
-          {/* Tareas Pendientes */}
-          <div className="bg-white border border-slate-200 shadow-sm rounded-2xl p-5 sm:p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h2 className="text-base font-bold text-[#1E2A3C] flex items-center gap-2">
-                  <CheckSquare className="text-[#166BA3]" size={18} />
-                  Tareas Pendientes
-                </h2>
-                <p className="text-xs text-gray-400">
-                  {isAdmin ? 'Tus tareas personales pendientes' : 'Tus tareas asignadas'}
-                </p>
-              </div>
-
-            </div>
-
-            {tasksLoading ? (
-              <div className="text-xs text-gray-400 py-4 text-center">Cargando tareas...</div>
-            ) : pendingTasks.length === 0 ? (
-              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center justify-between text-xs text-slate-600 font-medium">
-                <span className="flex items-center gap-2">
-                  <CheckCheck size={15} className="text-[#166BA3]" /> Sin tareas pendientes por el momento.
-                </span>
-                <Link href="/configuracion?tab=TAREAS&action=new-task" className="underline font-semibold text-[#166BA3]">
-                  + Crear Tarea
-                </Link>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {pendingTasks.slice(0, 4).map((t) => (
-                  <div
-                    key={t.id}
-                    className="bg-slate-50/70 border border-slate-200/60 rounded-xl p-3.5 flex flex-col justify-between"
-                  >
-                    <div>
-                      <div className="flex items-center justify-between gap-1 mb-1.5">
-                        <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${
-                          t.priority === 'URGENTE' ? 'bg-rose-100 text-rose-700' :
-                          t.priority === 'ALTA' ? 'bg-amber-100 text-amber-800' :
-                          'bg-slate-200/70 text-slate-700'
-                        }`}>
-                          {t.priority}
-                        </span>
-                        {t.dueDate && (
-                          <span className="text-[10px] text-gray-400">
-                            {new Date(t.dueDate).toLocaleDateString('es-EC')}
+                          <span className="text-[10px] text-gray-400 truncate">
+                            {t.assignedTo?.fullName?.split(' ')[0] || 'Mayra'}
                           </span>
-                        )}
+                        </div>
+                        <p className="text-xs font-semibold text-[#1E2A3C] truncate leading-tight">{t.title}</p>
                       </div>
-                      <h3 className="text-xs font-bold text-[#1E2A3C] block truncate">{t.title}</h3>
-                      {t.description && (
-                        <p className="text-[11px] text-gray-500 line-clamp-1 mt-0.5">{t.description}</p>
-                      )}
-                    </div>
-
-                    <div className="mt-3 pt-2 border-t border-slate-200/50 flex items-center justify-between">
-                      <span className="text-[10px] text-gray-400">
-                        Asignado: <strong className="text-slate-600">{t.assignedTo?.fullName || 'Mayra'}</strong>
-                      </span>
                       <button
                         onClick={() => handleToggleTask(t.id, t.status)}
-                        className="text-[10px] font-semibold text-[#166BA3] hover:text-emerald-700 flex items-center gap-1"
+                        className="text-[10px] shrink-0 font-semibold text-slate-500 hover:text-emerald-700 p-1 rounded-lg hover:bg-emerald-50"
+                        title="Marcar completada"
                       >
-                        <CheckCheck size={11} /> Listo
+                        <CheckCheck size={14} />
                       </button>
                     </div>
-                  </div>
-                ))}
-              </div>
-            )}
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px]">
+              <span className="text-gray-400">
+                Total: <strong className="text-slate-700">{pendingTasks.length} pendientes</strong>
+              </span>
+              {pendingTasks.length > 5 && (
+                <button
+                  type="button"
+                  onClick={() => setIsTasksModalOpen(true)}
+                  className="text-[11px] font-bold text-[#166BA3] hover:underline"
+                >
+                  +{pendingTasks.length - 5} más...
+                </button>
+              )}
+            </div>
           </div>
 
-          {/* Atención de Mayra Hoy (solo ADMIN, inline con Tareas) */}
-          {isAdmin && (
-            <div className="bg-white border border-slate-200 shadow-sm rounded-2xl p-5 sm:p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-base font-bold text-[#1E2A3C] flex items-center gap-2">
-                  <ShieldAlert className="text-[#166BA3]" size={18} />
-                  Atención de Mayra Hoy
-                </h2>
-              </div>
-
-              {attentionLoading ? (
-                <div className="animate-pulse h-16 bg-slate-100 rounded-xl" />
-              ) : !mayraAttention ? (
-                <p className="text-xs text-gray-400">Sin alertas para hoy.</p>
-              ) : (
-                <div className="space-y-4">
-                  <div>
-                    {mayraAttention.promises.length === 0 ? (
-                      <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center gap-2 text-xs text-slate-600 font-medium">
-                        <CheckCheck size={15} className="text-[#166BA3]" /> Sin promesas de pago pendientes.
-                      </div>
-                    ) : (
-                      <div className="space-y-2">
-                        <p className="text-[11px] font-semibold text-rose-700 flex items-center gap-1 mb-2">
-                          <Bell size={12} /> Prometieron pagar hoy:
-                        </p>
-                        {mayraAttention.promises.map((p) => (
-                          <div key={p.id} className="flex items-center justify-between bg-slate-50 border border-slate-200/80 rounded-xl px-4 py-3 gap-3">
-                            <div className="min-w-0">
-                              <span className="text-xs font-bold text-[#1E2A3C] block truncate">{p.clientName}</span>
-                              <span className="text-[10px] text-slate-500">
-                                ${p.amount.toFixed(2)} · {new Date(p.promisedDate).toLocaleDateString('es-EC')}
-                                {p.isToday && <strong className="ml-1 text-rose-600">— HOY</strong>}
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-1.5 shrink-0">
-                              <button
-                                onClick={() => handleMarkPromise(p.id, 'CUMPLIDA')}
-                                className="text-[10px] font-semibold px-2 py-1 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200"
-                              >
-                                Pagó
-                              </button>
-                              <button
-                                onClick={() => handleMarkPromise(p.id, 'CANCELADA')}
-                                className="text-[10px] font-semibold px-2 py-1 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200"
-                              >
-                                No pagó
-                              </button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <Link href="/whatsapp" className="flex items-center gap-3 p-4 rounded-xl bg-slate-50 border border-slate-200/80 hover:border-[#166BA3]/40 transition-colors">
-                      <div className="w-9 h-9 rounded-xl bg-[#166BA3]/10 text-[#166BA3] flex items-center justify-center shrink-0">
-                        <MessageSquare size={16} />
-                      </div>
-                      <div>
-                        <span className="text-xl font-extrabold font-mono text-[#1E2A3C]">
-                          {mayraAttention.gerencialTicketsCount}
-                        </span>
-                        <span className="text-[11px] text-gray-500 block">asesorías en espera</span>
-                      </div>
-                    </Link>
-
-                    <div className="flex items-center gap-3 p-4 rounded-xl bg-slate-50 border border-slate-200/80">
-                      <div className="w-9 h-9 rounded-xl bg-slate-100 text-slate-500 flex items-center justify-center shrink-0">
-                        <FileText size={16} />
-                      </div>
-                      <div>
-                        <span className="text-xl font-extrabold font-mono text-[#1E2A3C]">
-                          {mayraAttention.docsTodayCount}
-                        </span>
-                        <span className="text-[11px] text-gray-500 block">docs subidos hoy</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-        )}
-
-        {/* GRID INFERIOR (DIRECTORIO, FIRMAS Y ACCESOS):
-            - Para ADMIN: 3 Columnas (Deudores + Directorio + Firmas)
-            - Para ASISTENTE: 2 Columnas (Directorio + Firmas y Accesos) sin datos financieros */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-          {/* Top Deudores (SOLO ADMIN / COBRADOR) */}
+          {/* CARD 2: TOP DEUDORES (SOLO ADMIN / COBRADOR) */}
           {!isAssistant && (
-            <div className="lg:col-span-4 bg-white border border-slate-200 shadow-sm rounded-2xl p-5 sm:p-6 flex flex-col">
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <h2 className="text-sm font-bold text-[#1E2A3C] flex items-center gap-2">
-                    <DollarSign className="text-rose-500" size={16} />
-                    Top Deudores
-                  </h2>
-                  <p className="text-[11px] text-gray-500">Mayores saldos pendientes</p>
+            <div className="bg-white border border-slate-200 shadow-sm rounded-2xl p-5 flex flex-col justify-between h-[390px]">
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center font-bold">
+                      <DollarSign size={17} />
+                    </div>
+                    <div>
+                      <h2 className="text-sm font-bold text-[#1E2A3C] leading-none">Top Deudores</h2>
+                      <span className="text-[10px] text-gray-400">Saldos pendientes</span>
+                    </div>
+                  </div>
+                  <Link href="/clientes" className="text-[11px] font-bold text-[#166BA3] hover:underline flex items-center gap-0.5">
+                    Cartera <ChevronRight size={12} />
+                  </Link>
                 </div>
-                <Link href="/clientes" className="text-xs text-[#166BA3] hover:underline font-semibold flex items-center gap-1">
-                  Ver cartera <ChevronRight size={12} />
-                </Link>
+
+                {debtorsLoading ? (
+                  <div className="space-y-2 py-4">
+                    {[1, 2, 3].map((n) => (
+                      <div key={n} className="h-10 bg-slate-100 animate-pulse rounded-lg" />
+                    ))}
+                  </div>
+                ) : debtors.length === 0 ? (
+                  <div className="py-8 text-center text-xs text-gray-400 flex flex-col items-center justify-center gap-1">
+                    <CheckCircle size={24} className="text-[#166BA3]" />
+                    <span>Todos los saldos al día.</span>
+                  </div>
+                ) : (
+                  <div className="space-y-1.5 overflow-hidden">
+                    {debtors.slice(0, 5).map((d, idx) => (
+                      <div key={idx} className="p-2 rounded-xl bg-slate-50 border border-slate-200/70 flex items-center justify-between gap-2 text-xs">
+                        <div className="min-w-0 pr-1">
+                          <span className="text-xs font-bold text-[#1E2A3C] block truncate">{d.clientName}</span>
+                          <span className="text-[10px] text-gray-400">
+                            {d.daysOverdue > 0 ? `${d.daysOverdue}d vencido` : 'Al día'}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <span className="text-xs font-mono font-extrabold text-rose-600">
+                            ${d.saldoPendiente.toFixed(2)}
+                          </span>
+                          <button
+                            onClick={() => setReminderDebtor(d)}
+                            className="p-1 rounded-lg text-[#166BA3] hover:bg-sky-50"
+                            title="Recordatorio WhatsApp"
+                          >
+                            <Send size={12} />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
-              {debtorsLoading ? (
-                <div className="space-y-2 flex-1 animate-pulse">
-                  {[1, 2, 3].map((n) => (
-                    <div key={n} className="h-14 bg-slate-100 rounded-xl" />
-                  ))}
-                </div>
-              ) : debtors.length === 0 ? (
-                <div className="flex-1 flex items-center justify-center py-6 text-xs text-gray-400">
-                  <CheckCircle size={24} className="mr-2 text-[#166BA3]" /> Todos los saldos al día
-                </div>
-              ) : (
-                <div className="space-y-2 flex-1">
-                  {debtors.slice(0, 5).map((d, idx) => (
-                    <div key={idx} className="p-3 rounded-xl bg-slate-50/70 border border-slate-200/60 flex items-center justify-between">
-                      <div className="min-w-0 pr-2">
-                        <span className="text-xs font-bold text-[#1E2A3C] block truncate">{d.clientName}</span>
-                        <span className="text-[10px] text-gray-400">
-                          {d.daysOverdue > 0 ? `${d.daysOverdue}d vencido` : 'Al día'}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2 shrink-0">
-                        <span className="text-xs font-mono font-bold text-rose-600">
-                          ${d.saldoPendiente.toFixed(2)}
-                        </span>
-                        <button
-                          onClick={() => setReminderDebtor(d)}
-                          className="p-1 rounded-lg text-[#166BA3] hover:bg-blue-50"
-                          title="Recordatorio"
-                        >
-                          <Send size={12} />
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
+              <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-gray-400">
+                <span>Top 5 deudores</span>
+                <span className="font-mono text-slate-500">Cobranza</span>
+              </div>
             </div>
           )}
 
-          {/* Directorio Rápido (7 cols para asistente, 5 cols para admin) */}
-          <div className={`${isAssistant ? 'lg:col-span-8' : 'lg:col-span-5'} bg-white border border-slate-200 shadow-sm rounded-2xl p-5 sm:p-6 flex flex-col justify-between`}>
+          {/* CARD 3: DIRECTORIO RÁPIDO */}
+          <div className="bg-white border border-slate-200 shadow-sm rounded-2xl p-5 flex flex-col justify-between h-[390px]">
             <div>
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-[#166BA3]/10 text-[#166BA3] flex items-center justify-center font-bold">
-                    <Building2 size={20} />
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg bg-[#166BA3]/10 text-[#166BA3] flex items-center justify-center font-bold">
+                    <Building2 size={17} />
                   </div>
                   <div>
-                    <h2 className="text-base font-bold text-[#1E2A3C]">Directorio Rápido</h2>
-                    <p className="text-xs text-gray-400">Búsqueda directa de contribuyentes</p>
+                    <h2 className="text-sm font-bold text-[#1E2A3C] leading-none">Directorio Rápido</h2>
+                    <span className="text-[10px] text-gray-400">Búsqueda directa</span>
                   </div>
                 </div>
-                <Link href="/clientes" className="text-xs font-semibold text-[#166BA3] hover:underline flex items-center gap-1">
-                  Directorio ({clients.length}) <ChevronRight size={14} />
+                <Link href="/clientes" className="text-[11px] font-bold text-[#166BA3] hover:underline flex items-center gap-0.5">
+                  Ver ({clients.length}) <ChevronRight size={12} />
                 </Link>
               </div>
 
-              <div className="relative">
-                <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+              <div className="relative mb-3">
+                <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                 <input
                   type="text"
                   value={clientSearch}
                   onChange={(e) => setClientSearch(e.target.value)}
-                  placeholder="Buscar por nombre, RUC o razón social..."
-                  className="w-full pl-10 pr-9 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-[#1E2A3C] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#166BA3]/40 transition-all"
+                  placeholder="Buscar por nombre o RUC..."
+                  className="w-full pl-8 pr-7 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-[#1E2A3C] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#166BA3]/30"
                 />
                 {clientSearch && (
-                  <button onClick={() => setClientSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
-                    <X size={14} />
+                  <button onClick={() => setClientSearch('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400">
+                    <X size={13} />
                   </button>
                 )}
 
                 {clientSearch.trim().length > 0 && (
-                  <div className="absolute left-0 right-0 top-full mt-2 bg-white border border-slate-200 rounded-xl shadow-xl z-30 max-h-64 overflow-y-auto divide-y divide-slate-100">
-                    {filteredClients.slice(0, 8).map((c) => (
+                  <div className="absolute left-0 right-0 top-full mt-1.5 bg-white border border-slate-200 rounded-xl shadow-xl z-30 max-h-56 overflow-y-auto divide-y divide-slate-100">
+                    {filteredClients.slice(0, 6).map((c) => (
                       <div
                         key={c.id}
                         onClick={() => router.push(`/clientes/${c.id}`)}
-                        className="p-3 hover:bg-slate-50 cursor-pointer flex items-center justify-between"
+                        className="p-2.5 hover:bg-slate-50 cursor-pointer flex items-center justify-between"
                       >
-                        <div className="min-w-0 pr-3">
+                        <div className="min-w-0 pr-2">
                           <p className="text-xs font-bold text-[#1E2A3C] truncate">{c.fullName}</p>
-                          <p className="text-[11px] text-gray-500 truncate">
+                          <p className="text-[10px] text-gray-500 truncate">
                             {c.taxpayers && c.taxpayers.length > 0
                               ? c.taxpayers.map((t) => t.razonSocial).join(', ')
-                              : 'Sin empresas registradas'}
+                              : 'Sin empresas'}
                           </p>
                         </div>
-                        <span className="text-xs text-[#166BA3] font-semibold flex items-center gap-1 shrink-0">
-                          Abrir <ArrowRight size={12} />
+                        <span className="text-[11px] text-[#166BA3] font-semibold flex items-center gap-0.5 shrink-0">
+                          Abrir <ArrowRight size={11} />
                         </span>
                       </div>
                     ))}
                     {filteredClients.length === 0 && (
-                      <div className="p-4 text-center text-xs text-gray-400">
-                        Sin coincidencias para &quot;{clientSearch}&quot;
+                      <div className="p-3 text-center text-xs text-gray-400">
+                        Sin coincidencias
                       </div>
                     )}
                   </div>
                 )}
               </div>
+
+              {/* Muestra rápida de clientes */}
+              <div className="space-y-1.5 overflow-hidden">
+                {clients.slice(0, 4).map((c) => (
+                  <div
+                    key={c.id}
+                    onClick={() => router.push(`/clientes/${c.id}`)}
+                    className="p-2 rounded-xl bg-slate-50 border border-slate-200/60 flex items-center justify-between cursor-pointer hover:bg-slate-100/70 transition-colors"
+                  >
+                    <div className="min-w-0 pr-2">
+                      <p className="text-xs font-semibold text-[#1E2A3C] truncate">{c.fullName}</p>
+                      <p className="text-[10px] text-gray-400 truncate">
+                        {c.taxpayers?.[0]?.ruc || c.taxpayers?.[0]?.razonSocial || 'Cliente regular'}
+                      </p>
+                    </div>
+                    <ArrowRight size={12} className="text-slate-400 shrink-0" />
+                  </div>
+                ))}
+              </div>
             </div>
 
-            <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-gray-400">
+            <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-gray-400">
               <span>Total contribuyentes: <strong className="text-slate-700">{clients.length}</strong></span>
-              <span className="font-mono text-slate-400">CRM Mayra</span>
+              <span className="font-mono text-slate-400">CRM</span>
             </div>
           </div>
 
-          {/* Firmas y Accesos (4 cols para asistente, 3 cols para admin) */}
-          <div className={`${isAssistant ? 'lg:col-span-4' : 'lg:col-span-3'} flex flex-col gap-4`}>
-            <div className="bg-white border border-slate-200 shadow-sm rounded-2xl p-5 flex-1">
-              <div className="flex items-center justify-between mb-2">
-                <h2 className="text-sm font-bold text-[#1E2A3C] flex items-center gap-2">
-                  <Key className="text-slate-500" size={15} />
-                  Firmas p12
-                </h2>
+          {/* CARD 4: FIRMAS P12 */}
+          <div className="bg-white border border-slate-200 shadow-sm rounded-2xl p-5 flex flex-col justify-between h-[390px]">
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center font-bold">
+                    <Key size={17} />
+                  </div>
+                  <div>
+                    <h2 className="text-sm font-bold text-[#1E2A3C] leading-none">Firmas p12</h2>
+                    <span className="text-[10px] text-gray-400">Vencimiento ≤ 5 días</span>
+                  </div>
+                </div>
                 <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-md bg-slate-100 text-[#1E2A3C]">
-                  {taxAlerts?.firmaAlerts.count ?? 0} activas
+                  {taxAlerts?.firmaAlerts.count ?? 0} alertas
                 </span>
               </div>
-              <p className="text-[11px] text-gray-400 mb-3">Vence ≤ 5 días</p>
 
               {!taxAlerts || taxAlerts.firmaAlerts.count === 0 ? (
-                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-[11px] text-slate-600 flex items-center gap-2">
-                  <CheckCircle size={13} className="text-[#166BA3]" /> Todas vigentes
+                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-600 flex items-center gap-2 mb-3">
+                  <CheckCircle size={15} className="text-[#166BA3]" /> Todas las firmas p12 vigentes
                 </div>
               ) : (
-                <div className="space-y-2">
-                  {taxAlerts.firmaAlerts.items.map((f, idx) => (
-                    <div key={idx} className="p-2.5 rounded-xl bg-slate-50/80 border border-slate-200/60 flex items-center justify-between text-[11px]">
+                <div className="space-y-1.5 mb-3 overflow-hidden">
+                  {taxAlerts.firmaAlerts.items.slice(0, 3).map((f, idx) => (
+                    <div key={idx} className="p-2 rounded-xl bg-slate-50 border border-slate-200/60 flex items-center justify-between text-xs">
                       <span className="font-semibold text-[#1E2A3C] truncate">{f.razonSocial}</span>
-                      <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-rose-100 text-rose-800 ml-2">
+                      <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-rose-100 text-rose-800 ml-2 shrink-0">
                         {f.daysLeft <= 0 ? '¡Hoy!' : `${f.daysLeft}d`}
                       </span>
                     </div>
                   ))}
                 </div>
               )}
-            </div>
 
-            <div className="bg-white border border-slate-200 shadow-sm rounded-2xl p-5">
-              <h2 className="text-sm font-bold text-[#1E2A3C] mb-3 flex items-center gap-2">
-                <Zap className="text-[#166BA3]" size={15} />
-                Accesos
-              </h2>
-              <div className="space-y-2">
-                <Link
-                  href="/clientes"
-                  className="w-full flex items-center gap-2.5 p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-[#1E2A3C] text-xs font-semibold transition-all"
-                >
-                  <Building2 size={14} /> Directorio
-                </Link>
+              {/* Accesos rápidos */}
+              <div className="space-y-1.5 pt-1">
                 <Link
                   href="/whatsapp"
-                  className="w-full flex items-center gap-2.5 p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-[#1E2A3C] text-xs font-semibold transition-all"
+                  className="w-full flex items-center justify-between p-2 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200/60 text-[#1E2A3C] text-xs font-semibold transition-all"
                 >
-                  <MessageSquare size={14} /> WhatsApp
+                  <span className="flex items-center gap-2">
+                    <MessageSquare size={13} className="text-[#166BA3]" /> WhatsApp Chat
+                  </span>
                   {totalWaPending > 0 && (
-                    <span className="ml-auto px-1.5 py-0.5 bg-rose-500 text-white rounded-full text-[9px] font-bold">
+                    <span className="px-1.5 py-0.5 bg-rose-500 text-white rounded-full text-[9px] font-bold">
                       {totalWaPending}
                     </span>
                   )}
                 </Link>
                 <Link
                   href="/supercias"
-                  className="w-full flex items-center gap-2.5 p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-[#1E2A3C] text-xs font-semibold transition-all"
+                  className="w-full flex items-center justify-between p-2 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200/60 text-[#1E2A3C] text-xs font-semibold transition-all"
                 >
-                  <ExternalLink size={14} /> Informes Supercias
+                  <span className="flex items-center gap-2">
+                    <ExternalLink size={13} className="text-[#166BA3]" /> Informes Supercias
+                  </span>
+                  <ChevronRight size={12} className="text-gray-400" />
                 </Link>
               </div>
+            </div>
+
+            <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-gray-400">
+              <span>Certificados digitales</span>
+              <span className="font-mono text-slate-400">Seguridad</span>
             </div>
           </div>
         </div>
@@ -1246,6 +1145,184 @@ function DashboardView() {
               >
                 <MessageSquare size={13} /> Ir a WhatsApp
               </Link>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL POPUP: TODAS LAS TAREAS */}
+      {isTasksModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl relative border border-slate-100 flex flex-col max-h-[85vh]">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+              <div className="flex items-center gap-2.5">
+                <div className="w-10 h-10 rounded-xl bg-[#166BA3]/10 text-[#166BA3] flex items-center justify-center">
+                  <CheckSquare size={20} />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-[#1E2A3C]">
+                    Todas las Tareas
+                  </h3>
+                  <p className="text-xs text-gray-400">
+                    {pendingTasks.length} pendientes · {tasks.filter(t => t.status === 'COMPLETADA').length} completadas
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Link
+                  href="/configuracion?tab=TAREAS&action=new-task"
+                  className="text-xs font-semibold text-[#166BA3] hover:underline px-3 py-1.5 rounded-lg bg-sky-50 border border-sky-100"
+                >
+                  + Nueva Tarea
+                </Link>
+                <button
+                  onClick={() => setIsTasksModalOpen(false)}
+                  className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-slate-100"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+            </div>
+
+            {/* Lista de Tareas en el modal con scroll independiente */}
+            <div className="flex-1 overflow-y-auto py-4 space-y-2.5 pr-1">
+              {tasks.length === 0 ? (
+                <div className="text-center py-12 text-gray-400 text-xs">
+                  <CheckCheck size={28} className="mx-auto text-emerald-600 mb-2" />
+                  No existen tareas registradas.
+                </div>
+              ) : (
+                tasks.map((t) => (
+                  <div
+                    key={t.id}
+                    className={`p-3.5 rounded-xl border flex items-center justify-between gap-3 transition-colors ${
+                      t.status === 'COMPLETADA'
+                        ? 'bg-slate-50/60 border-slate-200/50 opacity-60'
+                        : 'bg-white border-slate-200 shadow-xs hover:border-[#166BA3]/40'
+                    }`}
+                  >
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className={`text-[9px] font-extrabold px-2 py-0.5 rounded ${
+                          t.priority === 'URGENTE' ? 'bg-rose-100 text-rose-700' :
+                          t.priority === 'ALTA' ? 'bg-amber-100 text-amber-800' :
+                          'bg-slate-100 text-slate-700'
+                        }`}>
+                          {t.priority}
+                        </span>
+                        <span className={`text-[9px] font-bold px-2 py-0.5 rounded ${
+                          t.status === 'COMPLETADA' ? 'bg-emerald-100 text-emerald-800' : 'bg-blue-50 text-[#166BA3]'
+                        }`}>
+                          {t.status}
+                        </span>
+                        {t.dueDate && (
+                          <span className="text-[10px] text-gray-400">
+                            Vence: {new Date(t.dueDate).toLocaleDateString('es-EC')}
+                          </span>
+                        )}
+                      </div>
+                      <h4 className={`text-xs font-bold ${t.status === 'COMPLETADA' ? 'line-through text-gray-400' : 'text-[#1E2A3C]'}`}>
+                        {t.title}
+                      </h4>
+                      {t.description && (
+                        <p className="text-[11px] text-gray-500 mt-0.5 line-clamp-2">{t.description}</p>
+                      )}
+                      <div className="mt-1.5 text-[10px] text-gray-400 flex items-center gap-2">
+                        <span>Asignado a: <strong className="text-slate-600">{t.assignedTo?.fullName || 'Mayra Castillo'}</strong></span>
+                      </div>
+                    </div>
+                    <div className="shrink-0">
+                      <button
+                        onClick={() => handleToggleTask(t.id, t.status)}
+                        className={`text-xs font-semibold px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-all ${
+                          t.status === 'COMPLETADA'
+                            ? 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                            : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200'
+                        }`}
+                      >
+                        <CheckCheck size={14} />
+                        {t.status === 'COMPLETADA' ? 'Reabrir' : 'Marcar lista'}
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-gray-400">
+              <span>Haga clic en una tarea para cambiar su estado</span>
+              <button
+                onClick={() => setIsTasksModalOpen(false)}
+                className="px-4 py-2 bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-xl font-medium"
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL POPUP: DESGLOSE DE CUENTAS BANCARIAS Y EFECTIVO */}
+      {isBankBreakdownOpen && (
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl relative border border-slate-100 flex flex-col">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+              <div className="flex items-center gap-2.5">
+                <div className="w-10 h-10 rounded-xl bg-[#166BA3]/10 text-[#166BA3] flex items-center justify-center">
+                  <TrendingUp size={20} />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-[#1E2A3C]">
+                    Desglose de Recaudación (Mes)
+                  </h3>
+                  <p className="text-xs text-gray-400">
+                    Total conciliado: <strong className="text-emerald-700 font-mono font-bold">+${summary?.totalRecaudadoMes.toFixed(2) ?? '0.00'}</strong>
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsBankBreakdownOpen(false)}
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-slate-100"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="py-5 grid grid-cols-2 gap-3.5">
+              {[
+                { label: 'Pichincha', key: 'pichincha' as const, icon: <Landmark size={18} className="text-[#166BA3]" />, desc: 'Banco Pichincha' },
+                { label: 'JEP',       key: 'jep'       as const, icon: <Landmark size={18} className="text-[#166BA3]" />, desc: 'Coop. JEP' },
+                { label: 'Loja',      key: 'loja'      as const, icon: <Landmark size={18} className="text-[#166BA3]" />, desc: 'Banco de Loja' },
+                { label: 'Efectivo',  key: 'efectivo'  as const, icon: <Banknote  size={18} className="text-slate-500" />, desc: 'Caja física' },
+              ].map(({ label, key, icon, desc }) => (
+                <div
+                  key={key}
+                  className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 flex flex-col justify-between hover:bg-slate-100/70 transition-colors"
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="flex items-center gap-2 text-xs text-gray-700 font-bold">
+                      {icon} {label}
+                    </span>
+                    <span className="text-[10px] text-gray-400 uppercase font-semibold">{desc}</span>
+                  </div>
+                  <div>
+                    <span className="text-2xl font-mono font-extrabold text-[#1E2A3C]">
+                      ${summary?.banks[key].toFixed(2) ?? '0.00'}
+                    </span>
+                    <span className="text-[10px] text-slate-500 block mt-0.5">Saldo recaudado</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-gray-400">
+              <span>Actualizado en tiempo real con cada abono</span>
+              <button
+                onClick={() => setIsBankBreakdownOpen(false)}
+                className="px-4 py-2 bg-[#166BA3] text-white hover:bg-[#135887] rounded-xl font-semibold shadow-xs"
+              >
+                Entendido
+              </button>
             </div>
           </div>
         </div>

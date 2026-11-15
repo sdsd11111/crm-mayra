@@ -111,6 +111,7 @@ router.get('/users', authenticateToken, async (req: Request, res: Response): Pro
         id: true,
         username: true,
         fullName: true,
+        phone: true,
         avatarUrl: true,
         role: true,
         isActive: true,
@@ -134,7 +135,7 @@ router.post('/users', authenticateToken, async (req: Request, res: Response): Pr
       return;
     }
 
-    const { username, fullName, password, role, avatarUrl } = req.body;
+    const { username, fullName, phone, password, role, avatarUrl } = req.body;
 
     if (!username || !password || !fullName || !role) {
       res.status(400).json({ error: 'Todos los campos son requeridos: username, fullName, password, role.' });
@@ -170,6 +171,7 @@ router.post('/users', authenticateToken, async (req: Request, res: Response): Pr
       data: {
         username: cleanUsername,
         fullName: String(fullName).trim(),
+        phone: phone ? String(phone).trim() : null,
         avatarUrl: avatarUrl || null,
         passwordHash,
         role,
@@ -179,6 +181,7 @@ router.post('/users', authenticateToken, async (req: Request, res: Response): Pr
         id: true,
         username: true,
         fullName: true,
+        phone: true,
         avatarUrl: true,
         role: true,
         isActive: true,
@@ -206,7 +209,7 @@ router.put('/users/:id', authenticateToken, async (req: Request, res: Response):
     }
 
     const targetId = parseInt(Array.isArray(req.params.id) ? req.params.id[0] : req.params.id, 10);
-    const { fullName, role, password, isActive, avatarUrl } = req.body;
+    const { fullName, phone, role, password, isActive, avatarUrl } = req.body;
 
     const targetUser = await prisma.user.findUnique({
       where: { id: targetId },
@@ -225,6 +228,7 @@ router.put('/users/:id', authenticateToken, async (req: Request, res: Response):
 
     const updateData: any = {};
     if (fullName !== undefined) updateData.fullName = String(fullName).trim();
+    if (phone !== undefined) updateData.phone = phone ? String(phone).trim() : null;
     if (avatarUrl !== undefined) updateData.avatarUrl = avatarUrl ? String(avatarUrl) : null;
     if (role && ['ADMIN_MAYRA', 'ASISTENTE'].includes(role)) updateData.role = role;
     if (isActive !== undefined) updateData.isActive = Boolean(isActive);
@@ -239,6 +243,7 @@ router.put('/users/:id', authenticateToken, async (req: Request, res: Response):
         id: true,
         username: true,
         fullName: true,
+        phone: true,
         avatarUrl: true,
         role: true,
         isActive: true,

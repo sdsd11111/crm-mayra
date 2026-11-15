@@ -37,6 +37,7 @@ interface UserItem {
   id: number;
   username: string;
   fullName: string;
+  phone?: string | null;
   avatarUrl?: string | null;
   role: 'ADMIN_MAYRA' | 'ASISTENTE';
   isActive: boolean;
@@ -95,6 +96,7 @@ function ConfiguracionView() {
   const [editingUserId, setEditingUserId] = useState<number | null>(null);
   const [formUsername, setFormUsername] = useState('');
   const [formFullName, setFormFullName] = useState('');
+  const [formPhone, setFormPhone] = useState('');
   const [formPassword, setFormPassword] = useState('');
   const [formAvatarUrl, setFormAvatarUrl] = useState('');
   const [formRole, setFormRole] = useState<'ADMIN_MAYRA' | 'ASISTENTE'>('ASISTENTE');
@@ -290,6 +292,7 @@ function ConfiguracionView() {
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
           body: JSON.stringify({
             fullName: formFullName,
+            phone: formPhone || null,
             role: formRole,
             avatarUrl: formAvatarUrl || null,
           }),
@@ -309,6 +312,7 @@ function ConfiguracionView() {
           body: JSON.stringify({
             username: formUsername,
             fullName: formFullName,
+            phone: formPhone || null,
             password: formPassword,
             role: formRole,
             avatarUrl: formAvatarUrl || null,
@@ -334,6 +338,7 @@ function ConfiguracionView() {
     setEditingUserId(null);
     setFormUsername('');
     setFormFullName('');
+    setFormPhone('');
     setFormPassword('');
     setFormAvatarUrl('');
     setFormRole('ASISTENTE');
@@ -344,6 +349,7 @@ function ConfiguracionView() {
     setEditingUserId(u.id);
     setFormUsername(u.username);
     setFormFullName(u.fullName);
+    setFormPhone(u.phone || '');
     setFormPassword('');
     setFormAvatarUrl(u.avatarUrl || '');
     setFormRole(u.role);
@@ -355,6 +361,7 @@ function ConfiguracionView() {
     setEditingUserId(null);
     setFormUsername('');
     setFormFullName('');
+    setFormPhone('');
     setFormPassword('');
     setFormAvatarUrl('');
   };
@@ -698,7 +705,7 @@ function ConfiguracionView() {
                         <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${
                           u.role === 'ADMIN_MAYRA' ? 'bg-blue-100 text-blue-800' : 'bg-slate-100 text-slate-700'
                         }`}>
-                          {u.role === 'ADMIN_MAYRA' ? 'Administradora' : 'Asistente (Modo Ciego)'}
+                          {u.role === 'ADMIN_MAYRA' ? 'Administradora' : 'Asistente'}
                         </span>
                         {u.username !== 'mayra' && (
                           <button onClick={() => handleDeleteUser(u)} className="text-gray-300 hover:text-rose-500">
@@ -708,6 +715,10 @@ function ConfiguracionView() {
                       </div>
                       <h3 className="text-sm font-bold text-[#1E2A3C]">{u.fullName}</h3>
                       <p className="text-xs text-gray-400 font-mono">@{u.username}</p>
+                      <div className="mt-2 flex items-center gap-1.5 text-xs text-slate-600 bg-slate-50 px-2 py-1 rounded-lg border border-slate-100">
+                        <Smartphone size={13} className="text-[#166BA3] shrink-0" />
+                        <span className="font-mono">{u.phone || 'Sin WhatsApp configurado'}</span>
+                      </div>
                     </div>
 
                     <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
@@ -961,6 +972,21 @@ function ConfiguracionView() {
                   onChange={(e) => setFormFullName(e.target.value)}
                   className="w-full px-3 py-2 rounded-xl border border-gray-200 text-xs text-[#1E2A3C]"
                 />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 mb-1">
+                  Número WhatsApp (para alertas y traspaso de mando del Bot)
+                </label>
+                <input
+                  type="text"
+                  placeholder="Ej: 593983776219 o 0983776219"
+                  value={formPhone}
+                  onChange={(e) => setFormPhone(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl border border-gray-200 text-xs text-[#1E2A3C] font-mono"
+                />
+                <p className="text-[10px] text-gray-400 mt-0.5">
+                  El bot notificará a este número cuando se transfiera un cliente.
+                </p>
               </div>
               {!editingUserId && (
                 <>

@@ -97,7 +97,7 @@ router.post(
   requireRole(['ADMIN_MAYRA']),
   async (req: Request, res: Response): Promise<void> => {
     try {
-      const { clientOwnerId, taxpayerId, concept, amount, periodText } = req.body;
+      const { clientOwnerId, taxpayerId, concept, amount, periodText, recurringFreq } = req.body;
 
       if (!clientOwnerId || !concept || amount === undefined) {
         res.status(400).json({
@@ -113,6 +113,18 @@ router.post(
         return;
       }
 
+      // Calcular nextChargeDate según la frecuencia de recurrencia
+      let nextChargeDate: Date | null = null;
+      const validFreqs = ['MENSUAL', 'SEMESTRAL', 'ANUAL'];
+      const freq = recurringFreq && validFreqs.includes(recurringFreq) ? recurringFreq : null;
+      if (freq) {
+        const base = new Date();
+        if (freq === 'MENSUAL') base.setMonth(base.getMonth() + 1);
+        else if (freq === 'SEMESTRAL') base.setMonth(base.getMonth() + 6);
+        else if (freq === 'ANUAL') base.setFullYear(base.getFullYear() + 1);
+        nextChargeDate = base;
+      }
+
       const entry = await prisma.ledgerEntry.create({
         data: {
           clientOwnerId: parseInt(clientOwnerId, 10),
@@ -123,6 +135,8 @@ router.post(
           periodText: periodText || null,
           bankAccount: BankAccount.NO_APLICA,
           createdById: req.user!.id,
+          recurringFreq: freq,
+          nextChargeDate,
         },
       });
 

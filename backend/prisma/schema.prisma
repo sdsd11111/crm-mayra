@@ -21,6 +21,7 @@ model User {
   username     String   @unique
   passwordHash String
   fullName     String
+  phone        String?
   avatarUrl    String?  @db.Text
   role         UserRole @default(ASISTENTE)
   isActive     Boolean  @default(true)
@@ -116,6 +117,8 @@ model Taxpayer {
   superciasDetalle String?
   patenteDetalle String?
 
+  servicesBreakdown String? @db.Text // JSON con el desglose de múltiples servicios y honorarios
+
   autoBillFreq   BillingFrequency @default(NONE)
   autoBillAmount Decimal          @default(0.00) @db.Decimal(10, 2)
   appliesVat     Boolean          @default(false)
@@ -203,6 +206,10 @@ model LedgerEntry {
 
   createdById Int?
   createdBy   User? @relation(fields: [createdById], references: [id])
+
+  // Recurrencia de cargos manuales
+  recurringFreq  String?   // "MENSUAL" | "SEMESTRAL" | "ANUAL" | null
+  nextChargeDate DateTime? // Próxima fecha en que se debe aplicar este cargo
 
   @@unique([taxpayerId, periodText, entryType], name: "unique_billing_charge")
 }

@@ -56,39 +56,90 @@ export class BillingCron {
         }
       }
 
-      if (!shouldBill) continue;
-
-      const baseAmount = Number(t.autoBillAmount);
-      const finalAmount = t.appliesVat ? Number((baseAmount * 1.15).toFixed(2)) : baseAmount;
-      const fullConcept = t.appliesVat
-        ? `${conceptLabel} - ${t.razonSocial} ($${baseAmount.toFixed(2)} + 15% IVA)`
-        : `${conceptLabel} - ${t.razonSocial}`;
-
-      // Idempotencia atómica: el @@unique(taxpayerId, periodText, entryType) en MySQL
-      // garantiza que dos runs concurrentes nunca dupliquen el cargo.
-      try {
-        await prisma.ledgerEntry.create({
-          data: {
-            clientOwnerId: t.clientOwnerId,
-            taxpayerId: t.id,
-            entryType: EntryType.CARGO_AUTOMATICO,
-            concept: fullConcept,
-            periodText,
-            amount: finalAmount,
-            bankAccount: BankAccount.NO_APLICA,
-          },
-        });
-      } catch (err: any) {
-        // P2002 = Unique constraint violation → cargo ya existe (race condition ganada por otro proceso)
-        if (err?.code === 'P2002') {
-          console.log(`   ⭕ Empresa ${t.razonSocial} ya tiene cargo en ${periodText} (constraint MySQL). Omitiendo.`);
-          continue;
+      // Priorizar servicesBreakdown si existe
+      const rawBreakdown = t.servicesBreakdown || t.declaDetalle;
+      let servicesList: Array<{ concepto: string; monto: number; freq?: string }> = [];
+      if (rawBreakdown && rawBreakdown.trim().startsWith('[') && rawBreakdown.trim().endsWith(']')) {
+        try {
+          const parsed = JSON.parse(rawBreakdown);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            servicesList = parsed
+              .filter(s => s && typeof s.concepto === 'string' && Number(s.monto) > 0)
+              .map(s => ({
+                concepto: String(s.concepto).trim(),
+                monto: Number(s.monto),
+                freq: s.freq ? String(s.freq).toUpperCase() : undefined,
+              }));
+          }
+        } catch (_) {
+          // Si no es JSON válido, usamos el concepto normal
         }
-        throw err;
       }
 
-      createdEntries++;
-      totalAmount += finalAmount;
+      if (servicesList.length === 0) {
+        if (!shouldBill) continue;
+        const baseAmount = Number(t.autoBillAmount);
+        if (baseAmount > 0) {
+          const customConcept = t.declaDetalle && !t.declaDetalle.startsWith('[') ? t.declaDetalle.trim() : conceptLabel;
+          servicesList = [{ concepto: `${customConcept} - ${t.razonSocial}`, monto: baseAmount }];
+        }
+      }
+
+      for (let sIndex = 0; sIndex < servicesList.length; sIndex++) {
+        const service = servicesList[sIndex];
+        const finalAmount = service.monto;
+
+        // Si el servicio individual tiene su propia frecuencia, evaluar si le toca facturarse este mes
+        const effectiveFreq = service.freq || t.autoBillFreq;
+        let serviceShouldBill = false;
+        if (effectiveFreq === 'MENSUAL') {
+          serviceShouldBill = true;
+        } else if (effectiveFreq === 'SEMESTRAL') {
+          if (currentMonth === 1 || currentMonth === 7) serviceShouldBill = true;
+        } else if (effectiveFreq === 'ANUAL') {
+          if (
+            (t.regimen === 'COMPANIA_SUPERCIAS' && currentMonth === 4) ||
+            (t.regimen !== 'COMPANIA_SUPERCIAS' && currentMonth === 3)
+          ) {
+            serviceShouldBill = true;
+          }
+        } else if (effectiveFreq === 'NONE') {
+          serviceShouldBill = false;
+        } else {
+          serviceShouldBill = shouldBill;
+        }
+
+        if (!serviceShouldBill) continue;
+
+        const fullConcept = service.concepto.includes(t.razonSocial)
+          ? `${service.concepto} (${periodText})`
+          : `${service.concepto} (${periodText}) - ${t.razonSocial}`;
+
+        // Subíndice de período para idempotencia en MySQL si hay múltiples servicios
+        const subPeriodText = servicesList.length > 1 ? `${periodText}-S${sIndex + 1}` : periodText;
+
+        try {
+          await prisma.ledgerEntry.create({
+            data: {
+              clientOwnerId: t.clientOwnerId,
+              taxpayerId: t.id,
+              entryType: EntryType.CARGO_AUTOMATICO,
+              concept: fullConcept,
+              periodText: subPeriodText,
+              amount: finalAmount,
+              bankAccount: BankAccount.NO_APLICA,
+            },
+          });
+          createdEntries++;
+          totalAmount += finalAmount;
+        } catch (err: any) {
+          if (err?.code === 'P2002') {
+            console.log(`   ⭕ Cargo ya existe para ${t.razonSocial} (${subPeriodText}). Omitiendo.`);
+            continue;
+          }
+          throw err;
+        }
+      }
     }
 
     console.log(
@@ -317,6 +368,15 @@ export class BillingCron {
       }
     });
 
+    // 5. Recordatorios de cargos recurrentes manuales: Diario a las 09:05 AM
+    cron.schedule('5 9 * * *', async () => {
+      try {
+        await this.executeRecurringChargeReminders();
+      } catch (err) {
+        console.error('❌ Error ejecutando RecurringChargesReminder:', err);
+      }
+    });
+
     // 4. Alertas de firma electrónica por expirar: Diario a las 08:00 AM
     cron.schedule('0 8 * * *', async () => {
       try {
@@ -326,10 +386,74 @@ export class BillingCron {
       }
     });
 
-    console.log('⏰ BillingCron iniciado con 4 jobs programados:');
+    console.log('⏰ BillingCron iniciado con 5 jobs programados:');
     console.log('   📋 Facturación automática: Día 1 de mes a las 00:05 AM');
     console.log('   📲 Cobranza WhatsApp: Días 1-5 de mes a las 09:00 AM');
     console.log('   📅 Recordatorio promesas: Diario a las 09:00 AM');
+    console.log('   🔁 Recordatorio cargos recurrentes: Diario a las 09:05 AM');
     console.log('   🔑 Alerta firmas .p12: Diario a las 08:00 AM');
+  }
+
+  /**
+   * Revisa LedgerEntries con recurringFreq activo cuya nextChargeDate ya llegó,
+   * crea una Task de recordatorio para Mayra y avanza la nextChargeDate al siguiente período.
+   */
+  public static async executeRecurringChargeReminders(): Promise<{ reminded: number }> {
+    console.log('🔁 [BillingCron] Revisando cargos recurrentes pendientes...');
+    const now = new Date();
+    let reminded = 0;
+
+    // Buscar el usuario ADMIN_MAYRA para asignarle la Task
+    const mayra = await prisma.user.findFirst({ where: { role: 'ADMIN_MAYRA' } });
+    if (!mayra) {
+      console.warn('⚠️ [RecurringCharges] No se encontró usuario ADMIN_MAYRA para asignar tareas.');
+      return { reminded: 0 };
+    }
+
+    const dueEntries = await prisma.ledgerEntry.findMany({
+      where: {
+        recurringFreq: { not: null },
+        nextChargeDate: { lte: now },
+        entryType: 'CARGO_MANUAL',
+      },
+      include: {
+        clientOwner: { select: { id: true, fullName: true } },
+      },
+    });
+
+    for (const entry of dueEntries) {
+      try {
+        // Crear Task de recordatorio
+        await prisma.task.create({
+          data: {
+            title: `💳 Cargo recurrente: ${entry.concept}`,
+            description: `Recordatorio automático: aplicar cargo "${entry.concept}" por $${Number(entry.amount).toFixed(2)} al cliente "${entry.clientOwner.fullName}" (recurrencia: ${entry.recurringFreq}).`,
+            dueDate: entry.nextChargeDate,
+            status: 'PENDIENTE',
+            createdById: mayra.id,
+            assignedToId: mayra.id,
+          },
+        });
+
+        // Calcular la siguiente nextChargeDate
+        const base = entry.nextChargeDate ? new Date(entry.nextChargeDate) : new Date();
+        if (entry.recurringFreq === 'MENSUAL') base.setMonth(base.getMonth() + 1);
+        else if (entry.recurringFreq === 'SEMESTRAL') base.setMonth(base.getMonth() + 6);
+        else if (entry.recurringFreq === 'ANUAL') base.setFullYear(base.getFullYear() + 1);
+
+        await prisma.ledgerEntry.update({
+          where: { id: entry.id },
+          data: { nextChargeDate: base },
+        });
+
+        reminded++;
+        console.log(`   🔁 Recordatorio creado para "${entry.clientOwner.fullName}" — ${entry.concept}`);
+      } catch (err) {
+        console.error(`   ❌ Error procesando cargo recurrente id=${entry.id}:`, err);
+      }
+    }
+
+    console.log(`🔁 [RecurringCharges] Finalizado: ${reminded} recordatorios creados.`);
+    return { reminded };
   }
 }

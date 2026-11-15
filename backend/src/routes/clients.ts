@@ -5,7 +5,7 @@ import { authenticateToken } from '../middleware/auth';
 import { extractNovenoDigito, calculateFechaDecla } from '../utils/sriUtils';
 import { calculateClientBalance } from '../utils/balanceUtils';
 import { sanitizeTaxpayerForRole } from '../utils/sanitizeUtils';
-import { TaxRegime, BillingFrequency } from '@prisma/client';
+import { TaxRegime, BillingFrequency, EntryType, BankAccount } from '@prisma/client';
 
 const router = Router();
 
@@ -359,9 +359,14 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
     });
 
     // Vincular retroactivamente tickets previos de este número a la nueva ficha creada
+    // Soporta tanto 593967491847 como 0967491847 usando los últimos 9 dígitos
+    const last9 = cleanPhone.slice(-9);
     await prisma.chatTicket.updateMany({
       where: {
-        whatsappPhone: cleanPhone,
+        OR: [
+          { whatsappPhone: cleanPhone },
+          { whatsappPhone: { endsWith: last9 } },
+        ],
         clientOwnerId: null,
       },
       data: {
@@ -502,6 +507,7 @@ router.post('/:id/taxpayers', async (req: Request, res: Response): Promise<void>
       iessDetalle: req.body.iessDetalle !== undefined ? (req.body.iessDetalle ? String(req.body.iessDetalle).trim() : null) : null,
       superciasDetalle: req.body.superciasDetalle !== undefined ? (req.body.superciasDetalle ? String(req.body.superciasDetalle).trim() : null) : null,
       patenteDetalle: req.body.patenteDetalle !== undefined ? (req.body.patenteDetalle ? String(req.body.patenteDetalle).trim() : null) : null,
+      servicesBreakdown: req.body.servicesBreakdown !== undefined ? (req.body.servicesBreakdown ? String(req.body.servicesBreakdown).trim() : null) : null,
     };
 
     // Solo ADMIN_MAYRA puede configurar precios de cobro
@@ -515,6 +521,53 @@ router.post('/:id/taxpayers', async (req: Request, res: Response): Promise<void>
     const created = await prisma.taxpayer.create({
       data,
     });
+
+    // Generar de inmediato los cargos iniciales de los servicios configurados si aplica
+    if (!isAssistant && created.autoBillFreq !== BillingFrequency.NONE) {
+      const now = new Date();
+      const currentMonth = now.getMonth() + 1;
+      const currentYear = now.getFullYear();
+      const periodText = `${currentYear}-${String(currentMonth).padStart(2, '0')}`;
+
+      let servicesList: Array<{ concepto: string; monto: number }> = [];
+      if (created.servicesBreakdown && created.servicesBreakdown.trim().startsWith('[')) {
+        try {
+          const parsed = JSON.parse(created.servicesBreakdown);
+          if (Array.isArray(parsed)) {
+            servicesList = parsed
+              .filter(s => s && typeof s.concepto === 'string' && Number(s.monto) > 0)
+              .map(s => ({ concepto: String(s.concepto).trim(), monto: Number(s.monto) }));
+          }
+        } catch {}
+      }
+      if (servicesList.length === 0 && Number(created.autoBillAmount) > 0) {
+        servicesList = [{ concepto: `Honorarios Contables - ${created.razonSocial}`, monto: Number(created.autoBillAmount) }];
+      }
+
+      for (let sIndex = 0; sIndex < servicesList.length; sIndex++) {
+        const service = servicesList[sIndex];
+        const subPeriodText = servicesList.length > 1 ? `${periodText}-S${sIndex + 1}` : periodText;
+        const fullConcept = service.concepto.includes(created.razonSocial)
+          ? `${service.concepto} (${periodText})`
+          : `${service.concepto} (${periodText}) - ${created.razonSocial}`;
+
+        try {
+          await prisma.ledgerEntry.create({
+            data: {
+              clientOwnerId: created.clientOwnerId,
+              taxpayerId: created.id,
+              entryType: EntryType.CARGO_AUTOMATICO,
+              concept: fullConcept,
+              periodText: subPeriodText,
+              amount: service.monto,
+              bankAccount: BankAccount.NO_APLICA,
+            },
+          });
+        } catch (err: any) {
+          // Si ya existe por constraint unique, omitir
+        }
+      }
+    }
 
     res.status(201).json({
       success: true,
@@ -583,6 +636,7 @@ router.put('/taxpayers/:taxpayerId', async (req: Request, res: Response): Promis
     if (body.iessDetalle !== undefined) dataToUpdate.iessDetalle = body.iessDetalle ? String(body.iessDetalle).trim() : null;
     if (body.superciasDetalle !== undefined) dataToUpdate.superciasDetalle = body.superciasDetalle ? String(body.superciasDetalle).trim() : null;
     if (body.patenteDetalle !== undefined) dataToUpdate.patenteDetalle = body.patenteDetalle ? String(body.patenteDetalle).trim() : null;
+    if (body.servicesBreakdown !== undefined) dataToUpdate.servicesBreakdown = body.servicesBreakdown ? String(body.servicesBreakdown).trim() : null;
 
     // Campos financieros bloqueados para Asistente
     if (!isAssistant) {
@@ -596,6 +650,72 @@ router.put('/taxpayers/:taxpayerId', async (req: Request, res: Response): Promis
       where: { id: taxpayerId },
       data: dataToUpdate,
     });
+
+    // Sincronizar/crear cargos de cuenta corriente si se configuraron servicios
+    if (!isAssistant && updated.autoBillFreq !== BillingFrequency.NONE) {
+      const now = new Date();
+      const currentMonth = now.getMonth() + 1;
+      const currentYear = now.getFullYear();
+      const periodText = `${currentYear}-${String(currentMonth).padStart(2, '0')}`;
+
+      let servicesList: Array<{ concepto: string; monto: number }> = [];
+      if (updated.servicesBreakdown && updated.servicesBreakdown.trim().startsWith('[')) {
+        try {
+          const parsed = JSON.parse(updated.servicesBreakdown);
+          if (Array.isArray(parsed)) {
+            servicesList = parsed
+              .filter(s => s && typeof s.concepto === 'string' && Number(s.monto) > 0)
+              .map(s => ({ concepto: String(s.concepto).trim(), monto: Number(s.monto) }));
+          }
+        } catch {}
+      }
+      if (servicesList.length === 0 && Number(updated.autoBillAmount) > 0) {
+        servicesList = [{ concepto: `Honorarios Contables - ${updated.razonSocial}`, monto: Number(updated.autoBillAmount) }];
+      }
+
+      for (let sIndex = 0; sIndex < servicesList.length; sIndex++) {
+        const service = servicesList[sIndex];
+        const subPeriodText = servicesList.length > 1 ? `${periodText}-S${sIndex + 1}` : periodText;
+        const fullConcept = service.concepto.includes(updated.razonSocial)
+          ? `${service.concepto} (${periodText})`
+          : `${service.concepto} (${periodText}) - ${updated.razonSocial}`;
+
+        try {
+          // Si ya existe el cargo automático para este periodo, actualizamos el monto si cambió
+          const existing = await prisma.ledgerEntry.findFirst({
+            where: {
+              taxpayerId: updated.id,
+              periodText: subPeriodText,
+              entryType: EntryType.CARGO_AUTOMATICO,
+            },
+          });
+
+          if (existing) {
+            await prisma.ledgerEntry.update({
+              where: { id: existing.id },
+              data: {
+                concept: fullConcept,
+                amount: service.monto,
+              },
+            });
+          } else {
+            await prisma.ledgerEntry.create({
+              data: {
+                clientOwnerId: updated.clientOwnerId,
+                taxpayerId: updated.id,
+                entryType: EntryType.CARGO_AUTOMATICO,
+                concept: fullConcept,
+                periodText: subPeriodText,
+                amount: service.monto,
+                bankAccount: BankAccount.NO_APLICA,
+              },
+            });
+          }
+        } catch (err: any) {
+          // Omitir errores de concurrencia
+        }
+      }
+    }
 
     res.json({
       success: true,

@@ -46,6 +46,7 @@ export interface TaxpayerItem {
   iessDetalle?: string | null;
   superciasDetalle?: string | null;
   patenteDetalle?: string | null;
+  servicesBreakdown?: string | null;
   // Solo presentes para ADMIN_MAYRA / COBRADOR:
   autoBillFreq?: BillingFrequency;
   autoBillAmount?: number;
@@ -69,5 +70,22 @@ export interface ClientOwnerItem {
   // Solo presente para ADMIN_MAYRA / COBRADOR:
   saldoPendienteTotal?: number;
   totalMovimientos?: number;
+  ledgerEntries?: LedgerEntryItem[];
+}
+
+export interface LedgerEntryItem {
+  id: number;
+  clientOwnerId: number;
+  taxpayerId: number | null;
+  entryType: string;
+  concept: string;
+  periodText: string | null;
+  amount: number;
+  bankAccount: string;
+  receiptUrl: string | null;
+  entryDate: string;
+  recurringFreq: string | null;
+  nextChargeDate: string | null;
+  createdAt?: string;
 }
 

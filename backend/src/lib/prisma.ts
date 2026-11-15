@@ -21,7 +21,7 @@ export const prisma =
           // Añadir parámetros de pool solo si no vienen ya en la URL
           if (base.includes('connection_limit')) return base;
           const separator = base.includes('?') ? '&' : '?';
-          return `${base}${separator}connection_limit=5&pool_timeout=30&connect_timeout=20`;
+          return `${base}${separator}connection_limit=15&pool_timeout=60&connect_timeout=30`;
         })(),
       },
     },
