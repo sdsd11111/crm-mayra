@@ -188,14 +188,14 @@ router.get('/tax-alerts', async (req: Request, res: Response): Promise<void> => 
       };
     });
 
-    const fiveDaysFromNow = new Date(today);
-    fiveDaysFromNow.setDate(fiveDaysFromNow.getDate() + 5);
+    const thirtyDaysFromNow = new Date(today);
+    thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
 
     const firmasExpirando = await prisma.taxpayer.findMany({
       where: {
         firmaExpira: {
           gte: today,
-          lte: fiveDaysFromNow,
+          lte: thirtyDaysFromNow,
         },
       },
       include: { clientOwner: true },

@@ -1,0 +1,252 @@
+Aquí tienes el análisis forense, organizativo y la propuesta ejecutiva correspondiente al audio grabado el 16 de noviembre a las 10:35 a.m. (WhatsApp Audio 2026-11-16 at 10.35.39 AM.mp4), en el que conversas con la contadora Mayra Castillo (dueña de un Estudio Contable) junto a tu equipo de desarrollo.FASE 1: Auditoría de Pureza, Descontaminación y Dudas Fonéticas (Uso Interno)1. Separación de Ruido y Demos CruzadosCliente Principal: Mayra Castillo (Estudio Contable / Soluciones Tributarias).Descarte de texto / Ruido detectado en la reunión:Ejemplo de la constructora: Demostración mostrada en pantalla por el equipo de César para explicar la interfaz gráfica del checklist de tareas12.Interrupción y salida apresurada al final: Mayra suspende la reunión porque tiene clientes esperándola presencialmente en su oficina ("ya me tengo que ir, hay clientes esperándome")13.Anécdotas operativas informales: Comentarios sobre levantarse a las 8:00 p.m. por haber olvidado revisar el cuadro de vencimientos del SRI correspondiente al día 121more_horiz.2. Pausado Fonético y Verificación de Términos[Contexto] Dice "las compañías de las mulas" $\rightarrow$ "Compañías / las multas son de $60 por cada obligación"14.[Contexto] Dice "hacer el la tesis de ahora" $\rightarrow$ "La declaración / el trámite de ahora"12.[Contexto] Dice "Pedro Delgado... Darma, Tulfar" $\rightarrow$ Cliente y sus razones sociales asociadas16.[Contexto] Dice "Santiago Goño... CSOS, ofertas en camino, transporte, tintura de café, histeria" $\rightarrow$ Cliente y sus múltiples emprendimientos/razones sociales16.[Precio / Condición Crítica]:Honorario acordado del servicio de bot/software: $70.00 total ($25.00 abonados, $45.00 saldo pendiente por cobrar a inicio de mes)17.Multas del SRI por retraso de obligación: $60.00 por cada declaración no presentada14.Precios de venta de firmas electrónicas: [VALIDAR LISTA DE PRECIOS Y PLANES CON CÉSAR] (Mayra enviará la plantilla con los planes y requisitos)1more_horiz.FASE 2: Radiografía Forense y Subtexto Comercial (Uso Interno)1. Mapa Político y Riesgo de SabotajeDecisora Principal y Sponsor: Mayra Castillo. Su motor principal es obtener paz mental al final del día. Quiere asegurarse de que sus asistentes no omitan vencimientos tributarios y desea cobrar deudas pendientes sin sufrir el desgaste ni la timidez de hacerlo manualmente.Operadoras Principales: Sus asistentes y colaboradoras ("las chicas").Riesgo de Sabotaje / Fricción: Las colaboradoras podrían omitir reportar por qué no se completó una tarea si el sistema no las obliga a justificarlo. Mayra exige un flujo en el que nadie pueda cerrar el día sin marcar "hecho" o justificar con un motivo válido (ej. "el cliente no transfirió para el impuesto" o "cambió la clave del SRI y no avisó")1more_horiz.2. Matriz "De la Boca para Afuera" vs. Verdad OperativaLo que pide literalmente: Un dashboard para ver qué impuestos vencen hoy y la próxima semana, enviar estados de cuenta por WhatsApp, un checklist de tareas diarias para sus chicas, alerta de vencimiento de firmas electrónicas y un buscador de clientes por RUC1more_horiz.Lo que confiesa en confianza / Entre dientes:"Soy descuidada para cobrar; solo cuando necesito dinero me pongo a revisar quién me debe para financiarme ese rato"116."Nos olvidamos del día 12... me levanté a las 8 de la noche a hacer de apuro porque eran 12 clientes y si multiplicas la multa es altísimo dinero ($60 c/u)"1more_horiz."Pierdo tiempo cambiando colores en los cuadros para acordarme de lo que ya hice"117."No me conviene que se vayan a comprar la firma electrónica a otro lado porque yo misma soy la distribuidora"18.La Victoria Política para la Cliente: Paz mental absoluta al finalizar la jornada (ver todos los checks en verde en el dashboard)12, cero multas del SRI por descuidos operativos14, cobro sistemático de cartera vencida sin exposición personal116 y retención automatizada de su negocio recurrente de firmas electrónicas18.3. Separación de Alcance del Software vs. Negocios ParalelosAlcance del MVP Tecnológico de Software (Cotización Técnica):Dashboard de Control Tributario: Alertas por dígito de RUC (días pares/impares, declaraciones IVA mensual/semestral, anexos ATS, utilidades, socios, gastos personales)1more_horiz.Registro Diario de Productividad y Checklist Auditables: Asignación de tareas por audio de WhatsApp y registro obligatorio de motivos de suspensión (falta de fondos, clave SRI modificada) con opción de notificar al cliente1more_horiz.Seguimiento Sistemático de Cartera (WhatsApp): Reporte de saldos adeudados por mes, confirmación de abonos bancarios y envío de estados de cuenta1more_horiz.Módulo de Alertas y Venta de Firmas Electrónicas: Notificación automática 30 días antes del vencimiento con recolección conversacional de requisitos (cédula, selfie, correo, dirección) según el tipo de persona (natural/jurídica)1more_horiz.Expediente Digital del Cliente Multirrazón Social: Buscador por RUC/nombre y agrupación de múltiples razones sociales/empresas bajo un solo titular (ej. Pedro Delgado, Santiago Goño)1more_horiz.Oportunidades de Alianza / Referidos (Fuera de Cotización del Software):Red de distribución de firmas electrónicas (Mayra como proveedora para la cartera de clientes de César Reyes)18.FASE 3: Compilación Autónoma con Árbitro de Dignidad Comercial (JSON Limpio para Publicar){
+  "portada": {
+    "titulo_principal": "SISTEMA INTEGRAL DE GESTIÓN TRIBUTARIA, CONTROL OPERATIVO Y SEGUIMIENTO DE CARTERA",
+    "titulo_destacado": "PLATAFORMA AUTOMATIZADA PARA ESTUDIO CONTABLE",
+    "subtitulo": "Control de obligaciones SRI, expediente digital de clientes y automatización de servicios recurrentes",
+    "preparado_para": "Estudio Contable Mayra Castillo"
+  },
+  "introduccion": {
+    "titulo": "Optimización Operativa y Control Sistemático del Estudio Contable",
+    "parrafos": [
+      "El volumen actual de contribuyentes y la diversidad de obligaciones fiscales (mensuales, semestrales y anuales) exigen una estructura tecnológica que elimine la dependencia de controles manuales y garantice el cumplimiento oportuno ante los organismos de control.",
+      "La presente solución instala un sistema de trabajo organizado que automatiza el seguimiento de fechas límite por dígito de RUC, centraliza la comunicación con los clientes vía WhatsApp y proporciona visibilidad inmediata sobre el avance diario del equipo de trabajo.",
+      "Asimismo, la plataforma incorpora un módulo de seguimiento automático de pagos y alerta de vencimiento de firmas electrónicas, transformando la gestión administrativa en un flujo eficiente, predecible y orientado a la continuidad del servicio."
+    ]
+  },
+  "como_funciona": {
+    "pasos": [
+      {
+        "numero": "01",
+        "titulo": "Asignación Paramétrica de Obligaciones por Cliente",
+        "descripcion": "Al dar de alta un perfil o razón social (persona natural o jurídica), se seleccionan mediante un checklist las obligaciones aplicables (IVA, ATS, Renta, Anexos), vinculando automáticamente el calendario de vencimientos tributarios según el noveno dígito del RUC."
+      },
+      {
+        "numero": "02",
+        "titulo": "Generación Diaria de Tareas y Alertas Oportunas",
+        "descripcion": "El sistema presenta un resumen de los trámites que vencen en la jornada y en la semana. Adicionalmente, permite a la dirección registrar tareas o instrucciones mediante notas de voz por WhatsApp que se convierten automáticamente en actividades asignadas al equipo."
+      },
+      {
+        "numero": "03",
+        "titulo": "Registro Diario de Productividad y Auditoría",
+        "descripcion": "Las colaboradoras marcan la conclusión de cada trámite o registran el motivo técnico de suspensión (como falta de fondos del contribuyente o claves no actualizadas). El sistema permite enviar notificaciones automáticas de justificación al cliente."
+      },
+      {
+        "numero": "04",
+        "titulo": "Seguimiento Sistemático de Cartera y Renovación de Servicios",
+        "descripcion": "El bot envía resúmenes periódicos de saldos pendientes, notifica la recepción de abonos y emite alertas automáticas 30 días antes del vencimiento de firmas electrónicas, guiando al usuario en la selección del plan y recepción de requisitos."
+      }
+    ]
+  },
+  "comparativa": {
+    "filas": [
+      {
+        "antes": "Seguimiento manual de vencimientos en planillas independientes con riesgo de omisiones y recargos.",
+        "despues": "Tablero centralizado con asignación automática de alertas según el calendario oficial del SRI."
+      },
+      {
+        "antes": "Dificultad para auditar en tiempo real la conclusión de trámites y justificación de pendientes al final de la jornada.",
+        "despues": "Resumen diario de trámites realizados con verificación de checklist e historial de justificaciones."
+      },
+      {
+        "antes": "Gestión discontinua del cobro de honorarios y seguimiento de saldos por pagar de clientes.",
+        "despues": "Envío automatizado de estados de cuenta, actualización de abonos y notificación transparente de saldo pendiente."
+      },
+      {
+        "antes": "Renovación reactiva de firmas electrónicas dependiente de la solicitud de última hora del cliente.",
+        "despues": "Notificación preventiva automatizada 30 días antes del vencimiento con captura de requisitos vía WhatsApp."
+      }
+    ]
+  },
+  "etapas": {
+    "componente_01": {
+      "nombre": "Fase 1: MVP Plataforma de Gestión Contable, Expediente Digital y CRM Conversacional",
+      "precio": "$70.00 (Abono realizado: $25.00 / Saldo a la entrega: $45.00)",
+      "eslogan": "Control de obligaciones tributarias y automatización del flujo de trabajo",
+      "descripcion": "Despliegue del núcleo del sistema para la gestión de clientes, control de tareas diarias y comunicación omnicanal por WhatsApp.",
+      "entregables": [
+        "Expediente digital del cliente con soporte para múltiples razones sociales bajo una misma persona titular.",
+        "Matriz paramétrica de obligaciones tributarias (IVA, ATS, Renta, Anexos) con calendario automático por RUC.",
+        "Dashboard gerencial con panel de tareas pendientes, alertas de vencimiento y asignación a colaboradoras.",
+        "Generador conversacional de tareas mediante notas de voz vía WhatsApp."
+      ],
+      "detalles_pie": [
+        "Incluye configuración inicial de perfiles y prueba operativa.",
+        "Saldo restante de $45.00 programado para cobro tras la puesta a punto."
+      ]
+    },
+    "componente_02": {
+      "nombre": "Fase 2: Módulo de Seguimiento de Cartera y Renovación de Firmas Electrónicas",
+      "precio": "Incluido en la estructura integral",
+      "eslogan": "Seguimiento automático de pagos y canalización de servicios recurrentes",
+      "descripcion": "Integración de herramientas para el control de cuentas pendientes y captación automatizada de renovaciones de firmas electrónicas.",
+      "entregables": [
+        "Módulo de seguimiento de cartera con emisión de estados de cuenta y confirmación de abonos recibidos.",
+        "Flujo automatizado de notificación de vencimiento de firmas electrónicas (30 días de anticipación).",
+        "Formulario conversacional para selección de plan de firmas y captura de requisitos (cédula, selfie, correo, dirección).",
+        "Alertas automáticas de cobro mensual de honorarios profesionales al inicio de cada periodo."
+      ],
+      "detalles_pie": [
+        "Parametrización de plantillas según categorías de clientes y tipos de firma (persona natural / jurídica)."
+      ]
+    },
+    "componente_mantenimiento": {
+      "nombre": "Componente de Mantenimiento y Continuidad Operativa",
+      "precio": "A definir según volumen de uso",
+      "eslogan": "Soporte técnico, resguardo de información y actualización continua",
+      "descripcion": "Servicio de acompañamiento técnico para garantizar el funcionamiento ininterrumpido de los canales conversacionales y respaldos de datos.",
+      "entregables": [
+        "Soporte técnico y atención de incidencias operativas.",
+        "Respaldos periódicos de la información de expedientes y registros de trámites.",
+        "Actualizaciones de reglas según modificaciones en normativas o formularios del SRI."
+      ],
+      "detalles_pie": [
+        "Garantía de disponibilidad y resguardo de la información institucional."
+      ]
+    }
+  },
+  "participantes": {
+    "bloques": [
+      {
+        "titulo": "Dirección General (Estudio Contable Mayra Castillo)",
+        "explicacion": "Supervisión del tablero gerencial, validación de avances diarios y atención de excepciones prioritarias."
+      },
+      {
+        "titulo": "Equipo de Colaboradoras y Asistentes",
+        "explicacion": "Ejecución de trámites asignados, actualización del checklist de tareas y registro de observaciones de suspensión."
+      },
+      {
+        "titulo": "Desarrollo Tecnológico y Consultoría (César Reyes & Equipo)",
+        "explicacion": "Implementación de la plataforma, integración de flujos conversacionales de WhatsApp y soporte técnico."
+      }
+    ]
+  },
+  "ir_mas_alla": {
+    "ejemplo_vivido": "Durante la sesión de trabajo se destacó la importancia de sustituir la revisión manual de planillas por un tablero dinámico que notifique con anticipación los vencimientos según el noveno dígito del RUC.",
+    "frase_bisagra": "Este mecanismo asegura que ningún trámite quede rezagado, brindando total certidumbre sobre el trabajo ejecutado por el equipo al cierre de cada jornada.",
+    "frase_final": "Con esta infraestructura, el Estudio Contable instala un modelo de trabajo organizado, rentable y con capacidad de atención escalable para sus clientes."
+  }
+}
+Diccionario de Términos Aplicado en la RedacciónBóveda Digital / Expediente Único $\rightarrow$ Carpeta digital de cada cliente / Expediente digital del cliente.Motor de cobranzas persistente $\rightarrow$ Seguimiento automático de pagos / Seguimiento Sistemático de Cartera.Registro Diario de Productividad $\rightarrow$ Resumen diario de trámites realizados / Registro Diario de Productividad y Auditoría.Frontend, Backend y CRM $\rightarrow$ Plataforma de gestión y control del estudio.Despacho Masivo de Expedientes $\rightarrow$ Envío de varios documentos en un solo paso.
+
+
+
+CONVERSACION
+
+"Y ahí es donde tienes que aportar, aquí es nuestras ideas
+y tú pasas en el día si puedes poner tal cosa
+claro, claro. Eso es. Solo que no tengo mucho tiempo, pero bueno, ahí vamos.
+Entonces, aquí usted quisiera eh todos los abonos y la resta de de lo que tenía que hacerle y todos los abonos que se van obteniendo de los clientes, ¿no?
+Exactamente. Por ejemplo, que el sistema me por ejemplo Digamos que el sistema le pasa a mi cliente, esto me estás debiendo.
+Claro,
+un resumen, ¿no? Enero, febrero, marzo, abril, esto me estás debiendo. Y mi cliente me hace un abono y ese abono lo anotamos en el banco y luego me da un resumen y le digo, "Gracias por tu pago y esto es lo que me quedas debiendo."
+Ah, sí, exactamente como
+ya perfecto.
+El horario acordado del servicio es de $70.
+Ajá.
+Aquí se aquí se agregan como todos los servicios que que se que se incluyen y El abono que se ha puesto no más es de 25 y se resta saldo a cobrar que es de 45 que el vot se encargaría de cobrar después de al inicio del mes como quamos.
+Ya. Sí, sí.
+Ya. Bien, pero primero vayamos a ver en este de aquí le agregué este de aquí que es tipo para avisos. Es decir, yo de lo que le entendí aquí en en este tiene pues los días donde toca hacerle las actividad,
+declaración
+las declaraciones. Exacto. Entonces, Esto de aquí está conectado a todos sus como clientes,
+¿ya?
+Entonces, cuando usted le agrega el rug a un cliente, se le va se le va determinando cuándo le toca. Entonces, aquí le muestra cuántos tiene la próxima semana, cuántos tiene que hacerle hoy día y así.
+Ya,
+ya.
+Perfecto.
+Ahora, ¿eso sí le sí le serviría a usted o eso cómo llevan en realidad?
+Bueno, en realidad nosotros decimos hoy es día par porque los días pares se declara el tema de las compañías le hemos puesto que nos un día antes como para no olvidarnos
+ya,
+ya, porque las compañías de las mulas, son 60 por cada por cada obligación que nos envía. Entonces, e hoy día es 12 y revisamos el cuatro, ¿quién se vence hoy día y hacemos?
+Pero no es tan práctico como que alguien me esté, porque por ejemplo, la semana pasada estábamos full, estamos haciendo unas conciliaciones de una empresa que hoy tengo una reunión y el día 12 nos olvidamos,
+ni las chicas ni yo revisamos el cuadro y el día 12 son como 12 clientes que si multiplicamos la multa es altísimo dinero.
+Entonces este antes yo me apé a las 8 de la noche y ese rato me levanté a hacer. ¿Por qué? Porque nadie nos avisó. Casi nosotros no revisamos.
+Entonces esta se le puede automatizar para que le avise que tiene que ser hoy, o sea, porque eso eso te viendo Okay, digamos, hay tareas pendientes que esto va a ser tanto en su en su dashboard como en el de sus asistentes.
+Sí, sí, sí, claro.
+Ya. Entonces, aquí la única que puede hacer tareas es usted. Y el y pensábamos implementarle mediante el WhatsApp, que fue una idea de mi papá, tuvo ch que usted manda un audio al WhatsApp de que conecta aquí. y este mismo le genera la tarea y le deja para avisarle a sus asistentes lo que tiene que hacer.
+En serio,
+Ajá. Eh, eso se va a dividir en un calendario para que tenga todo ordenadito, pero de lo que usted me dijo, siempre tienen que hacer lo mismo en ese cuadro, como veía el cuadro y y tienen que hacer eso, ¿ven? En par, ¿no? Entonces, eso se puede automatizar para que le avise esto. Les toca hoy hoy día y esto les toca y
+claro. Y lo que pasa es que nosotros nosotros tenemos un programita que me coge todas las facturas del SRI, las retenciones y me da el estado para yo declarar. Entonces, eso es fácil, ¿no? Entonces, nosotros ya sacamos todo eso y a veces yo cojo el apuro, subo, subo, subo, subo, subo, ya. Entonces, ¿qué hago para después? Ah, ya hice de este otro tengo que entrar para ya hice y pierdo tiempo y aquí y por ejemplo a veces de pronto me olvido de uno, entonces es que tengo que salirle cambiando todo. los meses de color. Pero si por ejemplo el el sistema me avisara con un con un check que ya está,
+ya no tendría que estarme preocupando, ¿no es cierto?
+Ya
+hago la tarea y verifico que ya está.
+Exacto. Sí, pero eso eso de las tareas las tiene que hacer usted mismo, o sea, como generarlas, decir, esto tengo que hacer mañana, esto tengo que hacer, pasado mañana. Sí. Eh, lo único que sí le decía que automatizaba era esto de aquí de lo de la tablita. Pero lo que me dijo ahorita que usted tiene la plantilla deo, pero eso no sabría bien cómo conectarle aos que me indique bien cómo es eso.
+A ver, la tablita de
+Sí, me dijo que ahorita me acaba de decir que usted acaba tiene unas tareas, o sea, pues sí, de si me dej para tener la cabeza.
+A ver, vea. Lo que yo quiero es que una vez que ya hice la tarea quede anotado en el sistema un checklist que ya está hecha.
+Ah, eso sí,
+sí, eso porque, por ejemplo, aquí yo tengo este enviado. Enviado.
+Ah, ya.
+Entonces, yo, por ejemplo, quisiera que los que me tocan el 12, una vez que ya enviamos la tarea, podemos nosotros mismos anotar o como dije, descargar ahí en la carpetita que ya está. Entonces, que me genere un checklist que ya está
+para que una vez que yo termino el día,
+para mi tranquilidad, yo revise y diga, "Se hicieron todos y Si todos están con check, check check, check. Así ya hemos hecho todos.
+Sí, eso, eso mismo, eso mismo es
+más o menos así. Mira, pues este es de la constructora, pero cada uno de ellos va a tener esta ventana y aquí le salen las tareas que tiene que hacer. Puedo ver la tarea, puedo decir ya hice la tarea. Y si no, la tengo que cerrar por alguna cosa. Tengo que decir no pude porque tal cosa.
+Exacto. Porque a veces, por ejemplo, tengo clientes que les tengo que hacer el la tesis de ahora, pero resulta que reviso y no se concilió el del mes pasado por alguna circunstancia o por ejemplo la declaración de I. Yo ya enví, pero a veces la gente no tiene el dinero en la cuenta y me voy a revisar y resulta que no está enviada porque no pagaron. O sea, yo sí hice mi trabajo, pero ellos no pagaron.
+Entonces, ¿qué pasa? Yo no puedo hacer noviembre si no está cerrado octubre. Entonces, ¿qué tengo que poner ahí? No pude hacer octubre porque no cerrar noviembre. Tuve que hacer octubre para cerrar noviembre. O sea, cosas así también me viene genial. Entonces, esto aquí es como un un checklist de tus chicas. Ellas no pueden cerrar las actividades si no dicen si hice o no hice por tal razón y a ti ya te queda ese histórico. Incluso eso se puede enviar, por ejemplo, en este caso que dices un mensaje al cliente. No podemos terminar este proceso porque usted no tiene fondos en esa
+Sí, sí. Eso también sería muy bueno porque a veces yo no puedo enviar o por ejemplo a veces cambian la clave y no me avisan
+y el momento que yo voy no puede entrar y hasta que los contacto para que me den la nueva clave, ya me olvidó hacer las cosas.
+Entonces, por ejemplo, podría poner un mensaje diciendo al final del día no pudimos enviar su declaración porque usted no me pasó la clave.
+M, ya
+sí,
+sí, eso está bien. Ya. Entonces, así mismo van a quedar las tareas. El siguiente es en el dark está lo de deudores, pero esto no, la verdad. ¿Usted si quisiera ver esto en el en su dashboard? de la gente que más le debe. Ya. Y entonces ahí mismo se le va a colocar para
+Sí. Y sí, me gustaría y y le explico por qué. Porque a veces yo necesito financiarm
+ya. Entonces es un problema para mí. Ese rato quiero cobrar porque yo soy así descuidada. Entonces, cuando yo necesito dinero, me voy a ver quién me debe y quién me podría pagarlo más pronto para ese rato yo financiar.
+Entonces, sería bueno tener ahí listo Porque si yo ya veo que necesito, yo les envío a todos un aviso de que por favor me paguen
+ya
+al menos de los que más duros son como huesos.
+Ya. Entonces esto le dejo aquí y lo siguiente es el el es el de sus clientes. Aquí no más busca digamos e a cualquier cliente que le esté escribiendo en ese momento, lo busca, le da clic y llega a su perfil, al perfil del cliente.
+Ah, ahí para poder descargar la documentación, ¿cierto? Ya. Buenas. Ya. Esto es esto es eso y ahora esto sí eh de las firmas, ¿cómo es el vencimiento? Es igual el Es igual el
+depende de la fecha que se haga y del tiempo. A ver, por ejemplo, el cliente A vino el 15 de enero
+y me compró una firma para 2 años. Ah,
+entonces el 15 de enero del 2027 significa que vence el 15 de enero del 2029. Quiero que me alegere para que un mes antes el sistema le vaya al cliente diciendo que en unos pocos días su firma electrónica ya vence
+para que lo tenga pendido, porque a veces me llaman, necesito una factura urgencia, me ingreso a hacerle la factura y la firma está caducada y hasta hacer la firma ya nos demoramos. Entonces que el sistema les vaya dando una alerta que ya mismo su firma cadut y que deberíamos hacerla otra vez.
+Ya, pero a usted le le sirve que esté aquí en el dashboard realmente porque no trabaja nada con esto, ¿cierto? En este momento, digamos, tiene lo de las firmas, el vencimiento ahí, pero solo va a ser como que el bot le va a avisar a al cliente, el cliente tiene que renovar y se contacta con usted y de ahí
+es que yo mismo hago la renovación misma
+yo vendo las firmas electrónicas. Entonces ahí sería enviarles un aviso diciendo si necesitas que te la renueve, mira, esto cuesta
+ya
+y si me me aplica que sí, entonces le digo, mira, esto tienes que pasarme para poder hacer. Entonces, cuando me confirma que sí, por favor confírmame el pago y procedemos.
+Es que yo mismo soy distribuidora de las firmas. No me conviene que se vayan a comprar en otro lado. Ya. Entonces, aquí siguiendo.
+Creo que sí le pasé, pero en todo caso ahorita le vuelvo a pasar. Tengo este cuadrito. Ay, tengo este Este cuadro que tiene, este cuadro de aquí tiene la información de las firmas electrónicas. Ah. Ah, ya.
+Mm. Entonces, esa información yo quisiera, por ejemplo, que se transmita una vez que me confirman que sí la va a hacer conmigo. Entonces yo le digo, "Por favor, escoge el plan que deseas contratar."
+Ya.
+Entonces escoge el plan y le paso. Creo que ya le pasamos el detalle de cuáles son los requisitos. Me parece que eso sí pasamos
+o vuelvo a revisar y vuelvo a enviar. Este, por favor, pásame porque para las firmas electrónicas de personas naturales, entonces ahí tenemos que eres persona natural, él es representante de empresa, eres representante de eres miembro de empresa porque los requisitos son diferentes.
+Entonces, por ejemplo, si es persona natural, necesito una foto. de la cédula enverso y reverso y una selfie con la cédula a la altura del mentón que me confirmen el correo que van donde van a descargar la firma y su dirección y me pasen el grupo. Entonces esos requisitos yo quisiera una vez que escojan el plan digo, "Sí, por favor ayúdame con esta información."
+Ya.
+Entonces, una vez que ya ellos me pasan la información tendríamos que decirle listo, entonces necesito que me confirmes en pago
+ya. Y le avisa usted para que vea que sí se ha hecho el pago. Exactamente. Se hizo el pago y proceden las chicas de hacen su trabajo.
+Ya. Sí, chévere. Eh,
+es que por es que quiero que todos todos mis procesos estén automatizados, todo para yo no tener que estarme preocupado por nada.
+Ya, ahora siguiendo del CRM, mira, aquí está lo de los clientes. Los clientes aquí tiene pues un buscador
+ya
+que para tiene el nombre o el rub o la razón social lo busca, eh, ahí le aparece. Ahora en este momento solo hay uno. Entonces, digamos, aquí ya lo encuentra al cliente, le da click y se abre el historial de este. Entonces, en en el historial tiene aquí primero la ficha. Aquí sí estaba confundido, ¿verdad? Miren aquí esto de aquí, esto es de aquí. Elice, anexo, IVA. Esto es de aquí. Toditos estos van cambiando de acuerdo a la razón social.
+Claro. Por ejemplo, yo May de Castillo
+como profesional en libre ejercicio, persona natural, solo hago declaración de Io al mes.
+Ya. Pero por ejemplo la empresa que ustedes tienen de Reyes, ellos envían la declaración de IVA y el anexo transmisional simplificado. Anualmente envían el anexo de socios, el anexo de utilidades, el anexo de emple Eso es anual. Entonces, dependiendo del giro del negocio, por ejemplo, un médico es semestral, ni siquiera es mensual como es semestral.
+Ya.
+Entonces, todo eso depende. Entonces, lo que el trabajito que nosotros haríamos, aunque ahí sí está, por ejemplo, ahí tengo mensual, esos de ahí son mensuales,
+ya más abajo está semestral
+y más abajo está anual. Pero lo voy a hacerles a las chicas que mejor hagan un cuadrito más explicativo. donde diga, por ejemplo, eh un cliente mío que es médico de frío semestral IVA renta en febrero anexo de gastos personales.
+Lo primero para para crear digamos un cliente usted tiene que determinar si este
+es que por eso ya entonces yo mismo lo tengo que hacer. Entonces hagamos una cosa, le paso todo lo que se hace
+para que me le ponga toditos y el momento de yo crear el cliente le pongo cuáles son las obligaciones. Ya,
+con un click, ¿no es cierto? Escojo
+es como un chiclitz, creo que
+con un click, claro, escojo. Este hace IVA, este semestral.
+Ah, aquí sí, aquí sí está eso, pero sí le agregué para escribir porque en algunas tenía usted números, en otras tenía letras, así, entonces no sabemos bien. Aquí es tipo checklist, le da click.
+Claro. Entonces, hay que le ponga la los nombres.
+Yo mismo escojo, o sea, creo el cliente y escojo qué es lo que hay que hacerle a él y en qué fechas.
+Ya. Entonces, solamente Sí, porque ese sistema sí lo teníamos ya. Entonces ahí enumérale todo lo que va a mandar de todos los servicios con el checklist le da clic click a varios porque obviamente va a tener varios y ese cliente ya asoma con solamente con eso, pero mostrar todito las columnas.
+Ah, sí, simón. Ya, mire, aquí también para agregar solo es nombre de nombre de la persona. Ah, sí, una sola persona tiene varias razones sociales, como me dijo la otra vez, ¿no? Sí se puede. Claro, por ejemplo, en el caso de Pedro Delgado, me gustaría en la misma de Pedro Delgado, ponerle Darma, ponerle Tulfar y ponerle él como persona natural.
+Ya.
+Sí, porque también tengo otro cliente, Santiago Goño tiene él y una empresa que se llama CSOS. Ya es Marcelo Refres, o sea, es la de él y tiene una de ofertas en camino, tiene una de transporte, tiene una de tintura de café, tiene una de histeria. Entonces, a él hay que se ley en una sola.
+Ya. Entonces, ah, aquí está. Eh, primero aparecer ya lo primero es el nombre y el WhatsApp. Es para el bot.
+Ya.
+D le coloque la razón social. Eso de la razón social también sería como persona natural, como usted dijo, ¿no?
+Sí,
+así se debe.
+Ya me tengo que ir. Lo si Ya
+dice que están unos clientes esperándome.
+Sí,
+si es que puedo vuelvo hoy día si no vengo mañana un ratito. Ya. Perdón, perdón, ya me tengo que ir.
+Ya, muchas gracias. Me voy, me voy, me voy, me voy. Que está cerca."

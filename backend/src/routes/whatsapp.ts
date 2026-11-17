@@ -35,6 +35,36 @@ router.post('/webhook', async (req: Request, res: Response): Promise<void> => {
 
     const cleanPhone = remoteJid.replace('@s.whatsapp.net', '').replace(/\D/g, '');
 
+    // Verificar si el número pertenece al equipo interno (Mayra o Asistentes configuradas en el CRM)
+    const assistantUser = await prisma.user.findFirst({
+      where: {
+        phone: { not: null },
+        isActive: true,
+      },
+    });
+
+    // Buscar si el remitente coincide con algún usuario interno (Mayra o Asistente)
+    const internalUsers = await prisma.user.findMany({
+      where: { phone: { not: null }, isActive: true },
+      select: { id: true, fullName: true, phone: true, role: true },
+    });
+    const matchedInternal = internalUsers.find(
+      (u) => u.phone && (cleanPhone.endsWith(u.phone.replace(/\D/g, '').slice(-9)) || u.phone.replace(/\D/g, '') === cleanPhone)
+    );
+
+    // Restricción de prueba / desarrollo solicitada: El bot responde al número autorizado de pruebas O a usuarios del equipo
+    const ALLOWED_BOT_PHONE = '593983776219';
+    const isBotAllowed =
+      cleanPhone.endsWith('983776219') ||
+      cleanPhone === ALLOWED_BOT_PHONE ||
+      Boolean(matchedInternal);
+
+    if (!isBotAllowed) {
+      console.log(`[Bot Filter]: Ignorando mensaje de ${cleanPhone} (solo responde a +593 98 377 6219 y personal registrado)`);
+      res.status(200).json({ status: 'IGNORED_UNAUTHORIZED_PHONE', phone: cleanPhone });
+      return;
+    }
+
     // 2. Control de idempotencia anti-duplicados por messageId
     if (messageId) {
       const alreadyProcessed = await prisma.processedWebhookEvent.findUnique({
@@ -70,7 +100,14 @@ router.post('/webhook', async (req: Request, res: Response): Promise<void> => {
         if (incomingMedia.mediaType === 'AUDIO' && incomingMedia.transcription) {
           messageContent = `🎤 [Nota de voz]: "${incomingMedia.transcription}"`;
         } else if (incomingMedia.mediaType === 'IMAGE') {
-          messageContent = messageContent ? `📷 [Foto]: ${messageContent}` : '📷 [Foto adjuntada por el cliente]';
+          if (incomingMedia.ocrText) {
+            const categoryTag = incomingMedia.docCategory ? `[${incomingMedia.docCategory}]` : '';
+            messageContent = messageContent
+              ? `📷 [Foto ${categoryTag}]: ${messageContent}\n[Texto extraído/OCR]:\n${incomingMedia.ocrText}`
+              : `📷 [Foto ${categoryTag} enviada por cliente]\n[Texto extraído/OCR]:\n${incomingMedia.ocrText}`;
+          } else {
+            messageContent = messageContent ? `📷 [Foto]: ${messageContent}` : '📷 [Foto adjuntada por el cliente]';
+          }
         } else if (incomingMedia.mediaType === 'DOCUMENT') {
           messageContent = messageContent ? `📄 [Documento ${incomingMedia.fileName}]: ${messageContent}` : `📄 [Documento adjuntado: ${incomingMedia.fileName}]`;
         }
@@ -570,15 +607,15 @@ router.get('/tax-alerts', async (req: Request, res: Response): Promise<void> => 
       };
     });
 
-    // Alertas de firma electrónica próximas a vencer (<= 5 días)
-    const fiveDaysFromNow = new Date(today);
-    fiveDaysFromNow.setDate(fiveDaysFromNow.getDate() + 5);
+    // Alertas de firma electrónica próximas a vencer (<= 30 días según requerimiento de Mayra)
+    const thirtyDaysFromNow = new Date(today);
+    thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
 
     const firmasExpirando = await prisma.taxpayer.findMany({
       where: {
         firmaExpira: {
           gte: today,
-          lte: fiveDaysFromNow,
+          lte: thirtyDaysFromNow,
         },
       },
       include: { clientOwner: true },

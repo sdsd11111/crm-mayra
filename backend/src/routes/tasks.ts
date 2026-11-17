@@ -1,10 +1,20 @@
 // backend/src/routes/tasks.ts
 import { Router, Request, Response } from 'express';
+import multer from 'multer';
 import { prisma } from '../lib/prisma';
 import { authenticateToken } from '../middleware/auth';
+import { BunnyStorageService } from '../services/BunnyStorageService';
+import { SriTaskCronService } from '../services/SriTaskCronService';
 
 const router = Router();
 router.use(authenticateToken);
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 50 * 1024 * 1024, // 50MB
+  },
+});
 
 /**
  * GET /api/tasks
@@ -50,10 +60,39 @@ router.get('/', async (req: Request, res: Response): Promise<void> => {
 });
 
 /**
- * POST /api/tasks
- * Crea una nueva tarea (para Mayra o para asistentes)
+ * POST /api/tasks/generate-sri
+ * Disparo manual/on-demand del motor de generación de tareas del SRI.
+ * Permite a Mayra forzar la evaluación o probar la generación en cualquier momento.
  */
-router.post('/', async (req: Request, res: Response): Promise<void> => {
+router.post('/generate-sri', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const user = req.user!;
+    if (user.role !== 'ADMIN_MAYRA') {
+      res.status(403).json({ success: false, message: 'Solo Administradores pueden ejecutar la generación SRI.' });
+      return;
+    }
+
+    const { date } = req.body;
+    const refDate = date ? new Date(date) : new Date();
+
+    const result = await SriTaskCronService.generateDailySriTasks(refDate);
+
+    res.json({
+      success: true,
+      message: `Generador SRI completado: ${result.createdTasks} tareas creadas, ${result.skippedExisting} existentes.`,
+      result,
+    });
+  } catch (error: any) {
+    console.error('Error en /api/tasks/generate-sri:', error);
+    res.status(500).json({ success: false, message: error.message || 'Error al ejecutar generador SRI.' });
+  }
+});
+
+/**
+ * POST /api/tasks
+ * Crea una nueva tarea (para Mayra o para asistentes), con soporte de subida de archivo opcional
+ */
+router.post('/', upload.single('file'), async (req: Request, res: Response): Promise<void> => {
   try {
     const { title, description, priority, dueDate, assignedToId } = req.body;
 
@@ -64,6 +103,25 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
 
     const assignedId = assignedToId ? parseInt(assignedToId, 10) : req.user!.id;
 
+    let fileUrl: string | null = null;
+    let fileName: string | null = null;
+    let fileType: string | null = null;
+
+    if (req.file) {
+      fileName = req.file.originalname;
+      fileType = req.file.mimetype;
+      // Subir archivo a Bunny Storage bajo carpeta tareas/
+      const uploadRes = await BunnyStorageService.uploadFile({
+        ruc: 'TAREAS',
+        year: new Date().getFullYear(),
+        category: 'ADJUNTOS',
+        fileName: `${Date.now()}_${req.file.originalname}`,
+        fileBuffer: req.file.buffer,
+        contentType: req.file.mimetype,
+      });
+      fileUrl = uploadRes.bunnyUrl;
+    }
+
     const task = await prisma.task.create({
       data: {
         title: title.trim(),
@@ -73,6 +131,9 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
         dueDate: dueDate ? new Date(dueDate) : null,
         createdById: req.user!.id,
         assignedToId: assignedId,
+        fileUrl,
+        fileName,
+        fileType,
       },
       include: {
         createdBy: { select: { id: true, fullName: true, username: true } },
@@ -95,10 +156,10 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
  * PATCH /api/tasks/:id
  * Actualiza estado (COMPLETADA, PENDIENTE, etc.) o campos de la tarea
  */
-router.patch('/:id', async (req: Request, res: Response): Promise<void> => {
+router.patch('/:id', upload.single('file'), async (req: Request, res: Response): Promise<void> => {
   try {
     const id = parseInt(req.params.id as string, 10);
-    const { status, title, description, priority, dueDate, assignedToId } = req.body;
+    const { status, title, description, priority, dueDate, assignedToId, cancelNote } = req.body;
 
     if (isNaN(id)) {
       res.status(400).json({ success: false, message: 'ID inválido.' });
@@ -110,15 +171,35 @@ router.patch('/:id', async (req: Request, res: Response): Promise<void> => {
       dataToUpdate.status = status;
       if (status === 'COMPLETADA') {
         dataToUpdate.completedAt = new Date();
+        dataToUpdate.cancelNote = null;
+      } else if (status === 'CANCELADA') {
+        dataToUpdate.completedAt = null;
+        dataToUpdate.cancelNote = cancelNote ? cancelNote.trim() : null;
       } else {
         dataToUpdate.completedAt = null;
+        dataToUpdate.cancelNote = null;
       }
     }
+    if (cancelNote !== undefined && !status) dataToUpdate.cancelNote = cancelNote ? cancelNote.trim() : null;
     if (title !== undefined) dataToUpdate.title = title.trim();
     if (description !== undefined) dataToUpdate.description = description ? description.trim() : null;
     if (priority !== undefined) dataToUpdate.priority = priority;
     if (dueDate !== undefined) dataToUpdate.dueDate = dueDate ? new Date(dueDate) : null;
     if (assignedToId !== undefined) dataToUpdate.assignedToId = parseInt(assignedToId, 10);
+
+    if (req.file) {
+      dataToUpdate.fileName = req.file.originalname;
+      dataToUpdate.fileType = req.file.mimetype;
+      const uploadRes = await BunnyStorageService.uploadFile({
+        ruc: 'TAREAS',
+        year: new Date().getFullYear(),
+        category: 'ADJUNTOS',
+        fileName: `${Date.now()}_${req.file.originalname}`,
+        fileBuffer: req.file.buffer,
+        contentType: req.file.mimetype,
+      });
+      dataToUpdate.fileUrl = uploadRes.bunnyUrl;
+    }
 
     const task = await prisma.task.update({
       where: { id },

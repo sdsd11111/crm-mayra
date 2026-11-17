@@ -223,11 +223,40 @@ _Por favor enviar el comprobante con la referencia para conciliar en su estado d
       data: { flowData: currentData },
     });
 
-    if (args.stepCompleted === 'DATOS_COMPLETOS') {
+    if (args.stepCompleted === 'DATOS_COMPLETOS' || args.stepCompleted === 'PAGO_CONFIRMADO') {
+      // Notificar y transferir a Mayra para validación de cobro y a las asistentes para la emisión
       await prisma.chatTicket.update({
         where: { id: ctx.ticketId },
-        data: { queueType: 'OPERATIVA_CHICAS' },
+        data: {
+          queueType: 'GERENCIAL_MAYRA',
+          botPaused: true,
+        },
       });
+
+      // Crear Task de alta prioridad para Mayra
+      const mayraUser = await prisma.user.findFirst({ where: { role: 'ADMIN_MAYRA' } });
+      if (mayraUser) {
+        await prisma.task.create({
+          data: {
+            title: `🔐 Firma Electrónica por Emitir: ${currentData?.razonSocial || 'Cliente'}`,
+            description: `El cliente ha completado los requisitos de firma electrónica y envió confirmación de pago por WhatsApp. Validar acreditación bancaria y autorizar emisión a las asistentes. Tel: ${ctx.phone}`,
+            dueDate: new Date(),
+            status: 'PENDIENTE',
+            createdById: mayraUser.id,
+            assignedToId: mayraUser.id,
+          },
+        }).catch(() => {});
+      }
+
+      if (io) {
+        io.emit('whatsapp:new-message', {
+          ticketId: ctx.ticketId,
+          queue: 'GERENCIAL_MAYRA',
+          clientPhone: ctx.phone,
+          isEscalated: true,
+          escalationReason: `Requisitos de firma completados y pago enviado. Requiere validación de Mayra.`,
+        });
+      }
     }
 
     return {
@@ -268,19 +297,36 @@ _Por favor enviar el comprobante con la referencia para conciliar en su estado d
   }
 
   /**
-   * 7. reset_active_flow: Cancela trámite en curso y vuelve a IDLE sin pausar el bot
+   * 7. reset_active_flow: Marca el trámite como no deseado o completado y vuelve a IDLE sin pausar el bot
    */
   public static async resetActiveFlow(
     ctx: ToolExecutionContext
   ): Promise<{ success: boolean; message: string }> {
+    const existing = await prisma.botSession.findUnique({
+      where: { whatsappPhone: ctx.phone },
+    });
+
+    const currentData: any = existing?.flowData ? { ...(existing.flowData as any) } : {};
+    currentData.rejectedAt = new Date().toISOString();
+    currentData.status = 'RECHAZADO_POR_CLIENTE';
+
     await prisma.botSession.upsert({
       where: { whatsappPhone: ctx.phone },
-      update: { currentFlow: 'IDLE', flowData: Prisma.DbNull, lastInteractionAt: new Date() },
-      create: { whatsappPhone: ctx.phone, currentFlow: 'IDLE' },
+      update: {
+        currentFlow: 'IDLE',
+        flowData: currentData,
+        lastInteractionAt: new Date(),
+      },
+      create: {
+        whatsappPhone: ctx.phone,
+        currentFlow: 'IDLE',
+        flowData: currentData,
+      },
     });
+
     return {
       success: true,
-      message: 'Trámite anterior cancelado. Ahora puede procesar su nueva solicitud.',
+      message: 'Flujo de renovación cerrado como rechazado por el cliente. Estado del bot en reposo.',
     };
   }
 }

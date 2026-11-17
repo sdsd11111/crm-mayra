@@ -110,7 +110,13 @@ interface TaskItem {
   priority: string;
   status: string;
   dueDate?: string | null;
+  fileUrl?: string | null;
+  fileName?: string | null;
+  fileType?: string | null;
+  cancelNote?: string | null;
+  createdAt?: string;
   assignedTo: { id: number; fullName: string };
+  createdBy?: { id: number; fullName: string };
 }
 
 interface MayraAttention {
@@ -161,6 +167,10 @@ function DashboardView() {
   const [tasks, setTasks] = useState<TaskItem[]>([]);
   const [tasksLoading, setTasksLoading] = useState(true);
   const [isTasksModalOpen, setIsTasksModalOpen] = useState(false);
+  const [selectedTaskDetail, setSelectedTaskDetail] = useState<TaskItem | null>(null);
+  const [dashCancelNote, setDashCancelNote] = useState('');
+  const [dashShowCancelForm, setDashShowCancelForm] = useState(false);
+  const [taskFilterTab, setTaskFilterTab] = useState<'HOY' | 'PASADAS' | 'TODAS'>('HOY');
 
   // Bloque Atención de Mayra
   const [mayraAttention, setMayraAttention] = useState<MayraAttention | null>(null);
@@ -436,6 +446,39 @@ function DashboardView() {
 
   const pendingTasks = tasks.filter((t) => t.status === 'PENDIENTE');
 
+  // Separación temporal de tareas
+  const isDateToday = (dStr?: string | null) => {
+    if (!dStr) return false;
+    const d = new Date(dStr);
+    const today = new Date();
+    return (
+      d.getDate() === today.getDate() &&
+      d.getMonth() === today.getMonth() &&
+      d.getFullYear() === today.getFullYear()
+    );
+  };
+
+  const isDatePastOrYesterday = (dStr?: string | null) => {
+    if (!dStr) return false;
+    const d = new Date(dStr);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const target = new Date(d);
+    target.setHours(0, 0, 0, 0);
+    return target < today;
+  };
+
+  // Tareas de hoy (por dueDate de hoy o sin fecha límite creadas hoy)
+  const tasksToday = pendingTasks.filter((t) => isDateToday(t.dueDate) || isDateToday(t.createdAt));
+  // Tareas de ayer y pasadas vencidas
+  const tasksPast = pendingTasks.filter((t) => isDatePastOrYesterday(t.dueDate) && !isDateToday(t.dueDate));
+  // Si no hay tareas específicamente marcadas de hoy, mostrar las pendientes principales
+  const displayedCardTasks = taskFilterTab === 'HOY'
+    ? (tasksToday.length > 0 ? tasksToday : pendingTasks.slice(0, 5))
+    : taskFilterTab === 'PASADAS'
+    ? tasksPast
+    : pendingTasks;
+
   if (authLoading) {
     return (
       <div className="min-h-screen bg-[#F4F6F9] flex items-center justify-center">
@@ -517,13 +560,38 @@ function DashboardView() {
                     </div>
                   </div>
 
-                  {/* Valor Principal centrado ocupando el cuerpo de la card */}
-                  <div className="flex-1 flex flex-col items-center justify-center py-6 text-center">
-                    <div className="text-5xl sm:text-6xl font-extrabold font-mono tracking-tight text-[#1E2A3C] group-hover:text-[#166BA3] transition-colors leading-none">
-                      +${summary?.totalRecaudadoMes.toFixed(2) ?? '0.00'}
+                  {/* Métricas: Recaudado vs Saldo a Cobrar */}
+                  <div className="flex-1 flex flex-col justify-center py-4 space-y-3">
+                    <div className="grid grid-cols-2 gap-3">
+                      {/* Total Ganado / Cobrado */}
+                      <div className="p-3 bg-emerald-50/70 border border-emerald-100 rounded-xl text-left">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-800 block">
+                          Total Ganado / Cobrado
+                        </span>
+                        <div className="text-2xl sm:text-3xl font-extrabold font-mono text-emerald-700 leading-tight mt-1">
+                          +${summary?.totalRecaudadoMes.toFixed(2) ?? '0.00'}
+                        </div>
+                        <span className="text-[10px] text-emerald-600 font-medium block mt-0.5">
+                          Ingresos recaudados
+                        </span>
+                      </div>
+
+                      {/* Saldo a Cobrar (Deuda) */}
+                      <div className="p-3 bg-rose-50/70 border border-rose-100 rounded-xl text-left">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-rose-800 block">
+                          Saldo a Cobrar (Deuda)
+                        </span>
+                        <div className="text-2xl sm:text-3xl font-extrabold font-mono text-rose-700 leading-tight mt-1">
+                          ${(summary?.totalCarteraPendiente ?? totalDebt).toFixed(2)}
+                        </div>
+                        <span className="text-[10px] text-rose-600 font-medium block mt-0.5">
+                          Saldo pendiente a cobrar
+                        </span>
+                      </div>
                     </div>
-                    <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold border border-emerald-100">
-                      <CheckCircle size={13} /> Conciliado al día
+
+                    <div className="inline-flex items-center justify-center gap-1.5 px-3 py-1 rounded-full bg-slate-50 text-slate-600 text-xs font-semibold border border-slate-200 self-center">
+                      <CheckCircle size={13} className="text-emerald-600" /> Conciliación contable activa
                     </div>
                   </div>
 
@@ -687,17 +755,12 @@ function DashboardView() {
           </div>
         </div>
 
-        {/* 4 CARDS ALINEADAS EN UNA SOLA FILA:
-            1. Tareas Pendientes (máx 5 + popup modal al hacer clic)
-            2. Top Deudores (solo visible para Mayra/Cobrador)
-            3. Directorio Rápido
-            4. Firmas p12 y Accesos
-        */}
+        {/* 4 CARDS ALINEADAS EN UNA SOLA FILA */}
         <div className={`grid grid-cols-1 md:grid-cols-2 ${isAssistant ? 'xl:grid-cols-3' : 'xl:grid-cols-4'} gap-5 items-stretch`}>
           {/* CARD 1: TAREAS PENDIENTES */}
           <div className="bg-white border border-slate-200 shadow-sm rounded-2xl p-5 flex flex-col justify-between h-[390px]">
             <div>
-              <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 rounded-lg bg-[#166BA3]/10 text-[#166BA3] flex items-center justify-center">
                     <CheckSquare size={17} />
@@ -718,26 +781,58 @@ function DashboardView() {
                 </button>
               </div>
 
+              {/* Botoncitos para filtrar: Hoy vs Ayer / Pasadas */}
+              <div className="flex items-center gap-1.5 mb-2.5 pt-1">
+                <button
+                  type="button"
+                  onClick={() => setTaskFilterTab('HOY')}
+                  className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all ${
+                    taskFilterTab === 'HOY'
+                      ? 'bg-[#166BA3] text-white shadow-xs'
+                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  }`}
+                >
+                  Hoy ({tasksToday.length})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTaskFilterTab('PASADAS')}
+                  className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all ${
+                    taskFilterTab === 'PASADAS'
+                      ? 'bg-rose-600 text-white shadow-xs'
+                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  }`}
+                >
+                  Ayer / Pasadas ({tasksPast.length})
+                </button>
+              </div>
+
               {tasksLoading ? (
                 <div className="space-y-2 py-4">
                   {[1, 2, 3].map((n) => (
                     <div key={n} className="h-10 bg-slate-100 animate-pulse rounded-lg" />
                   ))}
                 </div>
-              ) : pendingTasks.length === 0 ? (
+              ) : displayedCardTasks.length === 0 ? (
                 <div className="py-8 text-center text-xs text-gray-400 flex flex-col items-center justify-center gap-1.5">
                   <CheckCheck size={24} className="text-[#166BA3]" />
-                  <span>Sin tareas pendientes.</span>
+                  <span>
+                    {taskFilterTab === 'HOY'
+                      ? 'No hay tareas asignadas para hoy.'
+                      : 'No hay tareas atrasadas de días anteriores.'}
+                  </span>
                   <Link href="/configuracion?tab=TAREAS&action=new-task" className="text-[11px] text-[#166BA3] underline font-semibold mt-1">
                     + Crear tarea
                   </Link>
                 </div>
               ) : (
                 <div className="space-y-1.5 overflow-hidden">
-                  {pendingTasks.slice(0, 5).map((t) => (
+                  {displayedCardTasks.slice(0, 5).map((t) => (
                     <div
                       key={t.id}
-                      className="p-2 rounded-xl bg-slate-50 border border-slate-200/70 flex items-center justify-between gap-2 text-xs hover:bg-slate-100/70 transition-colors"
+                      onClick={() => setSelectedTaskDetail(t)}
+                      className="p-2 rounded-xl bg-slate-50 border border-slate-200/70 flex items-center justify-between gap-2 text-xs hover:bg-blue-50/50 hover:border-[#166BA3]/40 cursor-pointer transition-all group"
+                      title="Haz clic para ver la tarea completa con adjuntos"
                     >
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-1.5 mb-0.5">
@@ -751,11 +846,21 @@ function DashboardView() {
                           <span className="text-[10px] text-gray-400 truncate">
                             {t.assignedTo?.fullName?.split(' ')[0] || 'Mayra'}
                           </span>
+                          {t.fileUrl && (
+                            <span className="text-[9px] text-blue-600 font-semibold bg-blue-50 px-1 rounded flex items-center gap-0.5">
+                              📎 Adjunto
+                            </span>
+                          )}
                         </div>
-                        <p className="text-xs font-semibold text-[#1E2A3C] truncate leading-tight">{t.title}</p>
+                        <p className="text-xs font-semibold text-[#1E2A3C] truncate leading-tight group-hover:text-[#166BA3]">
+                          {t.title}
+                        </p>
                       </div>
                       <button
-                        onClick={() => handleToggleTask(t.id, t.status)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleToggleTask(t.id, t.status);
+                        }}
                         className="text-[10px] shrink-0 font-semibold text-slate-500 hover:text-emerald-700 p-1 rounded-lg hover:bg-emerald-50"
                         title="Marcar completada"
                       >
@@ -771,13 +876,13 @@ function DashboardView() {
               <span className="text-gray-400">
                 Total: <strong className="text-slate-700">{pendingTasks.length} pendientes</strong>
               </span>
-              {pendingTasks.length > 5 && (
+              {displayedCardTasks.length > 5 && (
                 <button
                   type="button"
                   onClick={() => setIsTasksModalOpen(true)}
                   className="text-[11px] font-bold text-[#166BA3] hover:underline"
                 >
-                  +{pendingTasks.length - 5} más...
+                  +{displayedCardTasks.length - 5} más...
                 </button>
               )}
             </div>
@@ -947,7 +1052,7 @@ function DashboardView() {
                   </div>
                   <div>
                     <h2 className="text-sm font-bold text-[#1E2A3C] leading-none">Firmas p12</h2>
-                    <span className="text-[10px] text-gray-400">Vencimiento ≤ 5 días</span>
+                    <span className="text-[10px] text-gray-400">Vencimiento ≤ 30 días</span>
                   </div>
                 </div>
                 <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-md bg-slate-100 text-[#1E2A3C]">
@@ -1195,10 +1300,11 @@ function DashboardView() {
                 tasks.map((t) => (
                   <div
                     key={t.id}
-                    className={`p-3.5 rounded-xl border flex items-center justify-between gap-3 transition-colors ${
+                    onClick={() => setSelectedTaskDetail(t)}
+                    className={`p-3.5 rounded-xl border flex items-center justify-between gap-3 transition-colors cursor-pointer hover:border-[#166BA3]/50 ${
                       t.status === 'COMPLETADA'
                         ? 'bg-slate-50/60 border-slate-200/50 opacity-60'
-                        : 'bg-white border-slate-200 shadow-xs hover:border-[#166BA3]/40'
+                        : 'bg-white border-slate-200 shadow-xs'
                     }`}
                   >
                     <div className="min-w-0 flex-1">
@@ -1220,6 +1326,11 @@ function DashboardView() {
                             Vence: {new Date(t.dueDate).toLocaleDateString('es-EC')}
                           </span>
                         )}
+                        {t.fileUrl && (
+                          <span className="text-[10px] text-blue-600 font-semibold bg-blue-50 px-1.5 py-0.2 rounded border border-blue-100">
+                            📎 {t.fileName || 'Archivo adjunto'}
+                          </span>
+                        )}
                       </div>
                       <h4 className={`text-xs font-bold ${t.status === 'COMPLETADA' ? 'line-through text-gray-400' : 'text-[#1E2A3C]'}`}>
                         {t.title}
@@ -1233,7 +1344,10 @@ function DashboardView() {
                     </div>
                     <div className="shrink-0">
                       <button
-                        onClick={() => handleToggleTask(t.id, t.status)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleToggleTask(t.id, t.status);
+                        }}
                         className={`text-xs font-semibold px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-all ${
                           t.status === 'COMPLETADA'
                             ? 'bg-slate-100 text-slate-600 hover:bg-slate-200'
@@ -1257,6 +1371,177 @@ function DashboardView() {
               >
                 Cerrar
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL POPUP: DETALLE COMPLETO DE TAREA Y DESCARGA DE ARCHIVOS */}
+      {selectedTaskDetail && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl relative border border-slate-100 flex flex-col animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <div className="flex items-center gap-2">
+                <span className={`text-[10px] font-extrabold px-2.5 py-1 rounded-md ${
+                  selectedTaskDetail.priority === 'URGENTE' ? 'bg-rose-100 text-rose-700' :
+                  selectedTaskDetail.priority === 'ALTA' ? 'bg-amber-100 text-amber-800' :
+                  'bg-slate-100 text-slate-700'
+                }`}>
+                  {selectedTaskDetail.priority}
+                </span>
+                <span className={`text-[10px] font-bold px-2.5 py-1 rounded-md ${
+                  selectedTaskDetail.status === 'COMPLETADA' ? 'bg-emerald-100 text-emerald-800' : 'bg-blue-50 text-[#166BA3]'
+                }`}>
+                  {selectedTaskDetail.status}
+                </span>
+              </div>
+              <button
+                onClick={() => setSelectedTaskDetail(null)}
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-slate-100 transition-colors"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="py-4 space-y-4">
+              <div>
+                <h3 className="text-base font-bold text-[#1E2A3C] leading-snug">
+                  {selectedTaskDetail.title}
+                </h3>
+                {selectedTaskDetail.dueDate && (
+                  <p className="text-xs text-amber-700 font-medium mt-1 flex items-center gap-1">
+                    <Calendar size={13} />
+                    Fecha límite: {new Date(selectedTaskDetail.dueDate).toLocaleDateString('es-EC', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                  </p>
+                )}
+              </div>
+
+              {selectedTaskDetail.description && (
+                <div className="p-3.5 bg-slate-50 border border-slate-200/80 rounded-xl text-xs text-slate-700 leading-relaxed whitespace-pre-wrap">
+                  {selectedTaskDetail.description}
+                </div>
+              )}
+
+              {/* Motivo de no realización */}
+              {selectedTaskDetail.cancelNote && (
+                <div className="p-3.5 bg-red-50 border border-red-200 rounded-xl text-xs text-red-800 leading-relaxed">
+                  <p className="font-bold mb-1">⚠ No se pudo realizar:</p>
+                  <p className="whitespace-pre-wrap">{selectedTaskDetail.cancelNote}</p>
+                </div>
+              )}
+
+              {/* Archivo adjunto descargable */}
+              {selectedTaskDetail.fileUrl ? (
+                <div className="p-3.5 bg-sky-50/70 border border-sky-200 rounded-xl flex items-center justify-between gap-3">
+                  <div className="min-w-0 flex items-center gap-2.5">
+                    <div className="w-9 h-9 rounded-lg bg-sky-100 text-[#166BA3] flex items-center justify-center shrink-0">
+                      <FileText size={18} />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-xs font-bold text-[#1E2A3C] truncate">{selectedTaskDetail.fileName || 'Documento adjunto'}</p>
+                      <p className="text-[10px] text-gray-400">Archivo adjunto a esta tarea</p>
+                    </div>
+                  </div>
+                  <a
+                    href={selectedTaskDetail.fileUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    download
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#166BA3] hover:bg-[#135887] text-white text-xs font-semibold shadow-xs transition-colors shrink-0"
+                  >
+                    Descargar <ExternalLink size={12} />
+                  </a>
+                </div>
+              ) : (
+                <div className="p-3 bg-slate-50 border border-slate-100 rounded-xl text-xs text-slate-400 italic text-center">
+                  Esta tarea no incluye archivos adjuntos.
+                </div>
+              )}
+
+              <div className="grid grid-cols-2 gap-3 text-xs bg-slate-50 p-3 rounded-xl border border-slate-100">
+                <div>
+                  <span className="text-[10px] text-gray-400 uppercase font-semibold block">Asignado a</span>
+                  <span className="font-bold text-slate-700">{selectedTaskDetail.assignedTo?.fullName || 'Mayra Castillo'}</span>
+                </div>
+                <div>
+                  <span className="text-[10px] text-gray-400 uppercase font-semibold block">Creado por</span>
+                  <span className="font-bold text-slate-700">{selectedTaskDetail.createdBy?.fullName || 'Mayra Castillo'}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-3 border-t border-slate-100 space-y-2">
+              {/* Formulario motivo */}
+              {dashShowCancelForm && (
+                <div className="p-3 bg-red-50 border border-red-200 rounded-xl space-y-2">
+                  <p className="text-xs font-bold text-red-800">¿Por qué no se pudo realizar?</p>
+                  <textarea
+                    rows={2}
+                    value={dashCancelNote}
+                    onChange={(e) => setDashCancelNote(e.target.value)}
+                    placeholder="Describe el inconveniente..."
+                    className="w-full px-3 py-2 rounded-lg border border-red-200 text-xs text-slate-700 focus:outline-none resize-none"
+                  />
+                  <div className="flex gap-2 justify-end">
+                    <button onClick={() => { setDashShowCancelForm(false); setDashCancelNote(''); }} className="px-3 py-1 text-xs text-slate-600 hover:bg-slate-100 rounded-lg">Cancelar</button>
+                    <button
+                      onClick={async () => {
+                        if (!token || !selectedTaskDetail) return;
+                        const res = await fetch(`/api/tasks/${selectedTaskDetail.id}`, {
+                          method: 'PATCH',
+                          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                          body: JSON.stringify({ status: 'CANCELADA', cancelNote: dashCancelNote }),
+                        });
+                        if (res.ok) {
+                          setTasks((prev) =>
+                            prev.map((t) =>
+                              t.id === selectedTaskDetail.id
+                                ? { ...t, status: 'CANCELADA', cancelNote: dashCancelNote }
+                                : t
+                            )
+                          );
+                          setSelectedTaskDetail(null);
+                          setDashShowCancelForm(false);
+                          setDashCancelNote('');
+                        }
+                      }}
+                      className="px-4 py-1 text-xs font-bold bg-red-600 text-white hover:bg-red-700 rounded-lg"
+                    >Guardar</button>
+                  </div>
+                </div>
+              )}
+              <div className="flex items-center gap-2 flex-wrap">
+                {selectedTaskDetail.status !== 'COMPLETADA' && selectedTaskDetail.status !== 'CANCELADA' && (
+                  <button
+                    onClick={() => { handleToggleTask(selectedTaskDetail.id, selectedTaskDetail.status); setSelectedTaskDetail(null); }}
+                    className="px-4 py-2 text-xs font-bold rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 transition-all"
+                  >
+                    ✓ Marcar como Completada
+                  </button>
+                )}
+                {(selectedTaskDetail.status === 'COMPLETADA' || selectedTaskDetail.status === 'CANCELADA') && (
+                  <button
+                    onClick={() => { handleToggleTask(selectedTaskDetail.id, selectedTaskDetail.status); setSelectedTaskDetail(null); }}
+                    className="px-4 py-2 text-xs font-bold rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 transition-all"
+                  >
+                    Reabrir Tarea
+                  </button>
+                )}
+                {selectedTaskDetail.status !== 'COMPLETADA' && !dashShowCancelForm && (
+                  <button
+                    onClick={() => setDashShowCancelForm(true)}
+                    className="px-4 py-2 text-xs font-bold rounded-xl bg-red-50 text-red-700 border border-red-200 hover:bg-red-100 transition-all"
+                  >
+                    ✗ No se pudo realizar
+                  </button>
+                )}
+                <button
+                  onClick={() => { setSelectedTaskDetail(null); setDashShowCancelForm(false); setDashCancelNote(''); }}
+                  className="px-4 py-2 bg-slate-100 text-slate-600 hover:bg-slate-200 rounded-xl text-xs font-medium ml-auto"
+                >
+                  Cerrar
+                </button>
+              </div>
             </div>
           </div>
         </div>

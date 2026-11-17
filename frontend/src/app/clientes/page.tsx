@@ -108,6 +108,7 @@ function ClientesView() {
   const [newClientIsVip, setNewClientIsVip] = useState(false);
 
   // Formulario Unificado en 3 Pasos (Excel Mayra)
+  const [wizardStep, setWizardStep] = useState<1 | 2 | 3>(1);
   const [clientMode, setClientMode] = useState<'NEW_OWNER' | 'EXISTING_OWNER'>('NEW_OWNER');
   const [newRazonSocial, setNewRazonSocial] = useState('');
   const [newRuc, setNewRuc] = useState('');
@@ -527,6 +528,7 @@ function ClientesView() {
           <button
             onClick={() => {
               setModalType('CLIENT');
+              setWizardStep(1);
               setIsModalOpen(true);
             }}
             className="inline-flex items-center gap-2 bg-[#166BA3] text-white px-4 py-2.5 rounded-xl font-semibold text-xs sm:text-sm shadow-md hover:bg-[#166BA3]/90 active:scale-95 transition-all self-start sm:self-auto"
@@ -1018,11 +1020,51 @@ function ClientesView() {
                     Ficha de Creación de Cliente
                   </h3>
                   <p className="text-xs text-gray-500 mt-0.5">
-                    Configura el Dueño, la Ficha Tributaria y las Reglas de Cartera en una sola vista.
+                    Llena los pasos de forma clara y guiada.
                   </p>
+
+                  {/* Wizard Stepper Tabs */}
+                  <div className="flex items-center gap-2 mt-4 pb-2 border-b border-gray-100">
+                    <button
+                      type="button"
+                      onClick={() => setWizardStep(1)}
+                      className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all ${
+                        wizardStep === 1
+                          ? 'bg-emerald-600 text-white shadow-xs'
+                          : 'bg-emerald-50 text-emerald-800 hover:bg-emerald-100'
+                      }`}
+                    >
+                      <span>1. Dueño / Contacto</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setWizardStep(2)}
+                      className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all ${
+                        wizardStep === 2
+                          ? 'bg-[#166BA3] text-white shadow-xs'
+                          : 'bg-blue-50 text-blue-800 hover:bg-blue-100'
+                      }`}
+                    >
+                      <span>2. Datos & Tributario</span>
+                    </button>
+                    {!isAssistant && (
+                      <button
+                        type="button"
+                        onClick={() => setWizardStep(3)}
+                        className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all ${
+                          wizardStep === 3
+                            ? 'bg-[#1E2A3C] text-white shadow-xs'
+                            : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                        }`}
+                      >
+                        <span>3. Reglas de Cobro</span>
+                      </button>
+                    )}
+                  </div>
                 </div>
 
                 {/* ═══════════════ PASO 1: CONTACTO / DUEÑO PAGADOR ═══════════════ */}
+                {wizardStep === 1 && (
                 <div className="bg-emerald-50/60 border border-emerald-200/80 rounded-2xl p-4 space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-emerald-800 uppercase tracking-wide flex items-center gap-1.5">
@@ -1137,8 +1179,10 @@ function ClientesView() {
                     </div>
                   )}
                 </div>
+                )}
 
                 {/* ═══════════════ PASO 2: LA FICHA DEL EXCEL DE MAYRA ═══════════════ */}
+                {wizardStep === 2 && (
                 <div className="bg-blue-50/60 border border-blue-200/80 rounded-2xl p-4 space-y-3.5">
                   <span className="text-xs font-bold text-blue-900 uppercase tracking-wide block">
                     🔵 PASO 2: La Ficha del Excel (Datos, RUC, Claves y Checks)
@@ -1180,7 +1224,7 @@ function ClientesView() {
                     <div>
                       <label className="block text-xs font-semibold text-gray-700 mb-1 flex items-center justify-between">
                         <span>3. FECHA DECLARACIÓN (SRI)</span>
-                        <span className="text-[10px] text-blue-700 font-normal">🤖 9no dígito</span>
+                        <span className="text-[10px] text-blue-700 font-normal">Calculado (9no dígito)</span>
                       </label>
                       <input
                         type="text"
@@ -1228,8 +1272,57 @@ function ClientesView() {
 
                   {/* 6. Las Claves (SRI, FIRMA, IESS, SUT, SALARIO, SUPERCIAS) */}
                   <div className="pt-2 border-t border-blue-200/60">
-                    <span className="text-[11px] font-bold text-gray-700 block mb-2">
-                      🔑 6. Las Claves de Acceso (Opcionales - se copian con 1 clic en la tabla)
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-[11px] font-bold text-gray-700 block">
+                        🔑 6. Firma Electrónica y Claves de Acceso (Oficiales)
+                      </span>
+                      <span className="text-[10px] text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full font-medium border border-amber-200">
+                        Alerta de Renovación activa a 30 días
+                      </span>
+                    </div>
+
+                    {/* Módulo Especial Destacado de Firma Electrónica (.p12) */}
+                    <div className="mb-3 p-3 rounded-xl bg-blue-50/70 border border-blue-200/80">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-base">🔐</span>
+                        <div>
+                          <span className="text-xs font-bold text-[#166BA3] block leading-tight">
+                            Firma Electrónica (.p12) — Estudio Mayra Castillo
+                          </span>
+                          <span className="text-[10px] text-slate-500">
+                            Mayra es distribuidora autorizada. Registra la fecha de caducidad para el aviso automático.
+                          </span>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                        <div>
+                          <label className="text-[10px] text-blue-900 font-bold block mb-0.5">
+                            Clave de la Firma Electrónica (.p12)
+                          </label>
+                          <input
+                            type="text"
+                            value={newClaveFirma}
+                            onChange={(e) => setNewClaveFirma(e.target.value)}
+                            placeholder="Contraseña del archivo .p12"
+                            className="w-full px-2.5 py-1.5 rounded-lg border border-blue-200 bg-white text-xs font-mono focus:ring-1 focus:ring-[#166BA3]"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-[10px] text-blue-900 font-bold block mb-0.5">
+                            Fecha de Vencimiento de la Firma
+                          </label>
+                          <input
+                            type="date"
+                            value={newFirmaExpira}
+                            onChange={(e) => setNewFirmaExpira(e.target.value)}
+                            className="w-full px-2.5 py-1.5 rounded-lg border border-blue-200 bg-white text-xs font-semibold focus:ring-1 focus:ring-[#166BA3]"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wide block mb-1.5">
+                      Otras Claves de Portales Públicos
                     </span>
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
                       <div>
@@ -1240,25 +1333,6 @@ function ClientesView() {
                           onChange={(e) => setNewClaveSri(e.target.value)}
                           placeholder="Clave SRI"
                           className="w-full px-2.5 py-1.5 rounded-lg border border-gray-200 bg-white text-xs font-mono"
-                        />
-                      </div>
-                      <div>
-                        <label className="text-[10px] text-gray-500 font-semibold block mb-0.5">Clave Firma .p12</label>
-                        <input
-                          type="text"
-                          value={newClaveFirma}
-                          onChange={(e) => setNewClaveFirma(e.target.value)}
-                          placeholder="Clave firma"
-                          className="w-full px-2.5 py-1.5 rounded-lg border border-gray-200 bg-white text-xs font-mono"
-                        />
-                      </div>
-                      <div>
-                        <label className="text-[10px] text-gray-500 font-semibold block mb-0.5">Firma Caduca El</label>
-                        <input
-                          type="date"
-                          value={newFirmaExpira}
-                          onChange={(e) => setNewFirmaExpira(e.target.value)}
-                          className="w-full px-2 py-1.5 rounded-lg border border-gray-200 bg-white text-xs"
                         />
                       </div>
                       <div>
@@ -1349,9 +1423,10 @@ function ClientesView() {
                     </div>
                   </div>
                 </div>
+                )}
 
                 {/* ═══════════════ PASO 3: CUÁNTO Y CÓMO SE COBRA ═══════════════ */}
-                {!isAssistant && (
+                {!isAssistant && wizardStep === 3 && (
                   <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-3">
                     <div className="flex items-center justify-between">
                       <div>
@@ -1477,21 +1552,69 @@ function ClientesView() {
                   </div>
                 )}
 
-                <div className="pt-2 flex items-center justify-end gap-2 border-t border-gray-100">
-                  <button
-                    type="button"
-                    onClick={() => setIsModalOpen(false)}
-                    className="px-4 py-2.5 rounded-xl text-xs font-semibold text-gray-600 hover:bg-gray-100"
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={saving}
-                    className="px-6 py-2.5 rounded-xl text-xs font-bold bg-[#166BA3] text-white hover:bg-[#166BA3]/90 shadow-md active:scale-95 transition-all"
-                  >
-                    {saving ? 'Guardando en Bóveda...' : 'Guardar Cliente'}
-                  </button>
+                <div className="pt-2 flex items-center justify-between border-t border-gray-100">
+                  <div className="flex items-center gap-2">
+                    {wizardStep > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => setWizardStep((prev) => (prev === 3 ? 2 : 1))}
+                        className="px-4 py-2.5 rounded-xl text-xs font-semibold bg-gray-100 hover:bg-gray-200 text-gray-700 transition-all"
+                      >
+                        ← Anterior
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => setIsModalOpen(false)}
+                      className="px-4 py-2.5 rounded-xl text-xs font-semibold text-gray-500 hover:bg-gray-100"
+                    >
+                      Cancelar
+                    </button>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    {wizardStep < (!isAssistant ? 3 : 2) ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (wizardStep === 1) {
+                            if (clientMode === 'NEW_OWNER' && !newClientName.trim()) {
+                              alert('Por favor, ingresa el nombre del dueño.');
+                              return;
+                            }
+                            if (clientMode === 'EXISTING_OWNER' && !selectedClientId) {
+                              alert('Por favor, selecciona un dueño existente.');
+                              return;
+                            }
+                            setWizardStep(2);
+                          } else if (wizardStep === 2) {
+                            if (!newRazonSocial.trim()) {
+                              alert('Por favor, ingresa la Razón Social.');
+                              return;
+                            }
+                            if (!newRuc.trim() || newRuc.trim().length !== 13) {
+                              alert('El RUC debe tener exactamente 13 dígitos.');
+                              return;
+                            }
+                            if (!isAssistant) {
+                              setWizardStep(3);
+                            }
+                          }
+                        }}
+                        className="px-6 py-2.5 rounded-xl text-xs font-bold bg-[#166BA3] text-white hover:bg-[#166BA3]/90 shadow-md active:scale-95 transition-all"
+                      >
+                        Siguiente →
+                      </button>
+                    ) : (
+                      <button
+                        type="submit"
+                        disabled={saving}
+                        className="px-6 py-2.5 rounded-xl text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 shadow-md active:scale-95 transition-all"
+                      >
+                        {saving ? 'Guardando en Bóveda...' : '✓ Guardar Cliente'}
+                      </button>
+                    )}
+                  </div>
                 </div>
               </form>
             ) : modalType === 'TAXPAYER' ? (

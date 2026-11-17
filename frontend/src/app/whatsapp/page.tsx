@@ -523,7 +523,7 @@ function WhatsAppView() {
                         : 'bg-emerald-50 text-emerald-700 border-emerald-300 hover:bg-emerald-100'
                     }`}
                   >
-                    {selectedChat.botPaused ? '👤 Atención Humana' : '🤖 Bot Activo'}
+                    {selectedChat.botPaused ? '👤 Atención Humana' : '⚡ Asistente Virtual'}
                   </button>
 
                   <button

@@ -6,6 +6,7 @@ import { PdfService } from './PdfService';
 import { BunnyStorageService } from './BunnyStorageService';
 import { OutboundQueueService } from './bot/outboundQueueService';
 import { calculateClientBalance } from '../utils/balanceUtils';
+import { SriTaskCronService } from './SriTaskCronService';
 
 export class BillingCron {
   /**
@@ -283,12 +284,12 @@ export class BillingCron {
   }
 
   public static async checkFirmaExpiry(): Promise<{ enqueued: number }> {
-    console.log('🔑 [BillingCron] Verificando firmas electrónicas por expirar para encolar...');
+    console.log('🔑 [BillingCron] Verificando firmas electrónicas por expirar a 30 días para retención y venta...');
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const alertThreshold = new Date(today);
-    alertThreshold.setDate(alertThreshold.getDate() + 5);
+    alertThreshold.setDate(alertThreshold.getDate() + 30); // 30 días como exige Mayra
 
     const expiringTaxpayers = await prisma.taxpayer.findMany({
       where: {
@@ -312,13 +313,37 @@ export class BillingCron {
         (taxpayer.firmaExpira!.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
       );
 
+      // Activar sesión conversacional para captura interactiva guiada
+      await prisma.botSession.upsert({
+        where: { whatsappPhone: client.whatsappPhone },
+        update: {
+          currentFlow: 'FIRMA_STEPS',
+          flowData: {
+            taxpayerId: taxpayer.id,
+            razonSocial: taxpayer.razonSocial,
+            daysLeft,
+            step: 'OFERTA_ENVIADA',
+            startedAt: new Date().toISOString(),
+          },
+        },
+        create: {
+          whatsappPhone: client.whatsappPhone,
+          currentFlow: 'FIRMA_STEPS',
+          flowData: {
+            taxpayerId: taxpayer.id,
+            razonSocial: taxpayer.razonSocial,
+            daysLeft,
+            step: 'OFERTA_ENVIADA',
+            startedAt: new Date().toISOString(),
+          },
+        },
+      });
+
       const message =
-        `🔑 *Aviso Importante* — Estudio Contable Mayra Castillo\n\n` +
-        `Estimado/a *${client.fullName}*, su Firma Electrónica de *${taxpayer.razonSocial}* ` +
-        `vence en *${daysLeft} día${daysLeft !== 1 ? 's' : ''}* (${taxpayer.firmaExpira!.toLocaleDateString('es-EC')}).\n\n` +
-        `Por favor coordine la *renovación de su firma .p12* a la brevedad para evitar ` +
-        `inconvenientes en sus trámites tributarios. 📋\n\n` +
-        `Contáctenos para iniciar el proceso. ¡Estamos para servirle! 😊`;
+        `🔐 *Aviso Preventivo de Firma Electrónica* — Estudio Contable Mayra Castillo\n\n` +
+        `Estimado/a *${client.fullName}*, le informamos que la firma electrónica (.p12) de *${taxpayer.razonSocial}* caduca en *${daysLeft} días* (${taxpayer.firmaExpira!.toLocaleDateString('es-EC')}).\n\n` +
+        `Como somos *distribuidores autorizados de firmas electrónicas*, podemos gestionar su renovación de inmediato para evitar bloqueos en la emisión de sus facturas del SRI.\n\n` +
+        `¿Desea que gestionemos su renovación ahora mismo? Responda *SÍ* y le indicaremos los planes y requisitos según sea Persona Natural o Empresa. ✍️`;
 
       try {
         await OutboundQueueService.enqueue({
@@ -327,13 +352,13 @@ export class BillingCron {
           textContent: message,
         });
         enqueued++;
-        console.log(`   🔑 Alerta firma encolada para ${client.fullName} — ${taxpayer.razonSocial} vence en ${daysLeft} días`);
+        console.log(`   🔑 Alerta y flujo de firma a 30 días encolada para ${client.fullName} — ${taxpayer.razonSocial} (${daysLeft} días)`);
       } catch (err) {
         console.error(`   ❌ Error encolando alerta firma a ${client.fullName}:`, err);
       }
     }
 
-    console.log(`🔑 [FirmaExpiry] Finalizado: ${enqueued} alertas encoladas.`);
+    console.log(`🔑 [FirmaExpiry] Finalizado: ${enqueued} alertas preventivas a 30 días encoladas.`);
     return { enqueued };
   }
 
@@ -386,12 +411,23 @@ export class BillingCron {
       }
     });
 
-    console.log('⏰ BillingCron iniciado con 5 jobs programados:');
+    // 5. Generador Automático de Tareas SRI (Regla Días Pares / 1 día antes): Diario a las 08:00 AM
+    cron.schedule('0 8 * * *', async () => {
+      try {
+        console.log('⏰ [Cron 08:00 AM] Ejecutando generador de tareas SRI automáticas...');
+        await SriTaskCronService.generateDailySriTasks();
+      } catch (err) {
+        console.error('❌ Error ejecutando SriTaskCron:', err);
+      }
+    });
+
+    console.log('⏰ BillingCron iniciado con 6 jobs programados:');
     console.log('   📋 Facturación automática: Día 1 de mes a las 00:05 AM');
     console.log('   📲 Cobranza WhatsApp: Días 1-5 de mes a las 09:00 AM');
     console.log('   📅 Recordatorio promesas: Diario a las 09:00 AM');
     console.log('   🔁 Recordatorio cargos recurrentes: Diario a las 09:05 AM');
     console.log('   🔑 Alerta firmas .p12: Diario a las 08:00 AM');
+    console.log('   ⚡ Tareas SRI (Días Pares / Anticipación): Diario a las 08:00 AM');
   }
 
   /**

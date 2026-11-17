@@ -13,7 +13,7 @@
  * Dígito 9 -> Día 26
  * Dígito 0 -> Día 28
  */
-const SRI_EXPIRATION_DAYS: Record<number, number> = {
+export const SRI_EXPIRATION_DAYS: Record<number, number> = {
   1: 10,
   2: 12,
   3: 14,
@@ -41,6 +41,35 @@ export function extractNovenoDigito(ruc?: string | null): number | null {
 }
 
 /**
+ * Traslada una fecha al siguiente día hábil si cae en sábado o domingo
+ * conforme al Art. 116 del Código Tributario de Ecuador.
+ */
+export function adjustToNextBusinessDay(date: Date): Date {
+  const adjusted = new Date(date);
+  const dayOfWeek = adjusted.getDay(); // 0 = Domingo, 6 = Sábado
+  if (dayOfWeek === 6) {
+    adjusted.setDate(adjusted.getDate() + 2); // Pasa al Lunes
+  } else if (dayOfWeek === 0) {
+    adjusted.setDate(adjusted.getDate() + 1); // Pasa al Lunes
+  }
+  return adjusted;
+}
+
+/**
+ * Calcula la fecha legal exacta de vencimiento SRI para un año, mes y RUC dados.
+ * Retorna un objeto Date con la hora fijada a las 18:00 (hora hábil de corte SRI).
+ */
+export function getSriLegalDueDate(year: number, month: number, ruc: string): Date | null {
+  const noveno = extractNovenoDigito(ruc);
+  if (noveno === null) return null;
+
+  const baseDay = SRI_EXPIRATION_DAYS[noveno] || 28;
+  // month es 1-based (1 = Enero, 12 = Diciembre)
+  const rawDate = new Date(year, month - 1, baseDay, 18, 0, 0, 0);
+  return adjustToNextBusinessDay(rawDate);
+}
+
+/**
  * Calcula el texto de fecha de declaración sugerido a partir del RUC y régimen.
  * Ejemplo para RUC con 9no dígito 9 en régimen MENSUAL: "26C/MES"
  */
@@ -60,4 +89,3 @@ export function calculateFechaDecla(ruc?: string | null, regimen?: string): stri
 
   return `${dia}C/MES`;
 }
-

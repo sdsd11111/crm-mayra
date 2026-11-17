@@ -30,6 +30,7 @@ import {
   Calendar,
   AlertTriangle,
   Check,
+  FileText,
   X,
 } from 'lucide-react';
 
@@ -57,6 +58,10 @@ interface TaskItem {
   priority: 'BAJA' | 'MEDIA' | 'ALTA' | 'URGENTE';
   status: 'PENDIENTE' | 'EN_PROCESO' | 'COMPLETADA' | 'CANCELADA';
   dueDate?: string | null;
+  fileUrl?: string | null;
+  fileName?: string | null;
+  fileType?: string | null;
+  cancelNote?: string | null;
   createdById: number;
   assignedToId: number;
   createdBy: { id: number; fullName: string; username: string };
@@ -116,7 +121,20 @@ function ConfiguracionView() {
   const [taskPriority, setTaskPriority] = useState<'BAJA' | 'MEDIA' | 'ALTA' | 'URGENTE'>('MEDIA');
   const [taskDueDate, setTaskDueDate] = useState('');
   const [taskAssignedToId, setTaskAssignedToId] = useState('');
+  const [taskFile, setTaskFile] = useState<File | null>(null);
   const [submittingTask, setSubmittingTask] = useState(false);
+
+  // Filtros de Tareas
+  const [taskSearch, setTaskSearch] = useState('');
+  const [taskCalendarDate, setTaskCalendarDate] = useState<string>(new Date().toISOString().split('T')[0]);
+  const [taskCalendarView, setTaskCalendarView] = useState<'HOY' | 'FECHA' | 'TODAS'>('TODAS');
+  const [selectedTaskPopup, setSelectedTaskPopup] = useState<TaskItem | null>(null);
+  const [cancelNoteInput, setCancelNoteInput] = useState('');
+  const [showCancelForm, setShowCancelForm] = useState(false);
+
+  // Estado del calendario mensual
+  const [calYear, setCalYear] = useState(new Date().getFullYear());
+  const [calMonth, setCalMonth] = useState(new Date().getMonth());
 
   // ================= ESTADO WHATSAPP =================
   const [waStatus, setWaStatus] = useState<InstanceStatus | null>(null);
@@ -202,25 +220,24 @@ function ConfiguracionView() {
     }
   }, [token, user, fetchUsers, fetchTasks, fetchWaStatus]);
 
-  // Crear Tarea
+  // Crear Tarea con archivo adjunto
   const handleCreateTask = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!token || !taskTitle.trim()) return;
     setSubmittingTask(true);
     try {
+      const formData = new FormData();
+      formData.append('title', taskTitle.trim());
+      if (taskDescription.trim()) formData.append('description', taskDescription.trim());
+      formData.append('priority', taskPriority);
+      if (taskDueDate) formData.append('dueDate', taskDueDate);
+      formData.append('assignedToId', taskAssignedToId ? taskAssignedToId : String(user?.id));
+      if (taskFile) formData.append('file', taskFile);
+
       const res = await fetch('/api/tasks', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          title: taskTitle.trim(),
-          description: taskDescription.trim() || undefined,
-          priority: taskPriority,
-          dueDate: taskDueDate || undefined,
-          assignedToId: taskAssignedToId ? parseInt(taskAssignedToId, 10) : user?.id,
-        }),
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
       });
       const data = await res.json();
       if (res.ok && data.success) {
@@ -230,6 +247,7 @@ function ConfiguracionView() {
         setTaskDescription('');
         setTaskDueDate('');
         setTaskPriority('MEDIA');
+        setTaskFile(null);
         await fetchTasks();
       } else {
         setFeedback({ type: 'error', message: data.message || 'Error al crear tarea.' });
@@ -238,6 +256,29 @@ function ConfiguracionView() {
       setFeedback({ type: 'error', message: err.message });
     } finally {
       setSubmittingTask(false);
+    }
+  };
+
+  // Marcar como no realizada (CANCELADA) con motivo
+  const handleCancelTask = async (taskId: number, note: string) => {
+    if (!token) return;
+    try {
+      const res = await fetch(`/api/tasks/${taskId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ status: 'CANCELADA', cancelNote: note }),
+      });
+      if (res.ok) {
+        setTasks((prev) =>
+          prev.map((t) => (t.id === taskId ? { ...t, status: 'CANCELADA', cancelNote: note } : t))
+        );
+        setSelectedTaskPopup((prev) => prev ? { ...prev, status: 'CANCELADA', cancelNote: note } : null);
+      }
+    } catch (err: any) {
+      console.error(err);
+    } finally {
+      setShowCancelForm(false);
+      setCancelNoteInput('');
     }
   };
 
@@ -590,83 +631,291 @@ function ConfiguracionView() {
 
             {tasksLoading ? (
               <div className="p-8 text-center text-xs text-gray-400">Cargando tareas...</div>
-            ) : tasks.length === 0 ? (
-              <div className="bg-white/95 rounded-2xl p-8 border border-white/80 text-center text-xs text-gray-400">
-                <CheckCircle2 size={32} className="mx-auto mb-2 text-emerald-500" />
-                <p className="font-semibold text-gray-600">No hay tareas pendientes</p>
-                <p className="mt-1">Crea una nueva tarea para ti o tus asistentes usando el botón de arriba.</p>
-              </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {tasks.map((task) => {
-                  const isDone = task.status === 'COMPLETADA';
-                  return (
-                    <div
-                      key={task.id}
-                      className={`bg-white/95 border rounded-2xl p-5 shadow-sm flex flex-col justify-between transition-all ${
-                        isDone ? 'border-emerald-200 bg-emerald-50/20 opacity-70' : 'border-white/80'
-                      }`}
-                    >
-                      <div>
-                        <div className="flex items-start justify-between gap-2 mb-2">
-                          <span
-                            className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${
-                              task.priority === 'URGENTE'
-                                ? 'bg-rose-100 text-rose-700'
-                                : task.priority === 'ALTA'
-                                ? 'bg-amber-100 text-amber-800'
-                                : 'bg-slate-100 text-slate-600'
-                            }`}
-                          >
-                            {task.priority}
-                          </span>
+              (() => {
+                const now = new Date();
+                const todayStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
 
+                // Para HOY y FECHA: lista filtrada normal
+                const filteredTasks = tasks.filter((t) => {
+                  let pass = true;
+                  if (taskCalendarView === 'HOY') {
+                    const due = t.dueDate
+                      ? (() => { const d = new Date(t.dueDate!); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; })()
+                      : (() => { const d = new Date(t.createdAt); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; })();
+                    pass = due === todayStr;
+                  } else if (taskCalendarView === 'FECHA') {
+                    const due = t.dueDate
+                      ? (() => { const d = new Date(t.dueDate!); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; })()
+                      : (() => { const d = new Date(t.createdAt); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; })();
+                    pass = due === taskCalendarDate;
+                  }
+                  if (taskSearch.trim()) {
+                    const q = taskSearch.toLowerCase();
+                    pass = pass && (t.title.toLowerCase().includes(q) || (t.description || '').toLowerCase().includes(q));
+                  }
+                  return pass;
+                });
+
+                // Cabecera de controles (siempre visible)
+                const controls = (
+                  <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setTaskCalendarView('HOY')}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${taskCalendarView === 'HOY' ? 'bg-[#166BA3] text-white' : 'bg-white text-slate-600 border border-slate-200 hover:border-[#166BA3]'}`}
+                      >
+                        Hoy
+                      </button>
+                      <button
+                        onClick={() => setTaskCalendarView('TODAS')}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${taskCalendarView === 'TODAS' ? 'bg-[#1E2A3C] text-white' : 'bg-white text-slate-600 border border-slate-200 hover:border-[#1E2A3C]'}`}
+                      >
+                        Calendario
+                      </button>
+                      <input
+                        type="date"
+                        value={taskCalendarDate}
+                        onChange={(e) => { setTaskCalendarDate(e.target.value); setTaskCalendarView('FECHA'); }}
+                        className="px-2 py-1.5 rounded-lg border border-slate-200 text-xs text-[#1E2A3C] focus:outline-none focus:border-[#166BA3]"
+                      />
+                    </div>
+                    <div className="relative flex-1 max-w-xs">
+                      <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                      <input
+                        type="text"
+                        placeholder="Buscar tarea..."
+                        value={taskSearch}
+                        onChange={(e) => setTaskSearch(e.target.value)}
+                        className="w-full pl-8 pr-3 py-1.5 rounded-lg border border-slate-200 text-xs focus:outline-none focus:border-[#166BA3]"
+                      />
+                    </div>
+                  </div>
+                );
+
+                // ===== VISTA CALENDARIO MENSUAL =====
+                if (taskCalendarView === 'TODAS') {
+                  const firstDay = new Date(calYear, calMonth, 1);
+                  const lastDay = new Date(calYear, calMonth + 1, 0);
+                  const startDow = firstDay.getDay();
+                  const daysInMonth = lastDay.getDate();
+                  const monthLabel = firstDay.toLocaleDateString('es-EC', { month: 'long', year: 'numeric' });
+
+                  // Helper: extraer YYYY-MM-DD desde string ISO respetando que la fecha
+                  // se guardó como mediodia local (evita shift de zona horaria)
+                  const toLocalDate = (iso: string) => {
+                    // Si ya viene como YYYY-MM-DD puro, retornar directo
+                    if (/^\d{4}-\d{2}-\d{2}$/.test(iso)) return iso;
+                    // Parsear y usar fecha local (no UTC)
+                    const d = new Date(iso);
+                    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+                  };
+
+                  // Map: 'YYYY-MM-DD' -> tasks[]
+                  const tasksByDay: Record<string, TaskItem[]> = {};
+                  tasks.forEach((t) => {
+                    const key = t.dueDate ? toLocalDate(t.dueDate) : toLocalDate(t.createdAt);
+                    if (!tasksByDay[key]) tasksByDay[key] = [];
+                    tasksByDay[key].push(t);
+                  });
+
+                  // Día seleccionado en el calendario para expandir sus tareas
+                  const selectedDayTasks = taskCalendarDate && taskCalendarView === 'TODAS'
+                    ? (tasksByDay[taskCalendarDate] || [])
+                    : [];
+
+                  const cells: React.ReactNode[] = [];
+                  for (let i = 0; i < startDow; i++) {
+                    cells.push(<div key={`e-${i}`} className="h-10 rounded-lg bg-slate-50/40" />);
+                  }
+                  for (let d = 1; d <= daysInMonth; d++) {
+                    const dateStr = `${calYear}-${String(calMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                    const dayTasks = tasksByDay[dateStr] || [];
+                    const isToday = dateStr === todayStr;
+                    const isSelected = dateStr === taskCalendarDate;
+                    const hasPending = dayTasks.some(t => t.status !== 'COMPLETADA' && t.status !== 'CANCELADA');
+                    const hasCancel = dayTasks.some(t => t.status === 'CANCELADA');
+                    const allDone = dayTasks.length > 0 && dayTasks.every(t => t.status === 'COMPLETADA');
+                    const isPast = dateStr < todayStr;
+
+                    cells.push(
+                      <button
+                        key={dateStr}
+                        onClick={() => setTaskCalendarDate(isSelected ? '' : dateStr)}
+                        className={`h-10 rounded-lg flex flex-col items-center justify-center gap-0.5 transition-all border ${
+                          isSelected
+                            ? 'border-[#166BA3] bg-[#166BA3]/10 ring-2 ring-[#166BA3]/30'
+                            : isToday
+                            ? 'border-[#166BA3]/50 bg-blue-50'
+                            : 'border-transparent hover:border-slate-200 hover:bg-slate-50'
+                        }`}
+                      >
+                        <span className={`text-[11px] font-bold leading-none ${
+                          isToday ? 'text-[#166BA3]' : 'text-slate-600'
+                        }`}>{d}</span>
+                        {dayTasks.length > 0 && (
+                          <div className="flex gap-0.5 items-center">
+                            {hasPending && <span className={`w-1.5 h-1.5 rounded-full ${isPast ? 'bg-rose-500' : 'bg-[#166BA3]'}`} />}
+                            {allDone && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />}
+                            {hasCancel && <span className="w-1.5 h-1.5 rounded-full bg-orange-400" />}
+                          </div>
+                        )}
+                      </button>
+                    );
+                  }
+
+                  return (
+                    <div className="space-y-4">
+                      {controls}
+                      <div className="bg-white/95 border border-slate-200 rounded-2xl p-4 shadow-sm space-y-3">
+                        {/* Cabecera mes + navegación */}
+                        <div className="flex items-center justify-between">
                           <button
-                            onClick={() => handleDeleteTask(task.id)}
-                            className="text-gray-300 hover:text-rose-500 transition-colors"
-                          >
-                            <Trash2 size={13} />
-                          </button>
+                            onClick={() => { if (calMonth === 0) { setCalMonth(11); setCalYear(y => y - 1); } else { setCalMonth(m => m - 1); } }}
+                            className="px-3 py-1 rounded-lg hover:bg-slate-100 text-slate-500 font-bold text-lg transition-colors"
+                          >‹</button>
+                          <h3 className="text-sm font-bold text-[#1E2A3C] capitalize">{monthLabel}</h3>
+                          <button
+                            onClick={() => { if (calMonth === 11) { setCalMonth(0); setCalYear(y => y + 1); } else { setCalMonth(m => m + 1); } }}
+                            className="px-3 py-1 rounded-lg hover:bg-slate-100 text-slate-500 font-bold text-lg transition-colors"
+                          >›</button>
                         </div>
 
-                        <h3 className={`text-sm font-bold text-[#1E2A3C] ${isDone ? 'line-through text-gray-400' : ''}`}>
-                          {task.title}
-                        </h3>
+                        {/* Cabecera días de semana */}
+                        <div className="grid grid-cols-7 gap-1">
+                          {['D','L','M','X','J','V','S'].map((d, i) => (
+                            <div key={i} className="text-center text-[10px] font-bold text-slate-400 uppercase">{d}</div>
+                          ))}
+                        </div>
 
-                        {task.description && (
-                          <p className="text-xs text-gray-500 mt-1 line-clamp-2">{task.description}</p>
-                        )}
+                        {/* Celdas días — compactas, solo número + dot */}
+                        <div className="grid grid-cols-7 gap-1">
+                          {cells}
+                        </div>
+
+                        {/* Leyenda */}
+                        <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-slate-100 text-[10px] text-slate-500">
+                          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-[#166BA3] inline-block" /> Pendiente</span>
+                          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" /> Completada</span>
+                          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-rose-500 inline-block" /> Vencida</span>
+                          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-orange-400 inline-block" /> No realizada</span>
+                        </div>
                       </div>
 
-                      <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
-                        <div className="text-[11px] text-gray-400">
-                          <span>Para: </span>
-                          <strong className="text-slate-700">
-                            {task.assignedTo?.fullName || 'Mayra'}
-                          </strong>
-                          {task.dueDate && (
-                            <span className="block text-[10px] text-amber-600 font-medium">
-                              Vence: {new Date(task.dueDate).toLocaleDateString('es-EC')}
-                            </span>
+                      {/* Tareas del día seleccionado */}
+                      {taskCalendarDate && (
+                        <div className="bg-white/95 border border-slate-200 rounded-2xl p-4 shadow-sm">
+                          <div className="flex items-center justify-between mb-3">
+                            <h4 className="text-xs font-bold text-[#1E2A3C]">
+                              Tareas del {new Date(taskCalendarDate + 'T12:00:00').toLocaleDateString('es-EC', { weekday: 'long', day: 'numeric', month: 'long' })}
+                            </h4>
+                            <button onClick={() => setTaskCalendarDate('')} className="text-gray-400 hover:text-gray-600"><X size={14} /></button>
+                          </div>
+                          {selectedDayTasks.length === 0 ? (
+                            <p className="text-xs text-gray-400 text-center py-4">Sin tareas para este día</p>
+                          ) : (
+                            <div className="space-y-2">
+                              {selectedDayTasks.map((t) => (
+                                <button
+                                  key={t.id}
+                                  onClick={() => setSelectedTaskPopup(t)}
+                                  className={`w-full text-left p-3 rounded-xl border flex items-center gap-3 hover:shadow-sm transition-all ${
+                                    t.status === 'COMPLETADA' ? 'border-emerald-200 bg-emerald-50/40'
+                                    : t.status === 'CANCELADA' ? 'border-orange-200 bg-orange-50/40'
+                                    : taskCalendarDate < todayStr ? 'border-rose-200 bg-rose-50/40'
+                                    : 'border-slate-200 bg-white hover:border-[#166BA3]/40'
+                                  }`}
+                                >
+                                  <span className={`w-2 h-2 rounded-full shrink-0 ${
+                                    t.status === 'COMPLETADA' ? 'bg-emerald-500'
+                                    : t.status === 'CANCELADA' ? 'bg-orange-400'
+                                    : taskCalendarDate < todayStr ? 'bg-rose-500'
+                                    : 'bg-[#166BA3]'
+                                  }`} />
+                                  <div className="min-w-0 flex-1">
+                                    <p className={`text-xs font-bold truncate ${t.status === 'COMPLETADA' ? 'line-through text-gray-400' : 'text-[#1E2A3C]'}`}>{t.title}</p>
+                                    <p className="text-[10px] text-gray-400">
+                                      {t.status === 'CANCELADA' ? `No realizada${t.cancelNote ? ': ' + t.cancelNote.slice(0, 40) + (t.cancelNote.length > 40 ? '…' : '') : ''}` : `Para: ${t.assignedTo?.fullName || 'Mayra'}`}
+                                    </p>
+                                  </div>
+                                  <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded shrink-0 ${
+                                    t.priority === 'URGENTE' ? 'bg-rose-100 text-rose-700'
+                                    : t.priority === 'ALTA' ? 'bg-amber-100 text-amber-800'
+                                    : 'bg-slate-100 text-slate-500'
+                                  }`}>{t.priority}</span>
+                                </button>
+                              ))}
+                            </div>
                           )}
                         </div>
-
-                        <button
-                          onClick={() => handleToggleTaskStatus(task.id, task.status)}
-                          className={`px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1 transition-all ${
-                            isDone
-                              ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200'
-                              : 'bg-slate-100 text-slate-700 hover:bg-emerald-100 hover:text-emerald-800'
-                          }`}
-                        >
-                          {isDone ? <Check size={12} /> : null}
-                          {isDone ? 'Hecha' : 'Completar'}
-                        </button>
-                      </div>
+                      )}
                     </div>
                   );
-                })}
-              </div>
+                }
+
+                // ===== VISTA LISTA (HOY / FECHA) =====
+                return (
+                  <div className="space-y-4">
+                    {controls}
+
+                    {filteredTasks.length === 0 ? (
+                      <div className="bg-white/95 rounded-2xl p-8 border border-white/80 text-center text-xs text-gray-400">
+                        <CheckCircle2 size={32} className="mx-auto mb-2 text-emerald-500" />
+                        <p className="font-semibold text-gray-600">Sin tareas para este día</p>
+                        <p className="mt-1">Prueba otra fecha o crea una nueva tarea.</p>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {filteredTasks.map((task) => {
+                          const isDone = task.status === 'COMPLETADA';
+                          return (
+                            <div
+                              key={task.id}
+                              onClick={() => setSelectedTaskPopup(task)}
+                              className={`bg-white/95 border rounded-2xl p-5 shadow-sm flex flex-col justify-between transition-all cursor-pointer hover:shadow-md hover:border-[#166BA3]/40 ${
+                                isDone ? 'border-emerald-200 bg-emerald-50/20 opacity-70' : 'border-white/80'
+                              }`}
+                            >
+                              <div>
+                                <div className="flex items-start justify-between gap-2 mb-2">
+                                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${
+                                    task.priority === 'URGENTE' ? 'bg-rose-100 text-rose-700'
+                                    : task.priority === 'ALTA' ? 'bg-amber-100 text-amber-800'
+                                    : 'bg-slate-100 text-slate-600'
+                                  }`}>{task.priority}</span>
+                                  <button
+                                    onClick={(e) => { e.stopPropagation(); handleDeleteTask(task.id); }}
+                                    className="text-gray-300 hover:text-rose-500 transition-colors"
+                                  ><Trash2 size={13} /></button>
+                                </div>
+                                <h3 className={`text-sm font-bold text-[#1E2A3C] ${isDone ? 'line-through text-gray-400' : ''}`}>{task.title}</h3>
+                                {task.description && <p className="text-xs text-gray-500 mt-1 line-clamp-2">{task.description}</p>}
+                                {task.fileUrl && <p className="text-[10px] text-[#166BA3] mt-1.5 flex items-center gap-1"><FileText size={11} /> Archivo adjunto</p>}
+                              </div>
+                              <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+                                <div className="text-[11px] text-gray-400">
+                                  <span>Para: </span>
+                                  <strong className="text-slate-700">{task.assignedTo?.fullName || 'Mayra'}</strong>
+                                  {task.dueDate && <span className="block text-[10px] text-amber-600 font-medium">Vence: {new Date(task.dueDate).toLocaleDateString('es-EC')}</span>}
+                                </div>
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); handleToggleTaskStatus(task.id, task.status); }}
+                                  className={`px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1 transition-all ${
+                                    isDone ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200' : 'bg-slate-100 text-slate-700 hover:bg-emerald-100 hover:text-emerald-800'
+                                  }`}
+                                >
+                                  {isDone ? <Check size={12} /> : null}
+                                  {isDone ? 'Hecha' : 'Completar'}
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                );
+              })()
             )}
           </div>
         )}
@@ -844,6 +1093,163 @@ function ConfiguracionView() {
         )}
       </main>
 
+      {/* Modal Ver Tarea */}
+      {selectedTaskPopup && (
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-lg w-full shadow-xl relative border border-gray-100 max-h-[90vh] overflow-y-auto">
+            {/* Header */}
+            <div className="sticky top-0 bg-white border-b border-slate-100 px-6 py-4 flex items-center justify-between rounded-t-2xl z-10">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${
+                  selectedTaskPopup.priority === 'URGENTE' ? 'bg-rose-100 text-rose-700'
+                  : selectedTaskPopup.priority === 'ALTA' ? 'bg-amber-100 text-amber-800'
+                  : 'bg-slate-100 text-slate-600'
+                }`}>{selectedTaskPopup.priority}</span>
+                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${
+                  selectedTaskPopup.status === 'COMPLETADA' ? 'bg-emerald-100 text-emerald-700'
+                  : selectedTaskPopup.status === 'CANCELADA' ? 'bg-red-100 text-red-700'
+                  : 'bg-blue-100 text-blue-700'
+                }`}>{selectedTaskPopup.status === 'CANCELADA' ? 'No realizada' : selectedTaskPopup.status}</span>
+              </div>
+              <button
+                onClick={() => { setSelectedTaskPopup(null); setShowCancelForm(false); setCancelNoteInput(''); }}
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-slate-100"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4">
+              <h3 className="text-base font-bold text-[#1E2A3C] leading-snug">{selectedTaskPopup.title}</h3>
+
+              {selectedTaskPopup.dueDate && (
+                <p className="text-xs text-amber-700 font-medium flex items-center gap-1">
+                  <Calendar size={13} />
+                  Fecha límite: {new Date(selectedTaskPopup.dueDate).toLocaleDateString('es-EC', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                </p>
+              )}
+
+              {selectedTaskPopup.description && (
+                <div className="p-3.5 bg-slate-50 border border-slate-200/80 rounded-xl text-xs text-slate-700 leading-relaxed whitespace-pre-wrap">
+                  {selectedTaskPopup.description}
+                </div>
+              )}
+
+              {/* Motivo de no realización */}
+              {selectedTaskPopup.cancelNote && (
+                <div className="p-3.5 bg-red-50 border border-red-200 rounded-xl text-xs text-red-800 leading-relaxed">
+                  <p className="font-bold mb-1 flex items-center gap-1">
+                    <AlertCircle size={13} /> Motivo / Inconveniente:
+                  </p>
+                  <p className="whitespace-pre-wrap">{selectedTaskPopup.cancelNote}</p>
+                </div>
+              )}
+
+              {selectedTaskPopup.fileUrl ? (
+                <div className="p-3.5 bg-sky-50/70 border border-sky-200 rounded-xl flex items-center justify-between gap-3">
+                  <div className="min-w-0 flex items-center gap-2.5">
+                    <div className="w-9 h-9 rounded-lg bg-sky-100 text-[#166BA3] flex items-center justify-center shrink-0">
+                      <FileText size={18} />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-xs font-bold text-[#1E2A3C] truncate">{selectedTaskPopup.fileName || 'Archivo adjunto'}</p>
+                      <p className="text-[10px] text-gray-400">Descarga directa</p>
+                    </div>
+                  </div>
+                  <a href={selectedTaskPopup.fileUrl} target="_blank" rel="noreferrer" download
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#166BA3] hover:bg-[#135887] text-white text-xs font-semibold transition-colors shrink-0">
+                    Descargar
+                  </a>
+                </div>
+              ) : (
+                <div className="p-3 bg-slate-50 border border-slate-100 rounded-xl text-xs text-slate-400 italic text-center">
+                  Sin archivos adjuntos.
+                </div>
+              )}
+
+              <div className="grid grid-cols-2 gap-3 text-xs bg-slate-50 p-3 rounded-xl border border-slate-100">
+                <div>
+                  <span className="text-[10px] text-gray-400 uppercase font-semibold block">Asignado a</span>
+                  <span className="font-bold text-slate-700">{selectedTaskPopup.assignedTo?.fullName || 'Mayra'}</span>
+                </div>
+                <div>
+                  <span className="text-[10px] text-gray-400 uppercase font-semibold block">Creado por</span>
+                  <span className="font-bold text-slate-700">{selectedTaskPopup.createdBy?.fullName || 'Mayra'}</span>
+                </div>
+              </div>
+
+              {/* Formulario "No se pudo realizar" */}
+              {showCancelForm && (
+                <div className="p-4 bg-red-50 border border-red-200 rounded-xl space-y-2">
+                  <p className="text-xs font-bold text-red-800">¿Por qué no se pudo realizar?</p>
+                  <textarea
+                    rows={3}
+                    value={cancelNoteInput}
+                    onChange={(e) => setCancelNoteInput(e.target.value)}
+                    placeholder="Describe el inconveniente o motivo..."
+                    className="w-full px-3 py-2 rounded-lg border border-red-200 text-xs text-slate-700 focus:outline-none focus:border-red-400 resize-none"
+                  />
+                  <div className="flex gap-2 justify-end">
+                    <button
+                      onClick={() => { setShowCancelForm(false); setCancelNoteInput(''); }}
+                      className="px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-100 rounded-lg"
+                    >Cancelar</button>
+                    <button
+                      onClick={() => handleCancelTask(selectedTaskPopup.id, cancelNoteInput)}
+                      className="px-4 py-1.5 text-xs font-bold bg-red-600 text-white hover:bg-red-700 rounded-lg"
+                    >Guardar motivo</button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Footer acciones */}
+            <div className="px-6 pb-5 border-t border-slate-100 pt-4 space-y-2">
+              <div className="flex items-center gap-2 flex-wrap">
+                {selectedTaskPopup.status !== 'COMPLETADA' && selectedTaskPopup.status !== 'CANCELADA' && (
+                  <button
+                    onClick={() => { handleToggleTaskStatus(selectedTaskPopup.id, selectedTaskPopup.status); setSelectedTaskPopup(null); }}
+                    className="px-4 py-2 text-xs font-bold rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 transition-all"
+                  >
+                    ✓ Marcar como Completada
+                  </button>
+                )}
+                {selectedTaskPopup.status === 'COMPLETADA' && (
+                  <button
+                    onClick={() => { handleToggleTaskStatus(selectedTaskPopup.id, selectedTaskPopup.status); setSelectedTaskPopup(null); }}
+                    className="px-4 py-2 text-xs font-bold rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 transition-all"
+                  >
+                    Reabrir Tarea
+                  </button>
+                )}
+                {selectedTaskPopup.status !== 'COMPLETADA' && !showCancelForm && (
+                  <button
+                    onClick={() => setShowCancelForm(true)}
+                    className="px-4 py-2 text-xs font-bold rounded-xl bg-red-50 text-red-700 border border-red-200 hover:bg-red-100 transition-all"
+                  >
+                    ✗ No se pudo realizar
+                  </button>
+                )}
+                {selectedTaskPopup.status === 'CANCELADA' && (
+                  <button
+                    onClick={() => { handleToggleTaskStatus(selectedTaskPopup.id, 'CANCELADA'); setSelectedTaskPopup(null); }}
+                    className="px-4 py-2 text-xs font-bold rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 transition-all"
+                  >
+                    Reabrir Tarea
+                  </button>
+                )}
+                <button
+                  onClick={() => { setSelectedTaskPopup(null); setShowCancelForm(false); setCancelNoteInput(''); }}
+                  className="px-4 py-2 bg-slate-100 text-slate-600 hover:bg-slate-200 rounded-xl text-xs font-medium ml-auto"
+                >
+                  Cerrar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Modal Crear Tarea */}
       {isTaskModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
@@ -928,6 +1334,15 @@ function ConfiguracionView() {
                   value={taskDueDate}
                   onChange={(e) => setTaskDueDate(e.target.value)}
                   className="w-full px-3 py-2 rounded-xl border border-gray-200 text-xs text-[#1E2A3C] focus:ring-1 focus:ring-[#166BA3] focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 mb-1">Archivo Adjunto (Opcional)</label>
+                <input
+                  type="file"
+                  onChange={(e) => setTaskFile(e.target.files?.[0] || null)}
+                  className="w-full text-xs text-slate-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200"
                 />
               </div>
 
