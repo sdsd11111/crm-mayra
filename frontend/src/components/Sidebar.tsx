@@ -1,7 +1,7 @@
 // frontend/src/components/Sidebar.tsx
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
@@ -37,6 +37,39 @@ export default function Sidebar() {
   const router = useRouter();
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  // ── Scroll-aware header: se oculta al bajar, aparece al subir ──
+  const [headerVisible, setHeaderVisible] = useState(true);
+  const lastScrollY = useRef(0);
+  const ticking = useRef(false);
+
+  useEffect(() => {
+    const handleScroll = (e: Event) => {
+      if (ticking.current) return;
+      ticking.current = true;
+      requestAnimationFrame(() => {
+        // Leer scrollTop del elemento que realmente scrolleó (puede ser window o un div)
+        const target = e.target as Element | Document;
+        const currentY =
+          target === document
+            ? (document.documentElement.scrollTop || document.body.scrollTop)
+            : (target as Element).scrollTop ?? window.scrollY;
+
+        const delta = currentY - lastScrollY.current;
+        if (Math.abs(delta) > 3) {
+          setHeaderVisible(currentY < 60 || delta < 0);
+          lastScrollY.current = currentY;
+        }
+        ticking.current = false;
+      });
+    };
+
+    // capture:true para interceptar el scroll de CUALQUIER contenedor hijo
+    window.addEventListener('scroll', handleScroll, { passive: true, capture: true });
+    return () => {
+      window.removeEventListener('scroll', handleScroll, { capture: true } as EventListenerOptions);
+    };
+  }, []);
 
   if (!user) return null;
 
@@ -164,7 +197,13 @@ export default function Sidebar() {
   return (
     <>
       {/* ═════════ BARRA MÓVIL SUPERIOR (< md) ═════════ */}
-      <header className="md:hidden bg-white/95 backdrop-blur-md border-b border-gray-200 sticky top-0 z-40 px-4 h-14 flex items-center justify-between">
+      {/* Spacer para compensar el header fixed en móvil */}
+      <div className="md:hidden h-14 shrink-0" aria-hidden="true" />
+      <header
+        className={`md:hidden fixed top-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-b border-gray-200 px-4 h-14 flex items-center justify-between transition-transform duration-300 ease-in-out ${
+          headerVisible ? 'translate-y-0' : '-translate-y-full'
+        }`}
+      >
         <button
           onClick={() => setMobileOpen(true)}
           className="p-2 rounded-xl text-gray-700 hover:bg-gray-100 border border-gray-200"

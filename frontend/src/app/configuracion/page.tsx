@@ -533,10 +533,10 @@ function ConfiguracionView() {
   const isWaConnected = waStatus?.state === 'open';
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#EEF3FA] to-[#E2EAF6] pb-12 md:pl-64">
+    <div className="min-h-screen bg-gradient-to-br from-[#EEF3FA] to-[#E2EAF6] pb-12 md:pl-64 overflow-x-hidden max-w-full">
       <Navbar />
 
-      <main className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 pt-5 space-y-6">
+      <main className="max-w-[1400px] mx-auto px-3 sm:px-6 lg:px-8 pt-5 space-y-6 overflow-x-hidden">
         {/* Cabecera */}
         <div className="bg-white/95 backdrop-blur-md border border-white/80 shadow-sm rounded-2xl p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
@@ -552,41 +552,41 @@ function ConfiguracionView() {
             </h1>
           </div>
 
-          <div className="flex items-center gap-2 border-b border-gray-200/80 pb-2">
+          <div className="flex items-center gap-1.5 sm:gap-2 border-b border-gray-200/80 pb-2 overflow-x-auto max-w-full no-scrollbar">
             <button
               onClick={() => { setActiveTab('USUARIOS'); setFeedback(null); }}
-              className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+              className={`inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
                 activeTab === 'USUARIOS'
                   ? 'bg-[#1E2A3C] text-white shadow-sm'
                   : 'bg-white/80 text-gray-600 hover:bg-white hover:text-[#1E2A3C]'
               }`}
             >
-              <Users size={15} />
-              Equipo ({users.length})
+              <Users size={14} />
+              <span>Equipo ({users.length})</span>
             </button>
 
             <button
               onClick={() => { setActiveTab('TAREAS'); setFeedback(null); }}
-              className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+              className={`inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
                 activeTab === 'TAREAS'
                   ? 'bg-[#166BA3] text-white shadow-sm'
                   : 'bg-white/80 text-gray-600 hover:bg-white hover:text-[#1E2A3C]'
               }`}
             >
-              <CheckSquare size={15} />
-              Tareas y Asignaciones ({tasks.filter(t => t.status === 'PENDIENTE').length})
+              <CheckSquare size={14} />
+              <span>Tareas ({tasks.filter(t => t.status === 'PENDIENTE').length})</span>
             </button>
 
             <button
               onClick={() => { setActiveTab('WHATSAPP'); setFeedback(null); }}
-              className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+              className={`inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
                 activeTab === 'WHATSAPP'
                   ? 'bg-[#1E2A3C] text-white shadow-sm'
                   : 'bg-white/80 text-gray-600 hover:bg-white hover:text-[#1E2A3C]'
               }`}
             >
-              <Radio size={15} />
-              WhatsApp
+              <Radio size={14} />
+              <span>WhatsApp</span>
               <span className={`w-2 h-2 rounded-full ${isWaConnected ? 'bg-emerald-500' : 'bg-red-500'}`} />
             </button>
           </div>

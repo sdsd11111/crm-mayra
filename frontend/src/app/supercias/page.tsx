@@ -81,10 +81,10 @@ function SuperciasView() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#EEF3FA] to-[#E2EAF6] pb-16 md:pl-64">
+    <div className="min-h-screen bg-gradient-to-br from-[#EEF3FA] to-[#E2EAF6] pb-16 md:pl-64 overflow-x-hidden max-w-full">
       <Navbar />
 
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 space-y-6">
+      <main className="max-w-4xl mx-auto px-3 sm:px-6 lg:px-8 pt-6 space-y-6 overflow-x-hidden">
         <div>
           <h1 className="text-xl sm:text-2xl font-bold text-[#1E2A3C] flex items-center gap-2">
             <FileText className="text-[#166BA3]" size={24} />

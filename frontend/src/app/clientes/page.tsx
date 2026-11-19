@@ -501,7 +501,7 @@ function ClientesView() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#EEF3FA] to-[#E2EAF6] pb-16 md:pl-64">
+    <div className="min-h-screen bg-gradient-to-br from-[#EEF3FA] to-[#E2EAF6] pb-16 md:pl-64 overflow-x-hidden max-w-full">
       <Navbar />
 
       {/* Toast flotante de copiado de clave */}
@@ -512,7 +512,7 @@ function ClientesView() {
         </div>
       )}
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+      <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-6 sm:pt-8 overflow-x-hidden">
         {/* Cabecera del Directorio */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <div>

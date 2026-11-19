@@ -13,6 +13,8 @@ import whatsappRoutes from './routes/whatsapp';
 import superciasRoutes from './routes/supercias';
 import taskRoutes from './routes/tasks';
 import { BillingCron } from './services/BillingCron';
+import { SriTaskCronService } from './services/SriTaskCronService';
+import { MayraVoiceTaskService } from './services/MayraVoiceTaskService';
 
 const app = express();
 const server = http.createServer(app);
@@ -63,6 +65,10 @@ app.use('/api/ledger', ledgerRoutes);
 app.use('/api/whatsapp', whatsappRoutes);
 app.use('/api/supercias', superciasRoutes);
 app.use('/api/tasks', taskRoutes);
+
+// Conectar Socket.io a servicios de tareas y crons
+SriTaskCronService.setSocketIo(io);
+MayraVoiceTaskService.setSocketIo(io);
 
 // Iniciar Cronjob de facturación mensual
 BillingCron.init();

@@ -42,7 +42,7 @@ export class BunnyStorageService {
     // Normalizar ruta interna
     const cleanRuc = ruc.replace(/[^a-zA-Z0-9]/g, '');
     const cleanFileName = fileName.replace(/[^a-zA-Z0-9._-]/g, '_');
-    const relativePath = `clientes/${cleanRuc}/${year}/${category}/${cleanFileName}`;
+    const relativePath = `clientes/${cleanRuc}/boveda-digital/${year}/${category}/${cleanFileName}`;
 
     // Si tenemos las credenciales de Bunny.net configuradas
     if (this.storageZone && this.apiKey) {
@@ -78,7 +78,7 @@ export class BunnyStorageService {
     }
 
     // Fallback Local Seguro: backend/uploads/...
-    const uploadsDir = path.join(process.cwd(), 'uploads', 'clientes', cleanRuc, String(year), category);
+    const uploadsDir = path.join(process.cwd(), 'uploads', 'clientes', cleanRuc, 'boveda-digital', String(year), category);
     fs.mkdirSync(uploadsDir, { recursive: true });
 
     const localFilePath = path.join(uploadsDir, cleanFileName);
@@ -93,23 +93,28 @@ export class BunnyStorageService {
   }
 
   /**
-   * Sube un archivo multimedia recibido desde WhatsApp a Bunny.net.
-   * Ruta: whatsapp-media/{phone}/{timestamp}_{fileName}
+   * Sube un archivo multimedia de WhatsApp a Bunny.net (o fallback local).
+   * Estructura jerárquica por cliente:
+   * Si tiene identificador/RUC: clientes/{clientIdentifier}/chat-media/{timestamp}_{fileName}
+   * Si es prospecto/teléfono: clientes/{phone}/chat-media/{timestamp}_{fileName}
    */
   public static async uploadWhatsappMedia({
     phone,
+    clientIdentifier,
     fileName,
     fileBuffer,
     contentType,
   }: {
     phone: string;
+    clientIdentifier?: string | null;
     fileName: string;
     fileBuffer: Buffer;
     contentType: string;
   }): Promise<{ bunnyUrl: string; bunnyPath: string }> {
     const cleanPhone = phone.replace(/\D/g, '');
+    const folderKey = (clientIdentifier || cleanPhone).replace(/[^a-zA-Z0-9_-]/g, '_');
     const cleanFileName = fileName.replace(/[^a-zA-Z0-9._-]/g, '_');
-    const relativePath = `whatsapp-media/${cleanPhone}/${Date.now()}_${cleanFileName}`;
+    const relativePath = `clientes/${folderKey}/chat-media/${Date.now()}_${cleanFileName}`;
 
     if (this.storageZone && this.apiKey) {
       try {
@@ -134,8 +139,8 @@ export class BunnyStorageService {
       }
     }
 
-    // Fallback local
-    const uploadsDir = path.join(process.cwd(), 'uploads', 'whatsapp-media', cleanPhone);
+    // Fallback local seguro
+    const uploadsDir = path.join(process.cwd(), 'uploads', 'clientes', folderKey, 'chat-media');
     fs.mkdirSync(uploadsDir, { recursive: true });
     const localPath = path.join(uploadsDir, cleanFileName);
     fs.writeFileSync(localPath, fileBuffer);

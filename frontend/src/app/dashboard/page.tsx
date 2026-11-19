@@ -167,6 +167,7 @@ function DashboardView() {
   const [tasks, setTasks] = useState<TaskItem[]>([]);
   const [tasksLoading, setTasksLoading] = useState(true);
   const [isTasksModalOpen, setIsTasksModalOpen] = useState(false);
+  const [modalTaskTab, setModalTaskTab] = useState<'HOY' | 'AYER' | 'PENDIENTES'>('HOY');
   const [selectedTaskDetail, setSelectedTaskDetail] = useState<TaskItem | null>(null);
   const [dashCancelNote, setDashCancelNote] = useState('');
   const [dashShowCancelForm, setDashShowCancelForm] = useState(false);
@@ -188,6 +189,10 @@ function DashboardView() {
 
   // Modal confirmación recordatorio WhatsApp
   const [reminderDebtor, setReminderDebtor] = useState<Debtor | null>(null);
+
+  // Modal Tarifario Oficial de Firmas Electrónicas (Flyer Oficial de Mayra)
+  const [isFirmaPricesOpen, setIsFirmaPricesOpen] = useState(false);
+  const [copiedFirmaPrices, setCopiedFirmaPrices] = useState(false);
 
   // Buscador
   const [clientSearch, setClientSearch] = useState('');
@@ -446,7 +451,7 @@ function DashboardView() {
 
   const pendingTasks = tasks.filter((t) => t.status === 'PENDIENTE');
 
-  // Separación temporal de tareas
+  // Separación temporal estricta de tareas
   const isDateToday = (dStr?: string | null) => {
     if (!dStr) return false;
     const d = new Date(dStr);
@@ -455,6 +460,18 @@ function DashboardView() {
       d.getDate() === today.getDate() &&
       d.getMonth() === today.getMonth() &&
       d.getFullYear() === today.getFullYear()
+    );
+  };
+
+  const isDateYesterday = (dStr?: string | null) => {
+    if (!dStr) return false;
+    const d = new Date(dStr);
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    return (
+      d.getDate() === yesterday.getDate() &&
+      d.getMonth() === yesterday.getMonth() &&
+      d.getFullYear() === yesterday.getFullYear()
     );
   };
 
@@ -468,16 +485,24 @@ function DashboardView() {
     return target < today;
   };
 
-  // Tareas de hoy (por dueDate de hoy o sin fecha límite creadas hoy)
-  const tasksToday = pendingTasks.filter((t) => isDateToday(t.dueDate) || isDateToday(t.createdAt));
-  // Tareas de ayer y pasadas vencidas
-  const tasksPast = pendingTasks.filter((t) => isDatePastOrYesterday(t.dueDate) && !isDateToday(t.dueDate));
-  // Si no hay tareas específicamente marcadas de hoy, mostrar las pendientes principales
+  // Tareas de Hoy: Únicamente las que tienen dueDate de hoy (o creadas hoy si no tienen dueDate)
+  const tasksToday = pendingTasks.filter((t) => (t.dueDate ? isDateToday(t.dueDate) : isDateToday(t.createdAt)));
+  // Tareas de Ayer: Específicamente las del día de ayer
+  const tasksYesterday = pendingTasks.filter((t) => (t.dueDate ? isDateYesterday(t.dueDate) : isDateYesterday(t.createdAt)));
+  // Tareas Pasadas / Atrasadas: Las que tienen dueDate anterior a hoy (o creadas antes de hoy)
+  const tasksPast = pendingTasks.filter((t) => (t.dueDate ? isDatePastOrYesterday(t.dueDate) : isDatePastOrYesterday(t.createdAt)));
+
+  // Tareas filtradas para el modal "Ver todas" (excluye las completadas por requerimiento explícito)
+  const modalFilteredTasks = modalTaskTab === 'HOY'
+    ? tasksToday
+    : modalTaskTab === 'AYER'
+    ? tasksYesterday
+    : pendingTasks; // Todas las pendientes acumuladas que quedaron sin hacer
+
+  // Filtro estricto y exacto según la pestaña activa
   const displayedCardTasks = taskFilterTab === 'HOY'
-    ? (tasksToday.length > 0 ? tasksToday : pendingTasks.slice(0, 5))
-    : taskFilterTab === 'PASADAS'
-    ? tasksPast
-    : pendingTasks;
+    ? tasksToday
+    : tasksPast;
 
   if (authLoading) {
     return (
@@ -490,10 +515,10 @@ function DashboardView() {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-[#F4F6F9] pb-12 md:pl-64">
+    <div className="min-h-screen bg-[#F4F6F9] pb-12 md:pl-64 overflow-x-hidden max-w-full">
       <Navbar />
 
-      <main className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 pt-5 space-y-5">
+      <main className="max-w-[1400px] mx-auto px-3 sm:px-6 lg:px-8 pt-5 space-y-5 overflow-x-hidden">
         {/* HEADER */}
         <div className="bg-white border border-slate-200 shadow-sm rounded-2xl p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
@@ -1101,6 +1126,17 @@ function DashboardView() {
                   </span>
                   <ChevronRight size={12} className="text-gray-400" />
                 </Link>
+
+                <button
+                  type="button"
+                  onClick={() => setIsFirmaPricesOpen(true)}
+                  className="w-full flex items-center justify-between p-2 rounded-xl bg-sky-50/70 hover:bg-sky-100/80 border border-sky-200/60 text-[#166BA3] text-xs font-bold transition-all"
+                >
+                  <span className="flex items-center gap-2">
+                    <DollarSign size={13} className="text-[#166BA3]" /> Tarifario Oficial de Firmas
+                  </span>
+                  <ChevronRight size={12} className="text-[#166BA3]" />
+                </button>
               </div>
             </div>
 
@@ -1289,23 +1325,58 @@ function DashboardView() {
               </div>
             </div>
 
+            {/* Pestañas de filtrado de tareas pendientes (Excluye las completadas) */}
+            <div className="flex items-center gap-2 pt-3 pb-2 border-b border-slate-100">
+              <button
+                type="button"
+                onClick={() => setModalTaskTab('HOY')}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                  modalTaskTab === 'HOY'
+                    ? 'bg-[#166BA3] text-white shadow-xs'
+                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                }`}
+              >
+                Hoy ({tasksToday.length})
+              </button>
+              <button
+                type="button"
+                onClick={() => setModalTaskTab('AYER')}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                  modalTaskTab === 'AYER'
+                    ? 'bg-amber-600 text-white shadow-xs'
+                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                }`}
+              >
+                Ayer ({tasksYesterday.length})
+              </button>
+              <button
+                type="button"
+                onClick={() => setModalTaskTab('PENDIENTES')}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                  modalTaskTab === 'PENDIENTES'
+                    ? 'bg-rose-600 text-white shadow-xs'
+                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                }`}
+              >
+                Todas Pendientes que Quedaron ({pendingTasks.length})
+              </button>
+            </div>
+
             {/* Lista de Tareas en el modal con scroll independiente */}
             <div className="flex-1 overflow-y-auto py-4 space-y-2.5 pr-1">
-              {tasks.length === 0 ? (
+              {modalFilteredTasks.length === 0 ? (
                 <div className="text-center py-12 text-gray-400 text-xs">
                   <CheckCheck size={28} className="mx-auto text-emerald-600 mb-2" />
-                  No existen tareas registradas.
+                  {modalTaskTab === 'HOY' ? 'No hay tareas asignadas para hoy.' :
+                   modalTaskTab === 'AYER' ? 'No quedaron tareas pendientes de ayer.' :
+                   '¡Excelente! No hay ninguna tarea pendiente acumulada.'}
                 </div>
               ) : (
-                tasks.map((t) => (
+                modalFilteredTasks.map((t) => (
                   <div
                     key={t.id}
                     onClick={() => setSelectedTaskDetail(t)}
-                    className={`p-3.5 rounded-xl border flex items-center justify-between gap-3 transition-colors cursor-pointer hover:border-[#166BA3]/50 ${
-                      t.status === 'COMPLETADA'
-                        ? 'bg-slate-50/60 border-slate-200/50 opacity-60'
-                        : 'bg-white border-slate-200 shadow-xs'
-                    }`}
+                    className="p-3.5 rounded-xl border flex items-center justify-between gap-3 transition-colors cursor-pointer hover:border-[#166BA3]/50 bg-white border-slate-200 shadow-xs"
                   >
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2 mb-1">
@@ -1316,14 +1387,12 @@ function DashboardView() {
                         }`}>
                           {t.priority}
                         </span>
-                        <span className={`text-[9px] font-bold px-2 py-0.5 rounded ${
-                          t.status === 'COMPLETADA' ? 'bg-emerald-100 text-emerald-800' : 'bg-blue-50 text-[#166BA3]'
-                        }`}>
+                        <span className="text-[9px] font-bold px-2 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200">
                           {t.status}
                         </span>
                         {t.dueDate && (
-                          <span className="text-[10px] text-gray-400">
-                            Vence: {new Date(t.dueDate).toLocaleDateString('es-EC')}
+                          <span className="text-[10px] text-gray-500 font-semibold">
+                            Límite: {new Date(t.dueDate).toLocaleDateString('es-EC')}
                           </span>
                         )}
                         {t.fileUrl && (
@@ -1332,7 +1401,7 @@ function DashboardView() {
                           </span>
                         )}
                       </div>
-                      <h4 className={`text-xs font-bold ${t.status === 'COMPLETADA' ? 'line-through text-gray-400' : 'text-[#1E2A3C]'}`}>
+                      <h4 className="text-xs font-bold text-[#1E2A3C]">
                         {t.title}
                       </h4>
                       {t.description && (
@@ -1348,14 +1417,11 @@ function DashboardView() {
                           e.stopPropagation();
                           handleToggleTask(t.id, t.status);
                         }}
-                        className={`text-xs font-semibold px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-all ${
-                          t.status === 'COMPLETADA'
-                            ? 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                            : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200'
-                        }`}
+                        className="text-xs font-semibold px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-all bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200"
+                        title="Marcar como realizada"
                       >
                         <CheckCheck size={14} />
-                        {t.status === 'COMPLETADA' ? 'Reabrir' : 'Marcar lista'}
+                        Marcar lista
                       </button>
                     </div>
                   </div>
@@ -1608,6 +1674,115 @@ function DashboardView() {
               >
                 Entendido
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ══ MODAL TARIFARIO OFICIAL DE FIRMAS ELECTRÓNICAS (FLYER MAYRA CASTILLO) ══ */}
+      {isFirmaPricesOpen && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-150">
+          <div className="bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border border-slate-200">
+            {/* Header del Flyer */}
+            <div className="bg-gradient-to-r from-[#1E2A3C] via-[#166BA3] to-[#0A4B75] p-6 text-white relative">
+              <button
+                onClick={() => setIsFirmaPricesOpen(false)}
+                className="absolute right-4 top-4 w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors"
+                title="Cerrar"
+              >
+                <X size={18} />
+              </button>
+              <div className="flex items-center gap-2 mb-1 text-sky-200 text-xs font-bold uppercase tracking-wider">
+                <Key size={14} /> Distribuidor Autorizado
+              </div>
+              <h3 className="text-2xl font-black tracking-tight">Firma Electrónica</h3>
+              <p className="text-xs text-sky-100/90 mt-0.5">Archivo digital .p12 para facturación SRI y trámites legales</p>
+            </div>
+
+            {/* Tabla de Precios Oficial */}
+            <div className="p-6 space-y-4">
+              <div className="bg-[#166BA3] rounded-2xl p-4 text-white shadow-md">
+                <div className="text-center font-bold text-xs uppercase tracking-wider text-sky-200 mb-3">
+                  Precios Incluidos IVA
+                </div>
+                <div className="divide-y divide-white/15 text-xs font-semibold">
+                  {[
+                    { vigencia: '1 mes',  precio: '$15' },
+                    { vigencia: '1 año',  precio: '$21' },
+                    { vigencia: '2 años', precio: '$32' },
+                    { vigencia: '3 años', precio: '$47' },
+                    { vigencia: '4 años', precio: '$67' },
+                  ].map((row, idx) => (
+                    <div key={idx} className="py-2.5 flex items-center justify-between px-2 hover:bg-white/5 rounded-lg transition-colors">
+                      <span className="text-slate-100 text-sm font-medium">{row.vigencia}</span>
+                      <span className="text-lg font-mono font-extrabold text-white">{row.precio}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Información de Ubicación y Teléfono */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs text-slate-600 bg-slate-50 p-4 rounded-2xl border border-slate-200/80">
+                <div className="space-y-1">
+                  <span className="text-[10px] font-bold text-gray-400 uppercase block">Ubicación</span>
+                  <p className="font-semibold text-slate-800 leading-tight">
+                    Calle Juan José Peña entre 10 de Agosto y José Antonio Eguiguren
+                  </p>
+                  <span className="text-[10px] text-slate-400">Loja, Ecuador</span>
+                </div>
+                <div className="space-y-1">
+                  <span className="text-[10px] font-bold text-gray-400 uppercase block">Contacto / WhatsApp</span>
+                  <p className="font-mono font-bold text-slate-800 text-sm">
+                    099 627 4187
+                  </p>
+                  <span className="text-[10px] text-emerald-600 font-semibold block">● Emisión inmediata</span>
+                </div>
+              </div>
+
+              {/* Acciones: Copiar texto para WhatsApp */}
+              <div className="pt-2 flex items-center justify-between gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const textoPrecios = 
+                      `🔐 *Tarifario Oficial — Firma Electrónica (.p12)*\n` +
+                      `_Estudio Contable Mayra Castillo_\n\n` +
+                      `*Precios con IVA incluido:*\n` +
+                      `• 1 mes: $15\n` +
+                      `• 1 año: $21\n` +
+                      `• 2 años: $32\n` +
+                      `• 3 años: $47\n` +
+                      `• 4 años: $67\n\n` +
+                      `📍 *Oficina:* Calle Juan José Peña entre 10 de Agosto y José Antonio Eguiguren (Loja)\n` +
+                      `📞 *Teléfono:* 099 627 4187\n\n` +
+                      `_Requisitos Persona Natural: Foto de cédula ambos lados, selfie al mentón y correo._`;
+                    navigator.clipboard.writeText(textoPrecios);
+                    setCopiedFirmaPrices(true);
+                    setTimeout(() => setCopiedFirmaPrices(false), 2500);
+                  }}
+                  className="flex-1 py-2.5 px-4 rounded-xl text-xs font-bold border border-slate-300 hover:bg-slate-50 text-slate-700 flex items-center justify-center gap-2 transition-all"
+                >
+                  {copiedFirmaPrices ? (
+                    <>
+                      <CheckCheck size={14} className="text-emerald-600" />
+                      <span className="text-emerald-600">¡Copiado para WhatsApp!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy size={14} className="text-slate-500" />
+                      <span>Copiar texto para cliente</span>
+                    </>
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setIsFirmaPricesOpen(false)}
+                  className="py-2.5 px-5 bg-[#166BA3] text-white hover:bg-[#135887] rounded-xl text-xs font-bold shadow-xs transition-colors"
+                >
+                  Cerrar
+                </button>
+              </div>
             </div>
           </div>
         </div>

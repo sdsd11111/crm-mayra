@@ -3,7 +3,7 @@ import { BunnyStorageService } from '../BunnyStorageService';
 import { prisma } from '../../lib/prisma';
 
 export interface ProcessedMedia {
-  mediaType: 'AUDIO' | 'IMAGE' | 'DOCUMENT';
+  mediaType: 'AUDIO' | 'IMAGE' | 'DOCUMENT' | 'VIDEO';
   mediaUrl: string;
   mimeType: string;
   fileName: string;
@@ -262,18 +262,21 @@ export class MediaIngestionService {
    */
   public static async processIncomingMedia({
     phone,
+    clientIdentifier,
     messageKeyId,
     messageData,
   }: {
     phone: string;
+    clientIdentifier?: string | null;
     messageKeyId: string;
     messageData: any;
   }): Promise<ProcessedMedia | null> {
     const isAudio = Boolean(messageData?.audioMessage);
     const isImage = Boolean(messageData?.imageMessage);
     const isDoc = Boolean(messageData?.documentMessage);
+    const isVideo = Boolean(messageData?.videoMessage);
 
-    if (!isAudio && !isImage && !isDoc) return null;
+    if (!isAudio && !isImage && !isDoc && !isVideo) return null;
 
     const { base64, mimeType, fileName } = await this.fetchDecryptedBase64(messageKeyId, messageData);
 
@@ -286,13 +289,14 @@ export class MediaIngestionService {
     const cleanBase64 = base64.replace(/^data:[^;]+;base64,/, '');
     const buffer = Buffer.from(cleanBase64, 'base64');
 
-    const defaultExt = isAudio ? 'ogg' : isImage ? 'jpg' : 'pdf';
+    const defaultExt = isAudio ? 'ogg' : isImage ? 'jpg' : isVideo ? 'mp4' : 'pdf';
     const finalFileName = fileName || `archivo_${Date.now()}.${defaultExt}`;
-    const finalMime = mimeType || (isAudio ? 'audio/ogg' : isImage ? 'image/jpeg' : 'application/pdf');
+    const finalMime = mimeType || (isAudio ? 'audio/ogg' : isImage ? 'image/jpeg' : isVideo ? 'video/mp4' : 'application/pdf');
 
-    // Subir a BunnyCDN (siempre, independiente del procesamiento AI)
+    // Subir a BunnyCDN bajo clientes/{identificador}/chat-media
     const { bunnyUrl } = await BunnyStorageService.uploadWhatsappMedia({
       phone,
+      clientIdentifier,
       fileName: finalFileName,
       fileBuffer: buffer,
       contentType: finalMime,
@@ -317,7 +321,13 @@ export class MediaIngestionService {
       }
     }
 
-    const mediaType: 'AUDIO' | 'IMAGE' | 'DOCUMENT' = isAudio ? 'AUDIO' : isImage ? 'IMAGE' : 'DOCUMENT';
+    const mediaType: 'AUDIO' | 'IMAGE' | 'DOCUMENT' | 'VIDEO' = isAudio
+      ? 'AUDIO'
+      : isImage
+      ? 'IMAGE'
+      : isVideo
+      ? 'VIDEO'
+      : 'DOCUMENT';
 
     // Guardar adjunto si cliente está en flujo FIRMA_STEPS
     const session = await prisma.botSession.findUnique({

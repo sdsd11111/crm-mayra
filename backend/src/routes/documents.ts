@@ -179,5 +179,95 @@ router.post('/upload', upload.single('file'), async (req: Request, res: Response
   }
 });
 
+/**
+ * POST /api/documents/from-chat-media
+ * Promociona un archivo multimedia recibido por WhatsApp a la Bóveda Digital.
+ * No re-sube el archivo: crea un registro Document apuntando a la URL existente en BunnyCDN.
+ * Requiere: chatMessageId, taxpayerId, category, title, periodYear (opcional), periodMonth (opcional).
+ */
+router.post('/from-chat-media', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { chatMessageId, taxpayerId, category, title, periodYear, periodMonth } = req.body;
+
+    if (!chatMessageId || !taxpayerId || !category || !title) {
+      res.status(400).json({
+        success: false,
+        message: 'Faltan campos obligatorios: chatMessageId, taxpayerId, category, title.',
+      });
+      return;
+    }
+
+    const parsedTaxpayerId = parseInt(taxpayerId, 10);
+    const parsedYear = periodYear ? parseInt(periodYear, 10) : new Date().getFullYear();
+    const parsedMonth = periodMonth ? parseInt(periodMonth, 10) : null;
+
+    // Verificar que la empresa existe
+    const taxpayer = await prisma.taxpayer.findUnique({
+      where: { id: parsedTaxpayerId },
+    });
+    if (!taxpayer) {
+      res.status(404).json({ success: false, message: 'Empresa (Taxpayer) no encontrada.' });
+      return;
+    }
+
+    // Obtener el mensaje de chat con su mediaUrl
+    const chatMsg = await prisma.chatMessage.findUnique({
+      where: { id: parseInt(chatMessageId, 10) },
+    });
+    if (!chatMsg || !chatMsg.mediaUrl) {
+      res.status(404).json({
+        success: false,
+        message: 'Mensaje no encontrado o no tiene archivo adjunto.',
+      });
+      return;
+    }
+
+    // Verificar que el category sea un DocCategory válido
+    const validCategories = [
+      'DECLARACION_IVA', 'DECLARACION_RENTA', 'ANEXO', 'COMPROBANTE_RETENCION',
+      'FACTURA', 'CONTRATO', 'FIRMA_ELECTRONICA', 'SRI_CLAVE', 'OTRO',
+    ];
+    if (!validCategories.includes(category)) {
+      res.status(400).json({ success: false, message: `Categoría inválida. Opciones: ${validCategories.join(', ')}` });
+      return;
+    }
+
+    // Determinar fileType por extensión o mimeType
+    const rawExt = (chatMsg.fileName || chatMsg.mediaUrl).split('.').pop() || '';
+    const fileType = rawExt.toLowerCase().replace(/[^a-z0-9]/g, '') || 'bin';
+
+    // Generar bunnyPath derivado desde la URL existente (sin reubicar el archivo)
+    // El path es informativo; la URL real ya está en BunnyCDN bajo chat-media/
+    const bunnyPath = chatMsg.mediaUrl.startsWith('http')
+      ? chatMsg.mediaUrl.split('/').slice(3).join('/') // extrae path desde URL pública
+      : chatMsg.mediaUrl.replace(/^\/uploads\//, '');
+
+    // Crear registro en Document apuntando a la URL de chat-media existente
+    const doc = await prisma.document.create({
+      data: {
+        taxpayerId: parsedTaxpayerId,
+        category: category as DocCategory,
+        title: title.trim(),
+        periodYear: parsedYear,
+        periodMonth: parsedMonth,
+        bunnyPath,
+        bunnyUrl: chatMsg.mediaUrl,
+        fileType,
+        uploadedById: req.user!.id,
+        sentByWhatsapp: false,
+      },
+    });
+
+    res.status(201).json({
+      success: true,
+      message: 'Archivo de chat guardado en la Bóveda Digital exitosamente.',
+      data: doc,
+    });
+  } catch (error: any) {
+    console.error('Error al guardar media de chat en Bóveda:', error);
+    res.status(500).json({ success: false, message: error.message || 'Error interno.' });
+  }
+});
+
 export default router;
 

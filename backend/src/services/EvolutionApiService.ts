@@ -88,7 +88,7 @@ export class EvolutionApiService {
         number: cleanNumber,
         mediatype: mediaType,
         caption: caption || '',
-        fileName: fileName || 'documento.pdf',
+        fileName: fileName || (mediaType === 'image' ? 'imagen.jpg' : mediaType === 'video' ? 'video.mp4' : 'documento.pdf'),
       };
 
       if (base64) {
@@ -115,6 +115,51 @@ export class EvolutionApiService {
       return { success: true, data: resData };
     } catch (err: any) {
       console.error('❌ [EvolutionApi] Fallo de conexión media:', err.message);
+      return { success: false, error: err.message };
+    }
+  }
+
+  /**
+   * Envía una NOTA DE VOZ (Push-To-Talk / PTT) auténtica de WhatsApp.
+   * Utiliza el endpoint nativo /message/sendWhatsAppAudio con audio en base64 o URL.
+   */
+  public static async sendWhatsAppAudio(options: {
+    number: string;
+    audioUrl?: string;
+    base64?: string;
+  }): Promise<{ success: boolean; data?: any; error?: string }> {
+    const cleanNumber = options.number.replace(/\D/g, '');
+
+    try {
+      const url = `${this.apiUrl}/message/sendWhatsAppAudio/${this.instanceName}`;
+      const payload: any = {
+        number: cleanNumber,
+      };
+
+      if (options.base64) {
+        payload.audio = options.base64;
+      } else if (options.audioUrl) {
+        payload.audio = options.audioUrl;
+      }
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          apikey: this.apiKey,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const resData = await response.json();
+      if (!response.ok) {
+        console.error('⚠️ [EvolutionApi] Error enviando WhatsApp Audio PTT:', resData);
+        return { success: false, error: resData.message || 'Error en Evolution API Audio' };
+      }
+
+      return { success: true, data: resData };
+    } catch (err: any) {
+      console.error('❌ [EvolutionApi] Fallo de conexión en Audio PTT:', err.message);
       return { success: false, error: err.message };
     }
   }

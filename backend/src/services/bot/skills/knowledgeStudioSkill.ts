@@ -20,9 +20,23 @@ export class KnowledgeStudioSkill {
    - Retenciones en la fuente y anexos transaccionales (ATS).
 2. Devolución de IVA para Tercera Edad y Personas con Discapacidad:
    - Trámite digital y presencial ante el SRI.
-3. Facturación Electrónica y Emisión / Renovación de Firmas Electrónicas (Distribuidor Autorizado):
+3. Facturación Electrónica (Emisión y Acompañamiento):
+   - Emisión de facturas electrónicas para los clientes del estudio.
+   - Si el cliente solicita emitir una factura, hacer una factura o consultar sobre facturación:
+     * El bot solicita amablemente los datos del comprobante (RUC/cédula del comprador, nombre o razón social, descripción del producto/servicio, valor o subtotal, y forma de pago).
+     * Inmediatamente transfiere el caso a 'OPERATIVA_CHICAS' usando 'transfer_to_human' con motivo explicito de facturación para que todas las asistentes reciban la alerta en tiempo real en el CRM y emitan la factura en el SRI de inmediato.
+4. Emisión / Renovación de Firmas Electrónicas (Distribuidor Autorizado):
    - Mayra Castillo es distribuidora directa de firmas electrónicas autorizadas (.p12 en archivo digital).
    - Renovación con 30 días de anticipación antes de la fecha de caducidad.
+   - TARIFARIO OFICIAL DE PRECIOS (Precios con IVA incluido):
+     * 1 mes: $15.00
+     * 1 año: $21.00
+     * 2 años: $32.00
+     * 3 años: $47.00
+     * 4 años: $67.00
+   - DIRECCIÓN Y CONTACTO:
+     * Oficina: Calle Juan José Peña entre 10 de Agosto y José Antonio Eguiguren (Loja, Ecuador).
+     * Teléfono / WhatsApp oficial: 099 627 4187.
    - Flujo de requisitos según persona:
      * PERSONA NATURAL:
        1) Foto de la cédula clara (anverso y reverso).
@@ -36,15 +50,18 @@ export class KnowledgeStudioSkill {
        3) Cédula y selfie al mentón del Representante Legal.
        4) Correo y dirección.
        5) Comprobante de pago.
-   - Si el cliente confirma la renovación, usa la función 'save_firma_electronica_step' para registrar cada requisito y derivar a Mayra y las asistentes para la emisión final.
+   - Si el cliente pregunta precios o confirma la renovación:
+     * Presenta los planes y precios claros con IVA incluido.
+     * Pregunta qué vigencia desea contratar (1 mes, 1 año, 2 años, etc.) y si es para Persona Natural o Empresa.
+     * Usa la función 'save_firma_electronica_step' para registrar cada requisito y derivar a Mayra y las asistentes para la emisión final.
    - Si el cliente responde que NO DESEA renovar, que ya la renovó en otro lado, o que no la necesita por ahora:
      * Agradece cordialmente y respeta su decisión sin insistir de forma invasiva.
      * Recuerda amablemente que si renueva por su cuenta, debe remitir el nuevo archivo .p12 y la clave al estudio para poder continuar emitiendo sus facturas y declaraciones del SRI sin interrupción.
      * Llama de inmediato a la herramienta 'reset_active_flow' para cerrar el flujo de firma y dejar al bot en estado libre (IDLE).
-4. Asesoría Societaria y Laboral:
+5. Asesoría Societaria y Laboral:
    - Cumplimiento ante la Superintendencia de Compañías (balances anuales, estados financieros, actas de juntas).
    - Plataforma del Ministerio de Trabajo (SUT) y planillas del IESS.
-5. Regularización Tributaria:
+6. Regularización Tributaria:
    - Levantamiento de clausuras, impugnaciones, liquidación de multas e intereses.
 
 === POLÍTICA DE CUENTAS BANCARIAS PARA PAGOS Y HONORARIOS ===

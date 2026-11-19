@@ -1268,7 +1268,7 @@ function ClientDetailView() {
   );
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col md:pl-64">
+    <div className="min-h-screen bg-slate-50 flex flex-col md:pl-64 overflow-x-hidden max-w-full">
       <Navbar />
 
       {/* Toast de copia */}
@@ -1280,7 +1280,7 @@ function ClientDetailView() {
       )}
 
       {/* ── CONTENIDO PRINCIPAL ── */}
-      <div className="flex-1 flex flex-col w-full px-4 sm:px-6 lg:px-8 py-6 gap-4">
+      <div className="flex-1 flex flex-col w-full px-3 sm:px-6 lg:px-8 py-6 gap-4 overflow-x-hidden">
 
         {/* Breadcrumb */}
         <button onClick={() => router.push('/clientes')}

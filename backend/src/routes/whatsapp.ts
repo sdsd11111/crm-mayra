@@ -8,7 +8,15 @@ import { EvolutionApiService } from '../services/EvolutionApiService';
 import { BotOrchestrator } from '../services/bot/botOrchestrator';
 import { MediaIngestionService } from '../services/bot/mediaIngestionService';
 import { OutboundQueueService } from '../services/bot/outboundQueueService';
+import { BunnyStorageService } from '../services/BunnyStorageService';
+import { MayraVoiceTaskService } from '../services/MayraVoiceTaskService';
+import multer from 'multer';
 import { io } from '../index';
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 30 * 1024 * 1024 }, // 30MB límite
+});
 
 const router = Router();
 
@@ -88,10 +96,23 @@ router.post('/webhook', async (req: Request, res: Response): Promise<void> => {
 
     let incomingMedia: any = null;
 
-    // 4. Ingesta Multimedia Real (Audio, Foto, Documento/PDF a BunnyCDN)
+    // 4. Ingesta Multimedia Real (Audio, Foto, Documento/PDF, Video a BunnyCDN)
     if (key?.fromMe !== true && body.data?.message) {
+      // Buscar si el cliente ya está registrado para agrupar por su ID/RUC
+      const registeredClient = await prisma.clientOwner.findFirst({
+        where: {
+          OR: [
+            { whatsappPhone: cleanPhone },
+            { whatsappPhone: { endsWith: cleanPhone.slice(-9) } },
+          ],
+        },
+        include: { taxpayers: { select: { ruc: true }, take: 1 } },
+      });
+      const clientIdentifier = registeredClient?.taxpayers?.[0]?.ruc || (registeredClient ? `cliente_${registeredClient.id}` : null);
+
       incomingMedia = await MediaIngestionService.processIncomingMedia({
         phone: cleanPhone,
+        clientIdentifier,
         messageKeyId: messageId,
         messageData: body.data.message,
       });
@@ -108,6 +129,8 @@ router.post('/webhook', async (req: Request, res: Response): Promise<void> => {
           } else {
             messageContent = messageContent ? `📷 [Foto]: ${messageContent}` : '📷 [Foto adjuntada por el cliente]';
           }
+        } else if (incomingMedia.mediaType === 'VIDEO') {
+          messageContent = messageContent ? `🎥 [Video]: ${messageContent}` : '🎥 [Video recibido del cliente]';
         } else if (incomingMedia.mediaType === 'DOCUMENT') {
           messageContent = messageContent ? `📄 [Documento ${incomingMedia.fileName}]: ${messageContent}` : `📄 [Documento adjuntado: ${incomingMedia.fileName}]`;
         }
@@ -158,6 +181,31 @@ router.post('/webhook', async (req: Request, res: Response): Promise<void> => {
 
     // 4. Mensaje entrante del cliente
     if (cleanPhone && messageContent) {
+      // 4.0 INTERCEPTOR EXCLUSIVO DE MAYRA: Generador determinista de Tareas por nota de voz o texto
+      if (matchedInternal && matchedInternal.role === 'ADMIN_MAYRA') {
+        const textToEvaluate = (incomingMedia?.mediaType === 'AUDIO' && incomingMedia.transcription)
+          ? incomingMedia.transcription
+          : messageContent;
+
+        const voiceTaskResult = await MayraVoiceTaskService.processMayraMessage({
+          mayraUser: { id: matchedInternal.id, fullName: matchedInternal.fullName },
+          mayraPhone: cleanPhone,
+          rawText: textToEvaluate,
+          audioUrl: incomingMedia?.mediaType === 'AUDIO' ? incomingMedia.mediaUrl : null,
+          audioFileName: incomingMedia?.mediaType === 'AUDIO' ? incomingMedia.fileName : null,
+        });
+
+        if (voiceTaskResult.created) {
+          console.log(`⚡ [MayraVoiceTaskService] Tarea creada desde WhatsApp por Mayra: "${voiceTaskResult.task.title}" (ID: ${voiceTaskResult.task.id})`);
+          res.status(200).json({
+            status: 'TASK_CREATED_BY_MAYRA',
+            taskId: voiceTaskResult.task.id,
+            title: voiceTaskResult.task.title,
+          });
+          return;
+        }
+      }
+
       // 4.1 COMANDO DE RESET: Si el usuario escribe /reset o /reiniciar, limpiar tickets e historial para pruebas
       const trimmedText = messageContent.trim().toLowerCase();
       if (trimmedText === '/reset' || trimmedText === '/reiniciar') {
@@ -460,6 +508,242 @@ router.post('/send-reply', async (req: Request, res: Response): Promise<void> =>
   } catch (error) {
     console.error('Error al responder chat:', error);
     res.status(500).json({ success: false, message: 'Error interno al enviar mensaje.' });
+  }
+});
+
+/**
+ * POST /api/whatsapp/send-media
+ * Envío de archivos multimedia (Audios PTT, Imágenes, Videos, PDFs)
+ * desde el CRM por Mayra o las asistentes hacia el WhatsApp del cliente.
+ */
+router.post('/send-media', upload.single('file'), async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { phone, ticketId, caption, isPtt } = req.body;
+    const file = req.file;
+    const userRole = req.user!.role;
+
+    if (!phone || !file) {
+      res.status(400).json({ success: false, message: 'Faltan parámetros requeridos (phone o archivo).' });
+      return;
+    }
+
+    const cleanPhone = phone.replace(/\D/g, '');
+
+    // Validación de permisos por rol
+    if (userRole === 'ASISTENTE' && ticketId) {
+      const ticket = await prisma.chatTicket.findUnique({
+        where: { id: parseInt(ticketId, 10) },
+      });
+      if (!ticket || ticket.queueType !== 'OPERATIVA_CHICAS') {
+        res.status(403).json({
+          success: false,
+          message: 'Acceso denegado: Solo puedes responder tickets de OPERATIVA_CHICAS.',
+        });
+        return;
+      }
+    }
+
+    // 1. Obtener identificador del cliente si existe
+    const registeredClient = await prisma.clientOwner.findFirst({
+      where: {
+        OR: [
+          { whatsappPhone: cleanPhone },
+          { whatsappPhone: { endsWith: cleanPhone.slice(-9) } },
+        ],
+      },
+      include: { taxpayers: { select: { ruc: true }, take: 1 } },
+    });
+    const clientIdentifier = registeredClient?.taxpayers?.[0]?.ruc || (registeredClient ? `cliente_${registeredClient.id}` : null);
+
+    // 2. Subir a BunnyCDN estructurado: clientes/{id}/chat-media/...
+    const { bunnyUrl } = await BunnyStorageService.uploadWhatsappMedia({
+      phone: cleanPhone,
+      clientIdentifier,
+      fileName: file.originalname || `archivo_${Date.now()}`,
+      fileBuffer: file.buffer,
+      contentType: file.mimetype,
+    });
+
+    // 3. Determinar tipo de medio
+    let mediaTypeStr: 'AUDIO' | 'IMAGE' | 'VIDEO' | 'DOCUMENT' = 'DOCUMENT';
+    if (file.mimetype.startsWith('audio/') || isPtt === 'true' || isPtt === true) {
+      mediaTypeStr = 'AUDIO';
+    } else if (file.mimetype.startsWith('image/')) {
+      mediaTypeStr = 'IMAGE';
+    } else if (file.mimetype.startsWith('video/')) {
+      mediaTypeStr = 'VIDEO';
+    }
+
+    // 4. Enviar mediante Evolution API
+    let sendResult: any = null;
+    const isPttAudio = isPtt === 'true' || isPtt === true || (mediaTypeStr === 'AUDIO' && file.mimetype.includes('opus'));
+
+    if (isPttAudio) {
+      // Nota de voz WhatsApp real PTT (Push-To-Talk)
+      const base64Audio = `data:${file.mimetype};base64,${file.buffer.toString('base64')}`;
+      sendResult = await EvolutionApiService.sendWhatsAppAudio({
+        number: cleanPhone,
+        base64: base64Audio,
+      });
+    } else {
+      const evoMediaType = mediaTypeStr === 'IMAGE' ? 'image' : mediaTypeStr === 'VIDEO' ? 'video' : 'document';
+      sendResult = await EvolutionApiService.sendMediaMessage({
+        number: cleanPhone,
+        mediaUrl: bunnyUrl,
+        caption: caption || '',
+        fileName: file.originalname,
+        mediaType: evoMediaType,
+      });
+    }
+
+    // 5. Guardar en BD del CRM
+    if (ticketId) {
+      const tId = parseInt(ticketId, 10);
+      const savedMsg = await prisma.chatMessage.create({
+        data: {
+          ticketId: tId,
+          sender: 'HUMAN',
+          senderType: 'HUMAN',
+          content: caption || (mediaTypeStr === 'AUDIO' ? '🎤 [Nota de voz enviada]' : `[Archivo adjunto: ${file.originalname}]`),
+          mediaType: mediaTypeStr,
+          mediaUrl: bunnyUrl,
+          fileName: file.originalname,
+          mimeType: file.mimetype,
+        },
+      });
+
+      await prisma.chatTicket.update({
+        where: { id: tId },
+        data: {
+          status: 'EN_PROCESO',
+          assignedToId: req.user!.id,
+          botPaused: true,
+          pausedById: req.user!.id,
+        },
+      });
+
+      if (io) {
+        io.emit('whatsapp:new-message', {
+          ticketId: tId,
+          botPaused: true,
+          isHumanReply: true,
+          message: savedMsg,
+        });
+      }
+    }
+
+    res.json({
+      success: true,
+      message: 'Archivo enviado exitosamente.',
+      mediaUrl: bunnyUrl,
+      mediaType: mediaTypeStr,
+      data: sendResult,
+    });
+  } catch (error: any) {
+    console.error('Error enviando archivo multimedia desde CRM:', error);
+    res.status(500).json({ success: false, message: error.message || 'Error interno al enviar archivo.' });
+  }
+});
+
+/**
+ * POST /api/whatsapp/send-media-url
+ * Envía un documento de la Bóveda Digital directamente al WhatsApp del cliente
+ * usando una URL pública de BunnyCDN (sin re-subir el archivo).
+ * Usado desde el sidebar de chat cuando la asistente pulsa "Enviar por WhatsApp"
+ * sobre un documento ya almacenado en la Bóveda.
+ */
+router.post('/send-media-url', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { phone, ticketId, mediaUrl, fileName, caption } = req.body;
+    const userRole = req.user!.role;
+
+    if (!phone || !mediaUrl || !fileName) {
+      res.status(400).json({ success: false, message: 'Faltan parámetros requeridos (phone, mediaUrl, fileName).' });
+      return;
+    }
+
+    const cleanPhone = phone.replace(/\D/g, '');
+
+    // ASISTENTE solo puede operar en tickets de OPERATIVA_CHICAS
+    if (userRole === 'ASISTENTE' && ticketId) {
+      const ticket = await prisma.chatTicket.findUnique({ where: { id: parseInt(ticketId, 10) } });
+      if (!ticket || ticket.queueType !== 'OPERATIVA_CHICAS') {
+        res.status(403).json({ success: false, message: 'Acceso denegado: Solo puedes responder tickets de OPERATIVA_CHICAS.' });
+        return;
+      }
+    }
+
+    // Determinar tipo de medio por extensión del nombre de archivo
+    const ext = (fileName.split('.').pop() || '').toLowerCase();
+    let mediaTypeStr: 'IMAGE' | 'VIDEO' | 'DOCUMENT' = 'DOCUMENT';
+    if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'heic'].includes(ext)) mediaTypeStr = 'IMAGE';
+    else if (['mp4', 'mov', 'avi', 'mkv', 'webm'].includes(ext)) mediaTypeStr = 'VIDEO';
+
+    // Mapear al formato de Evolution API
+    const evoMediaType: 'image' | 'video' | 'document' =
+      mediaTypeStr === 'IMAGE' ? 'image' : mediaTypeStr === 'VIDEO' ? 'video' : 'document';
+
+    // Enviar mediante Evolution API (URL pública de BunnyCDN)
+    const sendResult = await EvolutionApiService.sendMediaMessage({
+      number: cleanPhone,
+      mediaUrl,
+      caption: caption || '',
+      fileName,
+      mediaType: evoMediaType,
+    });
+
+    // Registrar en BD y actualizar ticket si se proporcionó ticketId
+    if (ticketId) {
+      const tId = parseInt(ticketId, 10);
+      const savedMsg = await prisma.chatMessage.create({
+        data: {
+          ticketId: tId,
+          sender: 'HUMAN',
+          senderType: 'HUMAN',
+          content: caption || `📂 [Documento de Bóveda enviado: ${fileName}]`,
+          mediaType: mediaTypeStr,
+          mediaUrl,
+          fileName,
+          mimeType: mediaTypeStr === 'IMAGE' ? 'image/jpeg' : mediaTypeStr === 'VIDEO' ? 'video/mp4' : 'application/pdf',
+        },
+      });
+
+      await prisma.chatTicket.update({
+        where: { id: tId },
+        data: {
+          status: 'EN_PROCESO',
+          assignedToId: req.user!.id,
+          botPaused: true,
+          pausedById: req.user!.id,
+        },
+      });
+
+      // Marcar el documento como enviado por WhatsApp
+      await prisma.document.updateMany({
+        where: { bunnyUrl: mediaUrl },
+        data: { sentByWhatsapp: true },
+      });
+
+      if (io) {
+        io.emit('whatsapp:new-message', {
+          ticketId: tId,
+          botPaused: true,
+          isHumanReply: true,
+          message: savedMsg,
+        });
+      }
+    }
+
+    res.json({
+      success: true,
+      message: 'Documento de Bóveda enviado exitosamente por WhatsApp.',
+      mediaUrl,
+      mediaType: mediaTypeStr,
+      data: sendResult,
+    });
+  } catch (error: any) {
+    console.error('Error enviando documento de Bóveda por WhatsApp:', error);
+    res.status(500).json({ success: false, message: error.message || 'Error interno.' });
   }
 });
 
